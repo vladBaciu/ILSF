@@ -1,0 +1,31 @@
+void PI(void) {
+    error = setpoint - sensorHeight; // positief voor bal onder setpoint ==> fan harder
+    dutycycle = (int) ((kp * error) + (ki * integral) ); // PI regulator
+    integral += error;
+    // integraal begrenzen
+    if ((ki*integral) > 250) {
+        integral = 250;
+    }
+    if ((ki*integral) < -250) {
+        integral = -250;
+    }
+    if(ki ==0){
+        integral = 0;
+    }
+    // dutycycle begrenzen tussen 0 en 200
+    if (dutycycle >= 200) {
+        dutycycle = 200;
+    }
+    if (dutycycle < 0) {
+        dutycycle = 0;
+    }
+
+    if (ADC_IsReady()) {
+        sensorHeight = (int) ADC_GetResult(); //resultaat van ADC
+        PWM6_LoadDutyValue((uint16_t)(sensorHeight / 1.2)); //0 - 240 naar 0 - 200 range
+        PWM5_LoadDutyValue(dutycycle); // output pwm signaal voor hoogte
+    }
+}ang
+
+
+THE CONSTANTS VALUES ARE STILL MISSING
