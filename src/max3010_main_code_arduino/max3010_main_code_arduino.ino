@@ -1,4 +1,3 @@
-
 #include <Wire.h>
 #include "MAX30105.h"
 #include "heartRate.h"
@@ -32,6 +31,7 @@ MAX30105 particleSensor;
 
 #define SERIAL_FRAME_LENGTH_MAX   (300U)
 
+#define FRAME_START               (0xDA)
 #define FRAME_TERMINATOR_1        (0xEA)
 #define FRAME_TERMINATOR_2        (0xDC)
 /**************************************************** GLOBAL VARIABLES **********************************************************/
@@ -53,6 +53,9 @@ uint8_t gBpmBuff[BPM_AVERAGE_RATE];
 uint8_t gBpmCurrentIndex = 0U;
 
 float gTempSpO2Avg;
+uint32_t gTempSpO2AvgInt1;
+uint32_t gTempSpO2AvgInt2;
+
 float gSpO2Buff[BPM_AVERAGE_RATE];
 uint8_t gSpO2CurrentIndex = 0U;
 
@@ -99,7 +102,7 @@ typedef struct
   frameType_t frameType;
   union
   {
-    uint8_t hr_spo2[2];
+    uint8_t hr_spo2[3];
     uint8_t wavelength;
     debugType_t debugParam;
   }params;
@@ -212,7 +215,7 @@ uint8_t* createSerialFrame(void *inputData, uint8_t noOfBytes, frameParams_t *se
   if( SERIAL_FRAME_LENGTH_MAX + 5 < noOfBytes)
     serialFrameStruct->frameType = 0xFF;
     
-  serialFrame[0] = 0xDA;
+  serialFrame[0] = FRAME_START;
   
   switch(serialFrameStruct->frameType)
   {
@@ -221,16 +224,17 @@ uint8_t* createSerialFrame(void *inputData, uint8_t noOfBytes, frameParams_t *se
         serialFrame[2] = serialFrameStruct->tissueDetected;
         serialFrame[3] = serialFrameStruct->params.wavelength;
         memcpy(&serialFrame[4], inputData, noOfBytes);
-        serialFrame[noOfBytes + 4] = 0xEA;
-        serialFrame[noOfBytes + 5] = 0xDC;
+        serialFrame[noOfBytes + 4] = FRAME_TERMINATOR_1;
+        serialFrame[noOfBytes + 5] = FRAME_TERMINATOR_2;
         break;
     case PARAMS:
         serialFrame[1] = PARAMS;
-        serialFrame[2] = serialFrameStruct->params.hr_spo2[0];
-        serialFrame[3] = serialFrameStruct->params.hr_spo2[1];
-        serialFrame[4] = serialFrameStruct->tissueDetected;
-        serialFrame[5] = 0xEA;
-        serialFrame[6] = 0xDC;
+        serialFrame[2] = serialFrameStruct->tissueDetected;
+        serialFrame[3] = serialFrameStruct->params.hr_spo2[0];
+        serialFrame[4] = serialFrameStruct->params.hr_spo2[1];
+        serialFrame[5] = serialFrameStruct->params.hr_spo2[2];
+        serialFrame[6] = FRAME_TERMINATOR_1;
+        serialFrame[7] = FRAME_TERMINATOR_2;
         
         break;
     case DEBUG:
@@ -240,8 +244,8 @@ uint8_t* createSerialFrame(void *inputData, uint8_t noOfBytes, frameParams_t *se
         serialFrame[2] = 0xAD;
         serialFrame[3] = 0xDE;
         serialFrame[4] = 0xAD;
-        serialFrame[5] = 0xEA;
-        serialFrame[6] = 0xDC;
+        serialFrame[5] = FRAME_TERMINATOR_1;
+        serialFrame[6] = FRAME_TERMINATOR_2;
         break;
   }
 
@@ -252,11 +256,13 @@ void sendFrame(uint8_t *pFrame)
 { 
   bool terminator_1 = FALSE;
   bool endOfFrame = FALSE;
+  char tempBuff[7];
   while(!endOfFrame)
   {
-    debug.print(*pFrame, HEX);
-    debug.print(" ");
 
+    if (*pFrame < 0x10) {Serial.print("0");}
+    debug.print(*pFrame, HEX);
+    
     if(FRAME_TERMINATOR_1 == *pFrame)
     {
       terminator_1 = TRUE;
@@ -292,7 +298,8 @@ void setTimers(void)
 void setup()
 {
   debug.begin(115200);
-  debug.println("MAX30105 Basic Readings Example");
+  pinMode(LED_BUILTIN, OUTPUT);
+
 
 #if (USE_CUSTOM_SENSOR_CFG == TRUE)
   sensorConfig_t max30105Config;
@@ -301,8 +308,12 @@ void setup()
   // Initialize sensor
   if (particleSensor.begin() == false)
   {
-    debug.println("MAX30105 was not found. Please check wiring/power. ");
+    digitalWrite(LED_BUILTIN, HIGH);
     while (1);
+  }
+  else
+  {
+    digitalWrite(LED_BUILTIN, LOW);
   }
 #if (USE_CUSTOM_SENSOR_CFG == TRUE)
   max30105Config.ledBrightness = CFG_LED_BRIGHTNESS;
@@ -382,21 +393,16 @@ void loop()
       memset(&frameParam, 0x00, sizeof(frameParam));  
       frameParam.frameType = PARAMS;
       frameParam.params.hr_spo2[0] = gTempbeatAvg;
-      frameParam.params.hr_spo2[1] = gTempSpO2Avg;
+      gTempSpO2AvgInt1 = gTempSpO2Avg;
+      gTempSpO2AvgInt2 = (gTempSpO2Avg - gTempSpO2AvgInt1) * 100;
+      frameParam.params.hr_spo2[1] = gTempSpO2AvgInt1;
+      frameParam.params.hr_spo2[2] = gTempSpO2AvgInt2;
       frameParam.tissueDetected = gTissueDetected;
-      uint8_t *pFrame =  createSerialFrame(NULL, 8, &frameParam);
       
-
-      memset(&frameParam, 0x00, sizeof(frameParam));
-     
-      frameParam.frameType = PARAMS;
-      frameParam.params.hr_spo2[0] = gTempbeatAvg;
-      frameParam.params.hr_spo2[1] = gTempSpO2Avg;
-      frameParam.tissueDetected = gTissueDetected;
       gpFrame =  createSerialFrame(NULL, 2, &frameParam);
 
-      sendFrame(gpFrame);
-    //  debug.print('\n');
+      //sendFrame(gpFrame);
+      debug.print('\n');
 
 
       memset(&frameParam, 0x00, sizeof(frameParam));
@@ -406,8 +412,9 @@ void loop()
       frameParam.tissueDetected = gTissueDetected;
       gpFrame = createSerialFrame(&FIFO_Buffer[(IR_CHANNEL * FIFO_NUMBER_OF_SAMPLES) + FIFO_NUMBER_OF_OVERLAPPING_SAMPLES], (FIFO_NUMBER_OF_SAMPLES - FIFO_NUMBER_OF_OVERLAPPING_SAMPLES) * 4, &frameParam);
 
+      debug.println(FIFO_Buffer[(IR_CHANNEL * FIFO_NUMBER_OF_SAMPLES) + FIFO_NUMBER_OF_OVERLAPPING_SAMPLES],HEX);
       sendFrame(gpFrame);
-    //  debug.print('\n');
+      //debug.print('\n');
 
       memset(&frameParam, 0x00, sizeof(frameParam));
 
@@ -416,8 +423,8 @@ void loop()
       frameParam.tissueDetected = gTissueDetected;
       gpFrame = createSerialFrame(&FIFO_Buffer[(RED_CHANNEL * FIFO_NUMBER_OF_SAMPLES) + FIFO_NUMBER_OF_OVERLAPPING_SAMPLES], (FIFO_NUMBER_OF_SAMPLES - FIFO_NUMBER_OF_OVERLAPPING_SAMPLES) * 4, &frameParam);
 
-     sendFrame(gpFrame);
-    //  debug.print('\n');
+     //sendFrame(gpFrame);
+     debug.print('\n');
    // debug.println("Frame");
   //  for (byte i = FIFO_NUMBER_OF_OVERLAPPING_SAMPLES; i < FIFO_NUMBER_OF_SAMPLES; i++)
  //   {
