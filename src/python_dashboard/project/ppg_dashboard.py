@@ -69,6 +69,8 @@ class PPGDashboard:
 serialHandler = SerialFrame('COM4', 115200)
 dashboard = PPGDashboard()
 
+
+# streamlit run D:\VUB\ILFS\src\python_dashboard\project\ppg_dashboard.py 
 def main():
     previous_heart_rate = 0
     image_finger = Image.open('D:/VUB/ILFS/src/python_dashboard/project/finger_press_icon.png')

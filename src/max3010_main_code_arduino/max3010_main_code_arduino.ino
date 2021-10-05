@@ -401,7 +401,7 @@ void loop()
       
       gpFrame =  createSerialFrame(NULL, 2, &frameParam);
 
-      //sendFrame(gpFrame);
+      sendFrame(gpFrame);
       debug.print('\n');
 
 
@@ -411,8 +411,7 @@ void loop()
       frameParam.params.wavelength = IR_CHANNEL;
       frameParam.tissueDetected = gTissueDetected;
       gpFrame = createSerialFrame(&FIFO_Buffer[(IR_CHANNEL * FIFO_NUMBER_OF_SAMPLES) + FIFO_NUMBER_OF_OVERLAPPING_SAMPLES], (FIFO_NUMBER_OF_SAMPLES - FIFO_NUMBER_OF_OVERLAPPING_SAMPLES) * 4, &frameParam);
-
-      debug.println(FIFO_Buffer[(IR_CHANNEL * FIFO_NUMBER_OF_SAMPLES) + FIFO_NUMBER_OF_OVERLAPPING_SAMPLES],HEX);
+      
       sendFrame(gpFrame);
       //debug.print('\n');
 
@@ -423,7 +422,7 @@ void loop()
       frameParam.tissueDetected = gTissueDetected;
       gpFrame = createSerialFrame(&FIFO_Buffer[(RED_CHANNEL * FIFO_NUMBER_OF_SAMPLES) + FIFO_NUMBER_OF_OVERLAPPING_SAMPLES], (FIFO_NUMBER_OF_SAMPLES - FIFO_NUMBER_OF_OVERLAPPING_SAMPLES) * 4, &frameParam);
 
-     //sendFrame(gpFrame);
+     sendFrame(gpFrame);
      debug.print('\n');
    // debug.println("Frame");
   //  for (byte i = FIFO_NUMBER_OF_OVERLAPPING_SAMPLES; i < FIFO_NUMBER_OF_SAMPLES; i++)
