@@ -39,6 +39,8 @@ class SerialFrame:
         return self.checkFrameIntegrity()
             
     def readAndProcessFrame(self):
+        tempBuff = []
+        tempBuff2 = []
         if(self.readFrame() == 0):
             
             self.heart_rate_spo_updated = 0
@@ -54,17 +56,28 @@ class SerialFrame:
                     self.heart_rate_spo_updated = 1
             elif(self.frameBytes[1] == 0x7C):
                 #process channel_data frame
-                self.tissue_detected = self.frameBytes[2];
+                self.tissue_detected = self.frameBytes[2]
+                
                 if(self.tissue_detected):
+                
+                    tempBuff = self.frameBytes[4:len(self.frameBytes) - 2]
+                    
+                    counterBuff = 0
                     if(self.frameBytes[3] == 0x00):
-                        # TO DO: little endian to big endian for each 16 byte value
-                        self.red_buffer = self.frameBytes[4:len(self.frameBytes) - 2]
+                        for x in range(0,len(tempBuff), 4):
+                            tempBuff2.append(tempBuff[x] + (tempBuff[x+1] << 8) + (tempBuff[x+2] << 16) + (tempBuff[x+3] << 24))
+                
                         self.red_buffer_updated = 1
+                        self.red_buffer = [max(tempBuff2)-x for x in tempBuff2]
                         
                     elif(self.frameBytes[3] == 0x02):
-                        # TO DO: little endian to big endian for each 16 byte value
-                        self.ir_buffer = self.frameBytes[4:len(self.frameBytes) - 2]
+                        for x in range(0,len(tempBuff), 4):
+                            tempBuff2.append(tempBuff[x] + (tempBuff[x+1] << 8) + (tempBuff[x+2] << 16) + (tempBuff[x+3] << 24))
+                            counterBuff += 1
+                            
                         self.ir_buffer_updated = 1
+                        self.ir_buffer = [max(tempBuff2)-x for x in tempBuff2]
+
                     else:
                         
                         self.ir_buffer = 0

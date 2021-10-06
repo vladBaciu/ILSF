@@ -413,7 +413,7 @@ void loop()
       gpFrame = createSerialFrame(&FIFO_Buffer[(IR_CHANNEL * FIFO_NUMBER_OF_SAMPLES) + FIFO_NUMBER_OF_OVERLAPPING_SAMPLES], (FIFO_NUMBER_OF_SAMPLES - FIFO_NUMBER_OF_OVERLAPPING_SAMPLES) * 4, &frameParam);
       
       sendFrame(gpFrame);
-      //debug.print('\n');
+      debug.print('\n');
 
       memset(&frameParam, 0x00, sizeof(frameParam));
 
