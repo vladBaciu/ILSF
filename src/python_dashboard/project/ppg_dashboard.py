@@ -35,7 +35,8 @@ class PPGDashboard:
         fig.update_layout(height=500, width=900)
         fig.update_yaxes(showticklabels=False)
         self.chart_placeholder.write(fig)
-    
+       
+        
     def bpm_gauge(self,heart_rate,previous_heart_rate):
         fig = go.Figure(go.Indicator(
             domain = {'x': [0, 1], 'y': [0, 1]},
@@ -43,8 +44,8 @@ class PPGDashboard:
             mode = "gauge+number+delta",
             title = {'text': "BPM"},
             delta = {'reference': previous_heart_rate},
-            gauge = {'axis': {'range': [40, 130]},
-                     'steps': [{'range': [40, 65], 'color': "lightgray"},
+            gauge = {'axis': {'range': [50, 130]},
+                     'steps': [{'range': [50, 65], 'color': "lightgray"},
                              {'range': [65, 85], 'color': "gray"},
                              {'range': [85, 130], 'color': "red"}],
                      'threshold': {'line': {'color': "black", 'width': 4}, 'thickness': 0.75, 'value': 110}
