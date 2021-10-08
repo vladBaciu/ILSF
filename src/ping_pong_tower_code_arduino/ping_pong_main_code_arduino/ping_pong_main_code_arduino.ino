@@ -25,6 +25,9 @@ MAX30105 particleSensor;
 
 
 #define USE_CUSTOM_SENSOR_CFG     TRUE
+#define SHOW_DEBUG_DATA           TRUE
+#define USE_PID_CONTROLLER        FALSE
+
 
 #define BPM_AVERAGE_RATE          (6U)
 #define SPO2_AVERAGE_RATE         (8U)
@@ -35,7 +38,18 @@ MAX30105 particleSensor;
 #define FRAME_TERMINATOR_1        (0xEA)
 #define FRAME_TERMINATOR_2        (0xDC)
 
+#define PI_KI_VALUE               (0.0027)
+#define PI_KI_MAX_ERROR           (27000)
+#define PI_KP_VALUE               (0.30)
+
+#define PI_MIN_OUTPUT_VALUE      (0)
+#define PI_MAX_OUTPUT_VALUE      (200)
+
+
 #define ANALOG_PIN                (17U)
+#define ADC_REF_VOLTAGE           (3.3)
+#define ADC_MAX_VALUE             (1024)
+
 #define PWM_CONTROL_PIN           (9U)
 
 #define TICK_SECOND      100       
@@ -43,14 +57,16 @@ MAX30105 particleSensor;
 #define NO_OF_ELEMENTS(arr)        (sizeof(arr)/sizeof(arr[0]))
 /**************************************************** GLOBAL VARIABLES **********************************************************/
 
-uint8_t hr_lookup_table[] = {45,50,55,58,61,65,67,70,80,85,90,95,100,110,115,120,130};
-float voltage_lookup_table[] = { 1.56, 1.606, 1.61, 1.751, 1.98, 2.23, 2.25, 2.634, 2.918, 3.14, 3.369, 3.707, 3.985, 4.053, 4.19, 4.53, 4.80};
+uint8_t hr_lookup_table[] = {50,55,60,65,70,74,78,80,85,90,95,100,110,115,120,130};
+float voltage_lookup_table[] = { 0.87, 0.91, 1.06, 1.18, 1.38, 1.53, 1.65, 1.77, 1.924, 2.095, 2.27, 2.43, 2.53, 2.66, 2.8, 3.1};
 
 
 volatile float voltageValue = 0;
 volatile uint8_t lookup_index = 0;
-volatile float v_in, v_out, v_set = 100;
-
+volatile float v_in, duty_cycle_out, v_set = 100;
+volatile int error = 0;
+volatile float integral = 0;
+char inputBuffer[4];
 
 uint32_t samplesTaken = 0UL;
 
@@ -335,7 +351,7 @@ float getControlVoltage(uint8_t lookup_index, uint8_t bpm)
   uint8_t hr_1 = hr_lookup_table[lookup_index];
   uint8_t hr_2 = hr_lookup_table[lookup_index + 1];
   // y = y1 + ((x – x1) / (x2 – x1)) * (y2 – y1),
-  return v1 + ((bpm - hr_1)/(hr_2 - hr_1)) * (v2 - v1);
+  return v1 + ((bpm - hr_1)/(float)(hr_2 - hr_1)) * (v2 - v1);
 
 }
 
@@ -343,7 +359,7 @@ void setTimers(void)
 {
      TCB0.CTRLB = TCB_CNTMODE_INT_gc;    // Setting to periodic interrupt mode
      TCB0.INTCTRL = TCB_CAPT_bm;      // enable interrupt
-     TCB0.CCMP = 0x0fff;            // setting
+     TCB0.CCMP = 0xffff;            // setting
      TCB0.CTRLA = TCB_CLKSEL_CLKDIV2_gc | TCB_ENABLE_bm;  // timer prescaler of 2, Enable timer TCB2
  sei();
 }
@@ -390,12 +406,13 @@ void setup()
   setTimers();
   pinMode(PWM_CONTROL_PIN, OUTPUT);
 
-  // Create PID controllers, set gains
-  pid = pid_create(&pidctrl, &v_in, &v_out, &v_set, 5, 1, 3);
-  // Set output limits
-  pid_limits(pid, 0, 255);
-  // Turn on PID
+#if (TRUE == USE_PID_CONTROLLER)
+  pid = pid_create(&pidctrl, &v_in, &duty_cycle_out, &v_set, 1.4, 0.004, 0);
+ 
+  pid_limits(pid, 0, 200);
+
   pid_auto(pid);
+#endif
 }
 
 
@@ -411,6 +428,7 @@ void loop()
 
    while(1)
    {
+    
       for (byte i = FIFO_NUMBER_OF_SAMPLES - FIFO_NUMBER_OF_OVERLAPPING_SAMPLES; i < FIFO_NUMBER_OF_SAMPLES; i++)
       {
 
@@ -444,22 +462,83 @@ void loop()
           gTempbeatAvg += gBpmBuff[x];
         gTempbeatAvg /= BPM_AVERAGE_RATE;
       }
+      if(FALSE == gTissueDetected)
+      {
+        gTempbeatAvg = 80; 
+      }
+      
+#if (SHOW_DEBUG_DATA == TRUE)      
+       debug.print("Error: ");
+       debug.print(error);
+       debug.print('\n');
+       debug.print("BPM: ");
+       debug.print(gTempbeatAvg);
+       debug.print('\n');
+       debug.print("V_SET: ");
+       debug.print(v_set);
+       debug.print('\n');
+       debug.print("Duty out: ");
+       debug.print(duty_cycle_out);
+       debug.print('\n');
+       debug.print("V_IN:");
+       debug.print(v_in);
+       debug.print('\n');
+#endif       
+   /*
+         if (Serial.available() > 0) 
+         {
+
+          Serial.readBytesUntil('\n', inputBuffer, 4);
+          gTempbeatAvg = atoi(inputBuffer);
+          Serial.print("BPM value: ");
+          Serial.println(gTempbeatAvg);
         
-        debug.println(voltageValue);
+          memset(inputBuffer,0x00,4);
+  `     }
+  */
    }
    
 }
 
 ISR(TCB0_INT_vect)
 {
+ TCB0.INTFLAGS = TCB_CAPT_bm;
   
-  TCB0.INTFLAGS = TCB_CAPT_bm;
-  
-  v_in = analogRead(ANALOG_PIN) * (5.0 / 1023.0);
+  v_in = analogRead(ANALOG_PIN) * (ADC_REF_VOLTAGE / (ADC_MAX_VALUE - 1));
   lookup_index = searchLookUpIndex(gTempbeatAvg);
-  v_set = getControlVoltage(lookup_index,lookup_index);
-  
-  pid_compute(pid);
+  v_set = getControlVoltage(lookup_index,gTempbeatAvg);
+  error = (v_set - v_in) * 100;
 
-  analogWrite(PWM_CONTROL_PIN, v_out);
+#if(FALSE == USE_PID_CONTROLLER)
+  duty_cycle_out = (int) ((PI_KP_VALUE * error) + (PI_KI_VALUE * integral));
+  
+  integral += error;
+  if ((integral) > PI_KI_MAX_ERROR) 
+  {
+       integral = PI_KI_MAX_ERROR;
+  }
+  if ((integral) < -PI_KI_MAX_ERROR) 
+  {
+       integral = -PI_KI_MAX_ERROR;
+  }
+  if (duty_cycle_out >= PI_MAX_OUTPUT_VALUE) 
+  {
+       duty_cycle_out = PI_MAX_OUTPUT_VALUE;
+  }
+  if (duty_cycle_out < PI_MIN_OUTPUT_VALUE) 
+  {
+       duty_cycle_out = PI_MIN_OUTPUT_VALUE;
+  }
+  if(gTempbeatAvg == 0)
+  {
+    analogWrite(PWM_CONTROL_PIN, 0 );
+  }
+  else
+  {
+    analogWrite(PWM_CONTROL_PIN, duty_cycle_out );
+  }
+#else
+  pid_compute(pid);
+  analogWrite(PWM_CONTROL_PIN, duty_cycle_out );
+#endif
 }

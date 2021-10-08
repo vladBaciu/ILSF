@@ -18,7 +18,7 @@
 	Author e-mail: ruben at geekfactory dot mx
  */
 #include "PID.h"
-#define TICK_SECOND      100  
+#define TICK_SECOND      1000  
 pid_t pid_create(pid_t pid, float* in, float* out, float* set, float kp, float ki, float kd)
 {
 	pid->input = in;
