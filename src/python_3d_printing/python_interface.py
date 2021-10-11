@@ -48,7 +48,7 @@ class CustomMainWindow(QMainWindow):
         
         # Define the geometry of the main window
         self.setGeometry(300, 300, 1000, 450)
-        self.setWindowTitle("PPG data aquisition")
+        self.setWindowTitle("PPG 3D print")
         self.State = False
         # Create FRAME_A
         self.FRAME_A = QFrame(self)
@@ -58,36 +58,44 @@ class CustomMainWindow(QMainWindow):
         self.FRAME_A.setLayout(self.LAYOUT_A)
         self.setCentralWidget(self.FRAME_A)
 
-        # Place the zoom button
+        # Create the stop button
         self.stopBtn = QPushButton(text = 'Stop data aquisition')
         setCustomSize(self.stopBtn, 100, 50)
         self.stopBtn.setStyleSheet('QPushButton {background-color: lightgrey; color: black;}')
         self.stopBtn.setCheckable(True)
         
+        # Create the convert button
         self.convertBtn = QPushButton(text = 'Convert and print')
         self.convertBtn.setStyleSheet('QPushButton {background-color: #39B3C4; color: black;}')
         setCustomSize(self.convertBtn, 100, 50)
         
+        # Set an action for each button
         self.stopBtn.clicked.connect(self.stopBtnAction)
         self.convertBtn.clicked.connect(self.convert_and_print)
         
+        # Place the buttons on LAYOUT_A
         self.LAYOUT_A.addWidget(self.stopBtn, *(1,0))
         self.LAYOUT_A.addWidget(self.convertBtn, *(1,1))
-        # Place the matplotlib figure
+        
+        # Place the matplotlib figures
         self.myFig = CustomFigCanvas(show_tail = True)
         self.LAYOUT_A.addWidget(self.myFig, *(1,2))
+        
         self.myFig2 = CustomFigCanvas(show_tail = False)
+        self.LAYOUT_A.addWidget(self.myFig2, *(2,2))
+        # Used as a print preview graph, do not use axis
         self.myFig2.ax1.axis('off')
         
-        self.LAYOUT_A.addWidget(self.myFig2, *(2,2))
         
+        # Span selector for PPG recording graph. Calls onselect function.
         self.span = SpanSelector(
             self.myFig.ax1,
             self.onselect,
             "horizontal",
             useblit=True,
-            rectprops=dict(alpha=0.5, facecolor="red"))   
-        # Add the callbackfunc to ..
+            rectprops=dict(alpha=0.5, facecolor="red"))  
+        
+        # Add the callbackfunc to read the serial buffer
         myDataLoop = threading.Thread(name = 'myDataLoop', target = dataSendLoop, args = (self.addData_callbackFunc,))
         myDataLoop.start()
 
@@ -95,15 +103,20 @@ class CustomMainWindow(QMainWindow):
         
     def closeEvent(self, event):
         super(CustomMainWindow, self).closeEvent(event)
+        # Close serial connection
         self.com.close()
+        # Close interface
         self.close()
+        
     ''''''
+    # Callback function for the span selector. Plots selection on the second graph
     def onselect(self, min_value, max_value):
         
         x, y = self.myFig.getIndex(min_value, max_value)
-   
         self.myFig2.plotSelection(x,y)
-        
+     
+    # Callback function for Convert button. Saves the selection as a PNG picture,
+    # converts the PNG picture to STL and calls prusaSlicer to create the G-CODE.
     def convert_and_print(self):
         
         self.myFig2.print_figure('out/ppg_selection_out.png', pad_inches=0)
@@ -116,32 +129,32 @@ class CustomMainWindow(QMainWindow):
         stl_file_loc = os.path.join(os.getcwd(),'out', 'ppg_selection_out.stl')
      
         command = "prusa-slicer-console.exe -printer-technology FFF -center 125,105 -g {} -load {}".format(stl_file_loc,ini_file_loc)
-        print(command)
+        
         subprocess.run(command, shell=True)
     
+    # Callback function for Stop data aquisition button.
     def stopBtnAction(self):
         if self.stopBtn.isChecked():
-  
             # setting background color to light-blue
             self.stopBtn.setStyleSheet("background-color : lightblue")
             self.State = True
-  
-        # if it is unchecked
-        else:
-  
+            
+        else: # if it is unchecked
             # set background color back to light-grey
             self.stopBtn.setStyleSheet("background-color : lightgrey")
             self.State = False
             
+        # Call the stopBtn function for the PPG recording graph   
         self.myFig.stopBtn(self.State)
 
-    ''''''
-
+    
+    # Callback function for adding data to the buffer which will be displayed on
+    # the PPG recording graph
     def addData_callbackFunc(self, value):
-        # print("Add data: " + str(value))
+        #print("Add data: " + str(value))
         self.myFig.addData(value)
 
-
+    ''''''
 
 ''' End Class '''
 
@@ -153,7 +166,7 @@ class CustomFigCanvas(FigureCanvas, TimedAnimation):
         self.stopDataAq = False
         self.show_tail = show_tail
     
-        # The data
+        # The default data
         self.xlim = 100
         self.n = np.linspace(0, self.xlim - 1, self.xlim)
         a = []
@@ -171,22 +184,27 @@ class CustomFigCanvas(FigureCanvas, TimedAnimation):
         self.ax1 = self.fig.add_subplot(111)
 
 
-        # self.ax1 settings
         #self.ax1.set_xlabel('Time')
+        #self.ax1.set_ylabel('Raw data')
+        # Disable axis since the purpose is to have a 3D print
         self.ax1.get_xaxis().set_visible(False)
         self.ax1.get_yaxis().set_visible(False)
         
-        self.ax1.set_ylabel('Raw data')
+        # Check if the linewidth should be increased
         if self.show_tail == False:
             self.line1 = Line2D([], [], color='blue', linewidth = 10)
         else:
             self.line1 = Line2D([], [], color='blue') 
+            
         self.ax1.add_line(self.line1)
+        
+        # Check if the new datapoints should be displayed as a colorful tail
         if self.show_tail == True:
             self.line1_tail = Line2D([], [], color='red', linewidth=2)
             self.line1_head = Line2D([], [], color='red', marker='o', markeredgecolor='r')
             self.ax1.add_line(self.line1_tail)
             self.ax1.add_line(self.line1_head)
+            
         self.ax1.set_xlim(0, self.xlim - 1)
         self.ax1.set_ylim(-10, 100)
 
@@ -196,7 +214,8 @@ class CustomFigCanvas(FigureCanvas, TimedAnimation):
 
     def new_frame_seq(self):
         return iter(range(self.n.size))
-
+    
+    # Init the graph with default data
     def _init_draw(self):
         if self.show_tail == True:
             lines = [self.line1, self.line1_tail, self.line1_head]
@@ -205,14 +224,17 @@ class CustomFigCanvas(FigureCanvas, TimedAnimation):
             
         for l in lines:
             l.set_data([], [])
-
+            
+    # Add data to the plot buffer
     def addData(self, value):
         if self.stopDataAq == False:
             self.addedData.append(value)
-
+            
+    # Stop updating the plot buffer        
     def stopBtn(self, value):
         self.stopDataAq = value
     
+    # Get the graph values for the span selector
     def getIndex(self, xmin, xmax):
         indmin, indmax = np.searchsorted(self.n, (xmin, xmax))
         indmax = min(len(self.n) - 1, indmax)
@@ -221,6 +243,7 @@ class CustomFigCanvas(FigureCanvas, TimedAnimation):
         
         return thisx, thisy
     
+    # Plot the span selection on the second graph
     def plotSelection(self, thisx, thisy):
         self.n = thisx
         self.y = thisy
@@ -239,7 +262,8 @@ class CustomFigCanvas(FigureCanvas, TimedAnimation):
             print(str(self.abc))
             TimedAnimation._stop(self)
             pass
-
+    
+    # Draw frame as long as the addedData contains new data
     def _draw_frame(self, framedata):
         margin = 0
         while(len(self.addedData) > 0):
@@ -274,9 +298,10 @@ class Communicate(QObject):
 
 serialHandler = SerialFrame('COM4', 115200)
 
+# Target function for read and plot data thread
 def dataSendLoop(addData_callbackFunc):
+    
     # Setup the signal-slot mechanism.
-
     mySrc = Communicate()
     mySrc.data_signal.connect(addData_callbackFunc)
 
@@ -291,10 +316,7 @@ def dataSendLoop(addData_callbackFunc):
         if(serialHandler.ir_buffer_updated):
                 for i in range(0, len(serialHandler.ir_buffer)-1):
                     time.sleep(0.1)
-                    mySrc.data_signal.emit(serialHandler.ir_buffer[i]) # <- Here you emit a signal!   
-
-    ###
-###
+                    mySrc.data_signal.emit(serialHandler.ir_buffer[i]) # Emit a signal!   
 
 
 

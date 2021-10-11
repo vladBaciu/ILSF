@@ -25,7 +25,7 @@ MAX30105 particleSensor;
 
 
 #define USE_CUSTOM_SENSOR_CFG     TRUE
-#define SHOW_DEBUG_DATA           TRUE
+#define SHOW_DEBUG_DATA           FALSE
 #define USE_PID_CONTROLLER        FALSE
 
 
