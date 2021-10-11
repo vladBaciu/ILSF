@@ -3,26 +3,28 @@
 #include "heartRate.h"
 #include "spo2_algorithm.h"
 
-MAX30105 particleSensor;
-
-
-#define debug Serial
-
 /******************************************************* MACROS ******************************************************************/
+/* @brief Just a redefinition */
 #define TRUE                      true
 #define FALSE                     false
 
-#define NO_FINGER_THRESHOLD       (50000UL)
-
+/* @brief Channel indexes */
 #define RED_CHANNEL   (0U)
 #define GREEN_CHANNEL (1U)
 #define IR_CHANNEL    (2U)
 
+/* @brief Frame flags. Same as in the Python application */
+#define FRAME_START               (0xDA)
+#define FRAME_TERMINATOR_1        (0xEA)
+#define FRAME_TERMINATOR_2        (0xDC)
 
-#define READ_FROM_FIFO_BUFFER     TRUE
+
+/* @brief Some config macros */
+#define NO_FINGER_THRESHOLD                   (50000UL)
+
+#define READ_FROM_FIFO_BUFFER                 TRUE
 #define FIFO_NUMBER_OF_SAMPLES               (100U)
 #define FIFO_NUMBER_OF_OVERLAPPING_SAMPLES   (75U)
-
 
 #define USE_CUSTOM_SENSOR_CFG     TRUE
 
@@ -30,37 +32,46 @@ MAX30105 particleSensor;
 #define SPO2_AVERAGE_RATE         (8U)
 
 #define SERIAL_FRAME_LENGTH_MAX   (300U)
+#define debug Serial
 
-#define FRAME_START               (0xDA)
-#define FRAME_TERMINATOR_1        (0xEA)
-#define FRAME_TERMINATOR_2        (0xDC)
 /**************************************************** GLOBAL VARIABLES **********************************************************/
 
+/* @brief Stores the number of samples aquired in the input buffer */
 uint32_t samplesTaken = 0UL;
-
+/* @brief Channel buffers */
 uint32_t FIFO_Buffer[3 * FIFO_NUMBER_OF_SAMPLES];
 uint32_t channelsValues[3];
+
+/* @brief Stores the SpO2 value */
+int32_t spo2;
+/* @brief Stores the status of SpO2 value */ 
+int8_t validSPO2; 
+/* @brief Stores the HR value */
+int32_t heartRate;
+/* @brief Las HR rate value */ 
+int32_t gLastHeartRate;
+/* @brief Stores the status of HR value */ 
+int8_t validHeartRate; 
+
+/* @brief HR buffer and index used for averaging */
 uint8_t gBeatAvg;
-
-int32_t spo2; //SPO2 value
-int8_t validSPO2; //indicator to show if the SPO2 calculation is valid
-int32_t heartRate; //heart rate value
-uint32_t gLastHeartRate;
-int8_t validHeartRate; //indicator to show if the heart rate calculation is valid
-
-uint32_t gTempbeatAvg;
 uint8_t gBpmBuff[BPM_AVERAGE_RATE];
 uint8_t gBpmCurrentIndex = 0U;
 
+/* @brief Temporary variables */
 float gTempSpO2Avg;
 uint32_t gTempSpO2AvgInt1;
 uint32_t gTempSpO2AvgInt2;
+uint32_t gTempbeatAvg;
 
+/* @brief SpO2 buffer and index used for averaging */
 float gSpO2Buff[BPM_AVERAGE_RATE];
 uint8_t gSpO2CurrentIndex = 0U;
 
+/* @brief Stores the status of the measurement */
 bool gTissueDetected = FALSE;
 
+/* @brief Pointer to a serial frame newly created*/
 uint8_t *gpFrame = NULL;
 /**************************************************** GLOBAL STRUCTS AND DEFINITIONS ********************************************/
 /* Options: 0=Off to 255=50mA */
@@ -76,6 +87,7 @@ uint8_t *gpFrame = NULL;
 /* Options: 2048, 4096, 8192, 16384 */
 #define CFG_ADC_RANGE        (16384)
 
+/* @brief Sensor config structure */
 typedef struct 
 {
   byte ledBrightness;
@@ -86,6 +98,7 @@ typedef struct
   int adcRange;
 } sensorConfig_t;
 
+/* @brief Enum with frame types */
 typedef enum 
 { 
     CHANNEL_DATA = 0x7C, 
@@ -93,10 +106,13 @@ typedef enum
     DEBUG = 0xF2
 } frameType_t;
 
+/* @brief Store params for the debug frame. Not supported yet. */
 typedef struct
 {
   uint8_t dummy;
 }debugType_t;
+
+/* @brief Store params for differend kind of serial frames */
 typedef struct
 {
   frameType_t frameType;
@@ -110,7 +126,14 @@ typedef struct
 }frameParams_t;
 
 frameParams_t frameParam;
+
+MAX30105 particleSensor;
 /**************************************************** CUSTOM FUNCTIONS **********************************************************/
+/* Function: readChannel
+ * Param: uint8_t channel - channel to be read
+ * Description: Read channel (not from FIFO buffer)
+ * Return type: uint32_t
+ */
 uint32_t readChannel(uint8_t channel)
 {
   uint32_t channelValue;
@@ -134,6 +157,12 @@ uint32_t readChannel(uint8_t channel)
   return channelValue;
 }
 
+/* Function: readChannels
+ * Param: uint32_t *channelsBuffer - output buffer where the channels are stored
+ *        bool readFIFO - read from FIFO buffer or not
+ * Description: Read IR, RED and GREEN channels
+ * Return type: bool
+ */
 bool readChannels(uint32_t *channelsBuffer, bool readFIFO)
 {
   bool bIsTissuePresent = TRUE;
@@ -153,7 +182,6 @@ bool readChannels(uint32_t *channelsBuffer, bool readFIFO)
  
     while(particleSensor.available())
       {
-       
         *(channelsBuffer + ((RED_CHANNEL * FIFO_NUMBER_OF_SAMPLES) + samplesTaken)) = particleSensor.getFIFORed();
         *(channelsBuffer + ((GREEN_CHANNEL * FIFO_NUMBER_OF_SAMPLES) + samplesTaken)) = particleSensor.getFIFOGreen();
         *(channelsBuffer + ((IR_CHANNEL * FIFO_NUMBER_OF_SAMPLES) + samplesTaken)) = particleSensor.getFIFOIR();
@@ -174,6 +202,13 @@ bool readChannels(uint32_t *channelsBuffer, bool readFIFO)
   return bIsTissuePresent;
 }
 
+/* Function: computeBPM
+ * Param: uint32_t sample - the last sample from one of the buffers (red/ir/green) - preferablly IR.
+ * Description: Compute BPM. Runs for each aquired sample in order to detect the beat. Function not used 
+ *              for the moment since it requires that all the samples to be treated - performs poorly if 
+ *              samples are lost or skiped.
+ * Return type: uint8_t
+ */
 uint8_t computeBPM(uint32_t sample)
 {
   long delta;
@@ -186,7 +221,7 @@ uint8_t computeBPM(uint32_t sample)
 
   if(checkForBeat(sample) == true)
   {
-    //We sensed a beat!
+    /* A beat was detected */
     delta = millis() - lastBeat;
     lastBeat = millis();
 
@@ -209,6 +244,13 @@ uint8_t computeBPM(uint32_t sample)
   return beatAvg;
 }
 
+/* Function: createSerialFrame
+ * Param: void *inputData - a generic pointer to an input buffer
+ *        uint8_t noOfBytes - number of bytes in the input buffer to be included in the frame
+ *        frameParams_t *serialFrameStruct - contains params such as hr, sp02, etc
+ * Description: Create the type of frame according to the frameType parameter. DEBUG frame not implemented.
+ * Return type: void
+ */
 uint8_t* createSerialFrame(void *inputData, uint8_t noOfBytes, frameParams_t *serialFrameStruct)
 {
   static uint8_t serialFrame[SERIAL_FRAME_LENGTH_MAX + 5];
@@ -227,6 +269,7 @@ uint8_t* createSerialFrame(void *inputData, uint8_t noOfBytes, frameParams_t *se
         serialFrame[noOfBytes + 4] = FRAME_TERMINATOR_1;
         serialFrame[noOfBytes + 5] = FRAME_TERMINATOR_2;
         break;
+        
     case PARAMS:
         serialFrame[1] = PARAMS;
         serialFrame[2] = serialFrameStruct->tissueDetected;
@@ -235,10 +278,11 @@ uint8_t* createSerialFrame(void *inputData, uint8_t noOfBytes, frameParams_t *se
         serialFrame[5] = serialFrameStruct->params.hr_spo2[2];
         serialFrame[6] = FRAME_TERMINATOR_1;
         serialFrame[7] = FRAME_TERMINATOR_2;
-        
         break;
+        
     case DEBUG:
         break;
+        
     default:
         serialFrame[1] = 0xDE;
         serialFrame[2] = 0xAD;
@@ -252,6 +296,11 @@ uint8_t* createSerialFrame(void *inputData, uint8_t noOfBytes, frameParams_t *se
   return serialFrame;
 }
 
+/* Function: sendFrame
+ * Param: uint8_t *pFrame - pointer to a buffer frame 
+ * Description: Sends the buffer frame untill the end terminators are detected
+ * Return type: void
+ */
 void sendFrame(uint8_t *pFrame)
 { 
   bool terminator_1 = FALSE;
@@ -278,6 +327,12 @@ void sendFrame(uint8_t *pFrame)
   }
 }
 
+/* Function: setTimers
+ * Param: void
+ * Description: Activate TCB2 timer unit in compare mode. Not used in this application. TCB2 is used in millis() function
+ *              or in I2C MAX sensor library
+ * Return type: void
+ */
 void setTimers(void)
 {
  /* Load the Compare or Capture register with the timeout value*/
@@ -289,8 +344,6 @@ void setTimers(void)
  /* Enable Capture or Timeout interrupt */
  TCB2.INTCTRL = TCB_CAPT_bm;
 
-
-  
  sei();
 }
 /**************************************************** ARDUINO STANDARD FUNCTIONS **********************************************************/
@@ -336,7 +389,6 @@ void setup()
 void loop()
 {
   
-  
    gTissueDetected = readChannels((uint32_t *)&FIFO_Buffer[0], TRUE);
    if(samplesTaken == FIFO_NUMBER_OF_SAMPLES)
    {
@@ -379,60 +431,56 @@ void loop()
         gTempbeatAvg /= BPM_AVERAGE_RATE;
       }
 
-      if(TRUE == validSPO2)
-      {
-          gSpO2Buff[gSpO2CurrentIndex++] = spo2;
-          gSpO2CurrentIndex %= 4;
+     if(TRUE == validSPO2)
+     {
+         gSpO2Buff[gSpO2CurrentIndex++] = spo2;
+         gSpO2CurrentIndex %= 4;
 
-          gTempSpO2Avg = 0;
-          for (byte x = 0 ; x < 4; x++)
-            gTempSpO2Avg += gSpO2Buff[x];
-          gTempSpO2Avg /= 4;
-      }
+         gTempSpO2Avg = 0;
+         for (byte x = 0 ; x < 4; x++)
+           gTempSpO2Avg += gSpO2Buff[x];
+         gTempSpO2Avg /= 4;
+     }
 
-      memset(&frameParam, 0x00, sizeof(frameParam));  
-      frameParam.frameType = PARAMS;
-      frameParam.params.hr_spo2[0] = gTempbeatAvg;
-      gTempSpO2AvgInt1 = gTempSpO2Avg;
-      gTempSpO2AvgInt2 = (gTempSpO2Avg - gTempSpO2AvgInt1) * 100;
-      frameParam.params.hr_spo2[1] = gTempSpO2AvgInt1;
-      frameParam.params.hr_spo2[2] = gTempSpO2AvgInt2;
-      frameParam.tissueDetected = gTissueDetected;
+     memset(&frameParam, 0x00, sizeof(frameParam));  
+     frameParam.frameType = PARAMS;
+     frameParam.params.hr_spo2[0] = gTempbeatAvg;
+     gTempSpO2AvgInt1 = gTempSpO2Avg;
+     gTempSpO2AvgInt2 = (gTempSpO2Avg - gTempSpO2AvgInt1) * 100;
+     frameParam.params.hr_spo2[1] = gTempSpO2AvgInt1;
+     frameParam.params.hr_spo2[2] = gTempSpO2AvgInt2;
+     frameParam.tissueDetected = gTissueDetected;
       
-      gpFrame =  createSerialFrame(NULL, 2, &frameParam);
-
-      sendFrame(gpFrame);
-      debug.print('\n');
-
-
-      memset(&frameParam, 0x00, sizeof(frameParam));
-
-      frameParam.frameType = CHANNEL_DATA;
-      frameParam.params.wavelength = IR_CHANNEL;
-      frameParam.tissueDetected = gTissueDetected;
-      gpFrame = createSerialFrame(&FIFO_Buffer[(IR_CHANNEL * FIFO_NUMBER_OF_SAMPLES) + FIFO_NUMBER_OF_OVERLAPPING_SAMPLES], (FIFO_NUMBER_OF_SAMPLES - FIFO_NUMBER_OF_OVERLAPPING_SAMPLES) * 4, &frameParam);
-      
-      sendFrame(gpFrame);
-      debug.print('\n');
-
-      memset(&frameParam, 0x00, sizeof(frameParam));
-
-      frameParam.frameType = CHANNEL_DATA;
-      frameParam.params.wavelength = RED_CHANNEL;
-      frameParam.tissueDetected = gTissueDetected;
-      gpFrame = createSerialFrame(&FIFO_Buffer[(RED_CHANNEL * FIFO_NUMBER_OF_SAMPLES) + FIFO_NUMBER_OF_OVERLAPPING_SAMPLES], (FIFO_NUMBER_OF_SAMPLES - FIFO_NUMBER_OF_OVERLAPPING_SAMPLES) * 4, &frameParam);
+     gpFrame =  createSerialFrame(NULL, 2, &frameParam);
 
      sendFrame(gpFrame);
      debug.print('\n');
-   // debug.println("Frame");
-  //  for (byte i = FIFO_NUMBER_OF_OVERLAPPING_SAMPLES; i < FIFO_NUMBER_OF_SAMPLES; i++)
- //   {
-  //     debug.print(FIFO_Buffer[((IR_CHANNEL * FIFO_NUMBER_OF_SAMPLES) + i)]);
-  //     debug.print('\n');
-  //  }
+
+
+     memset(&frameParam, 0x00, sizeof(frameParam));
+
+     frameParam.frameType = CHANNEL_DATA;
+     frameParam.params.wavelength = IR_CHANNEL;
+     frameParam.tissueDetected = gTissueDetected;
+     gpFrame = createSerialFrame(&FIFO_Buffer[(IR_CHANNEL * FIFO_NUMBER_OF_SAMPLES) + FIFO_NUMBER_OF_OVERLAPPING_SAMPLES], (FIFO_NUMBER_OF_SAMPLES - FIFO_NUMBER_OF_OVERLAPPING_SAMPLES) * 4, &frameParam);
+      
+     sendFrame(gpFrame);
+     debug.print('\n');
+
+     memset(&frameParam, 0x00, sizeof(frameParam));
+
+     frameParam.frameType = CHANNEL_DATA;
+     frameParam.params.wavelength = RED_CHANNEL;
+     frameParam.tissueDetected = gTissueDetected;
+     gpFrame = createSerialFrame(&FIFO_Buffer[(RED_CHANNEL * FIFO_NUMBER_OF_SAMPLES) + FIFO_NUMBER_OF_OVERLAPPING_SAMPLES], (FIFO_NUMBER_OF_SAMPLES - FIFO_NUMBER_OF_OVERLAPPING_SAMPLES) * 4, &frameParam);
+
+     sendFrame(gpFrame);
+     debug.print('\n');
+
    }
 }
 
+/* NOT USED */
 ISR(TCB2_INT_vect)
 {
  
