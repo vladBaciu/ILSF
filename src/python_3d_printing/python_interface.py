@@ -4,8 +4,7 @@ Created on Mon Oct 11 10:11:24 2021
 
 @author: baciu
 """
-import sys
-import os
+
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -25,6 +24,8 @@ import matplotlib
 import time
 import threading
 import subprocess
+import os, os.path, inspect
+import sys
 
 matplotlib.use("Qt5Agg")
 
@@ -45,6 +46,13 @@ class CustomMainWindow(QMainWindow):
 
     def __init__(self, COM_port):
 
+        
+
+        if '__file__' not in locals():
+            __file__ = inspect.getframeinfo(inspect.currentframe())[0]
+        
+        self.dir_path = os.path.dirname(os.path.abspath(__file__))
+        
         super(CustomMainWindow, self).__init__()
         self.com = COM_port
         # Define the geometry of the main window
@@ -120,8 +128,14 @@ class CustomMainWindow(QMainWindow):
     # Callback function for Convert button. Saves the selection as a PNG picture,
     # converts the PNG picture to STL and calls prusaSlicer to create the G-CODE.
     def convert_and_print(self):
-        self.myFig2.print_figure('out/ppg_selection.png', pad_inches=0)
-        image = Image.open('out/ppg_selection.png').convert('L')
+        
+
+        out_png_path = self.dir_path + "\out\ppg_selection.png"
+        out_stl_path = self.dir_path + "\out\ppg_selection.stl"
+        out_conf_path = self.dir_path + "\in\PrusaSlicer_config_bundle2.ini"
+
+        self.myFig2.print_figure(out_png_path, pad_inches=0)
+        image = Image.open(out_png_path).convert('L')
 
 
         # Make Numpy version for fast, efficient access
@@ -133,23 +147,21 @@ class CustomMainWindow(QMainWindow):
         # Anywhere the grey image is >127, make result image new colour
         res[npim<127] = [255,255,255]
         
-        Image.fromarray(res).save('out/ppg_selection.png')
+        Image.fromarray(res).save(out_png_path)
         
         # image = Image.open('out/ppg_selection.png')
         # MAX_SIZE = (100, 100) 
         # image.thumbnail(MAX_SIZE) 
         # image.save('pythonthumb.png') 
        
-        A = 256 * imread("out/ppg_selection.png")
+        A = 256 * imread(out_png_path)
         A = A[:, :, 2] + 1.0*A[:,:, 0] # Compose RGBA channels to give depth
         A = gaussian_filter(A, 1)  # smoothing
         matplotlib.pyplot.imshow(A)
-        numpy2stl(A, "out/ppg_selection.stl", scale=0.07, mask_val=0.1, solid=True, max_width=40, max_height = 20, max_depth=10)
-        ini_file_loc = os.path.join(os.getcwd(), 'in', 'PrusaSlicer_config_bundle2.ini')
-        stl_file_loc = os.path.join(os.getcwd(), 'out', 'ppg_selection.stl')
+        numpy2stl(A, out_stl_path, scale=0.07, mask_val=0.1, solid=True, max_width=40, max_height = 20, max_depth=10)
 
-        command = "prusa-slicer-console.exe -printer-technology FFF -center 125,105 -g {} -load {}".format(stl_file_loc,
-                                                                                                           ini_file_loc)
+        command = "prusa-slicer-console.exe -printer-technology FFF -center 125,105 -g {} -load {}".format(out_stl_path,
+                                                                                                           out_conf_path)
 
         subprocess.run(command, shell=True)
 
@@ -310,7 +322,6 @@ class Communicate(QObject):
 
 ''' End Class '''
 
-serialHandler = SerialFrame('COM4', 115200)
 
 
 # Target function for read and plot data thread
@@ -334,6 +345,17 @@ def dataSendLoop(addData_callbackFunc):
                     mySrc.data_signal.emit(serialHandler.ir_buffer[i])
 
 if __name__ == '__main__':
+
+    
+    if '__file__' not in locals():
+        __file__ = inspect.getframeinfo(inspect.currentframe())[0]
+        
+    ini_file_path = os.path.dirname(os.path.abspath(__file__)) + "\serial.ini"
+    ini_file = open(ini_file_path, "r")
+    com_port = ini_file.readline().rstrip()
+    baud = int(ini_file.readline().rstrip())
+    
+    serialHandler = SerialFrame(com_port, baud)
 
     app = QApplication(sys.argv)
     QApplication.setStyle(QStyleFactory.create('Plastique'))
