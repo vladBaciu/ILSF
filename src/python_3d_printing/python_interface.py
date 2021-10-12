@@ -52,6 +52,7 @@ class CustomMainWindow(QMainWindow):
             __file__ = inspect.getframeinfo(inspect.currentframe())[0]
         
         self.dir_path = os.path.dirname(os.path.abspath(__file__))
+       
         
         super(CustomMainWindow, self).__init__()
         self.com = COM_port
@@ -104,6 +105,7 @@ class CustomMainWindow(QMainWindow):
             useblit=True,
             rectprops=dict(alpha=0.5, facecolor="red"))
 
+        self.counter = 0
         # Add the callbackfunc to read the serial buffer
         myDataLoop = threading.Thread(name='myDataLoop', target=dataSendLoop,
                                       args=(self.addData_callbackFunc,))
@@ -130,10 +132,10 @@ class CustomMainWindow(QMainWindow):
     def convert_and_print(self):
         
 
-        out_png_path = self.dir_path + "\out\ppg_selection.png"
-        out_stl_path = self.dir_path + "\out\ppg_selection.stl"
+        out_png_path = self.dir_path + "\out\ppg_selection_" + str(self.counter) + ".png"
+        out_stl_path = self.dir_path + "\out\ppg_selection_" + str(self.counter) + ".stl"
         out_conf_path = self.dir_path + "\in\PrusaSlicer_config_bundle2.ini"
-
+        self.counter = self.counter + 1
         self.myFig2.print_figure(out_png_path, pad_inches=0)
         image = Image.open(out_png_path).convert('L')
 
@@ -293,7 +295,7 @@ class CustomFigCanvas(FigureCanvas, TimedAnimation):
 
     # Draw frame as long as the addedData contains new data
     def _draw_frame(self, framedata):
-        margin = 0
+        margin = 1
         while(len(self.addedData) > 0):
             self.y = np.roll(self.y, -1)
             self.y[-1] = self.addedData[0]
@@ -340,7 +342,7 @@ def dataSendLoop(addData_callbackFunc):
 
         if(serialHandler.ir_buffer_updated):
                 for i in range(0, len(serialHandler.ir_buffer)-1):
-                    time.sleep(0.1)
+                    time.sleep(0.01)
                     # Emit a signal!
                     mySrc.data_signal.emit(serialHandler.ir_buffer[i])
 

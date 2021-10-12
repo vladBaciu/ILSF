@@ -467,6 +467,7 @@ void loop()
      sendFrame(gpFrame);
      debug.print('\n');
 
+  
      memset(&frameParam, 0x00, sizeof(frameParam));
 
      frameParam.frameType = CHANNEL_DATA;
