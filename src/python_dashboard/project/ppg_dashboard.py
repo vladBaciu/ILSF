@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from process_serial_frames import SerialFrame
 from PIL import Image
-from datetime import datetime
 
+import os, os.path, inspect
 import streamlit as st
 import plotly.graph_objects as go
 import plotly.express as px
@@ -35,6 +35,7 @@ class PPGDashboard:
         fig.update_traces(line=dict(color='#456987', width=3))
         fig.update_layout(height=500, width=900)
         fig.update_yaxes(showticklabels=False)
+        fig.update_yaxes(range = [-400,1300])
         self.chart_placeholder.write(fig)
        
     def bpm_gauge(self, heart_rate, previous_heart_rate):
@@ -78,10 +79,22 @@ class PPGDashboard:
 # streamlit run D:\VUB\ILFS\src\python_dashboard\project\ppg_dashboard.py 
 def main():
     
-    serialHandler = SerialFrame('COM4', 115200)
+    if '__file__' not in locals():
+        __file__ = inspect.getframeinfo(inspect.currentframe())[0]
+        
+    ini_file_path = os.path.dirname(os.path.abspath(__file__)) + "\serial.ini"
+    ini_file = open(ini_file_path, "r")
+    com_port = ini_file.readline().rstrip()
+    baud = int(ini_file.readline().rstrip())
+    
+    serialHandler = SerialFrame(com_port, baud)
     dashboard = PPGDashboard()
     previous_heart_rate = 0
-    image_finger = Image.open('D:/VUB/ILFS/src/python_dashboard/project/finger_press_iconv.png')
+
+        
+    img_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'img',
+                            'finger_press_icon.png')
+    image_finger = Image.open(img_path)
     ppg_record = pd.DataFrame(data=[], columns=['Sample', 'Amplitude'])
     spo_color = "red"
     j = 0

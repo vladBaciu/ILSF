@@ -18,10 +18,9 @@ from process_serial_frames import SerialFrame
 from stl_tools import numpy2stl
 from scipy.ndimage import gaussian_filter
 from pylab import imread
+from PIL import Image
 
-import functools
 import numpy as np
-import random as rd
 import matplotlib
 import time
 import threading
@@ -116,17 +115,38 @@ class CustomMainWindow(QMainWindow):
     def onselect(self, min_value, max_value):
         x, y = self.myFig.getIndex(min_value, max_value)
         self.myFig2.plotSelection(x, y)
-
+        
+  
     # Callback function for Convert button. Saves the selection as a PNG picture,
     # converts the PNG picture to STL and calls prusaSlicer to create the G-CODE.
     def convert_and_print(self):
-        self.myFig2.print_figure('out/ppg_selection_out.png', pad_inches=0)
-        A = 256 * imread("out/ppg_selection_out.png")
-        A = A[:, :, 2] + 1.0 * A[:, :, 0]  # Compose RGBA channels to give depth
+        self.myFig2.print_figure('out/ppg_selection.png', pad_inches=0)
+        image = Image.open('out/ppg_selection.png').convert('L')
+
+
+        # Make Numpy version for fast, efficient access
+        npim = np.array(image)
+        
+        # Make solid black RGB output image, same width and height but 3 channels (RGB)
+        res = np.zeros((npim.shape[0],npim.shape[1],3), dtype=np.uint8)
+        
+        # Anywhere the grey image is >127, make result image new colour
+        res[npim<127] = [255,255,255]
+        
+        Image.fromarray(res).save('out/ppg_selection.png')
+        
+        # image = Image.open('out/ppg_selection.png')
+        # MAX_SIZE = (100, 100) 
+        # image.thumbnail(MAX_SIZE) 
+        # image.save('pythonthumb.png') 
+       
+        A = 256 * imread("out/ppg_selection.png")
+        A = A[:, :, 2] + 1.0*A[:,:, 0] # Compose RGBA channels to give depth
         A = gaussian_filter(A, 1)  # smoothing
-        numpy2stl(A, "out/ppg_selection_out.stl", scale=0.05, mask_val=5., solid=False)
-        ini_file_loc = os.path.join(os.getcwd(), 'in', 'PrusaSlicer_config_bundle.ini')
-        stl_file_loc = os.path.join(os.getcwd(), 'out', 'ppg_selection_out.stl')
+        matplotlib.pyplot.imshow(A)
+        numpy2stl(A, "out/ppg_selection.stl", scale=0.07, mask_val=0.1, solid=True, max_width=40, max_height = 20, max_depth=10)
+        ini_file_loc = os.path.join(os.getcwd(), 'in', 'PrusaSlicer_config_bundle2.ini')
+        stl_file_loc = os.path.join(os.getcwd(), 'out', 'ppg_selection.stl')
 
         command = "prusa-slicer-console.exe -printer-technology FFF -center 125,105 -g {} -load {}".format(stl_file_loc,
                                                                                                            ini_file_loc)
@@ -225,7 +245,8 @@ class CustomFigCanvas(FigureCanvas, TimedAnimation):
     def addData(self, value):
         if self.stopDataAq is False:
             self.addedData.append(value)
-
+        else:
+            self.addedData = []
     # Stop updating the plot buffer
     def stopBtn(self, value):
         self.stopDataAq = value

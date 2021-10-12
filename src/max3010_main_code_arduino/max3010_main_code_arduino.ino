@@ -221,7 +221,7 @@ uint8_t computeBPM(uint32_t sample)
 
   if(checkForBeat(sample) == true)
   {
-    /* A beat was detected */
+    /* A bit was detected */
     delta = millis() - lastBeat;
     lastBeat = millis();
 
