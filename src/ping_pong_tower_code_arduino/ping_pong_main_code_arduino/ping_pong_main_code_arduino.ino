@@ -16,11 +16,11 @@
 
 /* @brief Some config macros */
 #define SERIAL_FRAME_LENGTH_MAX               (300U)
-#define USE_CUSTOM_SENSOR_CFG                   TRUE
-#define SHOW_DEBUG_DATA                        FALSE
+#define USE_CUSTOM_SENSOR_CFG                  TRUE
+#define SHOW_DEBUG_DATA                        TRUE
 #define USE_PID_CONTROLLER                     FALSE
-#define SET_MANUAL_BEAT_AVG                    FALSE 
-#define READ_FROM_FIFO_BUFFER                   TRUE
+#define SET_MANUAL_BEAT_AVG                    TRUE 
+#define READ_FROM_FIFO_BUFFER                  TRUE
 #define FIFO_NUMBER_OF_SAMPLES                (100U)
 #define FIFO_NUMBER_OF_OVERLAPPING_SAMPLES    (75U)
 #define NO_FINGER_THRESHOLD       (50000UL)
@@ -28,16 +28,16 @@
 #define SPO2_AVERAGE_RATE         (8U)
 #define debug                     Serial
 
-#define PI_KI_VALUE               (0.0027)
-#define PI_KI_MAX_ERROR           (27000)
-#define PI_KP_VALUE               (0.30)
+#define PI_KI_VALUE               (0.0026)
+#define PI_KI_MAX_ERROR           (26000)
+#define PI_KP_VALUE               (0.34)
 
 #define PI_MIN_OUTPUT_VALUE       (0U)
 #define PI_MAX_OUTPUT_VALUE       (200U)
 
 #define ANALOG_PIN                (17U)
-#define ADC_REF_VOLTAGE           (3.3)
-#define ADC_MAX_VALUE             (1024)
+#define ADC_REF_VOLTAGE           (4.8)
+#define ADC_MAX_VALUE             (1024.0)
 #define PWM_CONTROL_PIN           (9U)
 
 /* @brief Frame flags. Same as in the Python application */
@@ -49,9 +49,8 @@
 #define NO_OF_ELEMENTS(arr)        (sizeof(arr)/sizeof(arr[0]))
 /**************************************************** GLOBAL VARIABLES **********************************************************/
 /* @brief Look up tables for HR and voltage */
-uint8_t hr_lookup_table[] = {50,55,60,65,70,74,78,83,86,90,94,98,104,108,110,120};
-float voltage_lookup_table[] = { 0.87, 0.91, 1.06, 1.18, 1.38, 1.53, 1.65, 1.77, 
-                                 1.924, 2.095, 2.27, 2.43, 2.53, 2.66, 2.8, 3.1};
+uint8_t hr_lookup_table[] =    {50  ,   60,   70,   80,   90,  100, 110, 120};
+float voltage_lookup_table[] = {1.15, 1.43, 1.76, 2.09, 2.42, 2.7, 3.0, 3.3};
 
 /* @brief Volatile variables used for PI controller inside ISR */
 volatile float voltageValue = 0;
@@ -374,23 +373,23 @@ uint8_t searchLookUpIndex(uint8_t bmpValue)
   {
     index = 0;
   }
-  else if(bmpValue >= hr_lookup_table[sizeof(hr_lookup_table)])
+  else if(bmpValue >= hr_lookup_table[sizeof(hr_lookup_table)-1])
   {
     index = NO_OF_ELEMENTS(hr_lookup_table) - 1;
   }
   else
   {
-      index = -1;
-  }
-  
-  for(uint8_t i = 0; i < NO_OF_ELEMENTS(hr_lookup_table) - 2; i++)
-  { 
+    for(uint8_t i = 1; i < NO_OF_ELEMENTS(hr_lookup_table) - 2; i++)
+    { 
       if((bmpValue >= hr_lookup_table[i]) && (bmpValue <= hr_lookup_table[i+1]))
       {
         index = i;
         break;
       }
+    }
   }
+  
+  
   return index;
 }
 
@@ -402,13 +401,23 @@ uint8_t searchLookUpIndex(uint8_t bmpValue)
  */
 float getControlVoltage(uint8_t lookup_index, uint8_t bpm)
 {
-  float v1 = voltage_lookup_table[lookup_index];
-  float v2 = voltage_lookup_table[lookup_index + 1];
-  uint8_t hr_1 = hr_lookup_table[lookup_index];
-  uint8_t hr_2 = hr_lookup_table[lookup_index + 1];
-  // y = y1 + ((x – x1) / (x2 – x1)) * (y2 – y1),
-  return v1 + ((bpm - hr_1)/(float)(hr_2 - hr_1)) * (v2 - v1);
-
+  if(lookup_index == 0U)
+  {
+     return voltage_lookup_table[0];
+  }
+  else if(lookup_index == NO_OF_ELEMENTS(hr_lookup_table) - 1)
+  {
+     return voltage_lookup_table[NO_OF_ELEMENTS(hr_lookup_table) - 1];
+  }
+  else
+  {
+    float v1 = voltage_lookup_table[lookup_index];
+    float v2 = voltage_lookup_table[lookup_index + 1];
+    uint8_t hr_1 = hr_lookup_table[lookup_index];
+    uint8_t hr_2 = hr_lookup_table[lookup_index + 1];
+    // y = y1 + ((x – x1) / (x2 – x1)) * (y2 – y1),
+    return v1 + ((bpm - hr_1)/(float)(hr_2 - hr_1)) * (v2 - v1);
+  }
 }
 
 /* Function: setTimers
@@ -509,7 +518,7 @@ void loop()
 
       maxim_heart_rate_and_oxygen_saturation(&FIFO_Buffer[IR_CHANNEL * FIFO_NUMBER_OF_SAMPLES], FIFO_NUMBER_OF_SAMPLES, &FIFO_Buffer[RED_CHANNEL * FIFO_NUMBER_OF_SAMPLES], &spo2, &validSPO2, &heartRate, &validHeartRate);
       
-      if(TRUE == validHeartRate)
+      if((TRUE == validHeartRate) && (heartRate > 40))
       {
 
         if(abs(gLastHeartRate - heartRate) < 10UL || (0UL == gLastHeartRate))
@@ -531,7 +540,11 @@ void loop()
       }
       if(FALSE == gTissueDetected)
       {
-        gTempbeatAvg = 80; 
+        gTempbeatAvg = 80;
+        for (byte x = 0 ; x < BPM_AVERAGE_RATE ; x++)
+        {
+           gBpmBuff[x] = 80;
+        }
       }
 #endif
 #if (SET_MANUAL_BEAT_AVG == TRUE)
@@ -543,24 +556,29 @@ void loop()
           Serial.println(gTempbeatAvg);
         
           memset(inputBuffer,0x00,4);
-  `   }
+     }
 #endif      
 #if (SHOW_DEBUG_DATA == TRUE)      
        debug.print("Error: ");
        debug.print(error);
-       debug.print('\n');
+       debug.write(13);
+       debug.write(10);
        debug.print("BPM: ");
        debug.print(gTempbeatAvg);
-       debug.print('\n');
+       debug.write(13);
+       debug.write(10);
        debug.print("V_SET: ");
        debug.print(v_set);
-       debug.print('\n');
+       debug.write(13);
+       debug.write(10);
        debug.print("Duty out: ");
        debug.print(duty_cycle_out);
-       debug.print('\n');
+       debug.write(13);
+       debug.write(10);
        debug.print("V_IN:");
        debug.print(v_in);
-       debug.print('\n');
+       debug.write(13);
+       debug.write(10);
 #endif 
 
    }
@@ -572,7 +590,7 @@ ISR(TCB0_INT_vect)
 {
  TCB0.INTFLAGS = TCB_CAPT_bm;
   
-  v_in = analogRead(ANALOG_PIN) * (ADC_REF_VOLTAGE / (ADC_MAX_VALUE - 1));
+  v_in = analogRead(ANALOG_PIN) * (ADC_REF_VOLTAGE / (float)(ADC_MAX_VALUE - 1.0));
   lookup_index = searchLookUpIndex(gTempbeatAvg);
   v_set = getControlVoltage(lookup_index,gTempbeatAvg);
   error = (v_set - v_in) * 100;
