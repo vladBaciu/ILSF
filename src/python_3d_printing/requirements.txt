@@ -1,0 +1,8 @@
+scipy==1.5.2
+py2exe==0.10.4.1
+stl_tools==0.2.2
+numpy==1.19.5
+matplotlib==3.3.2
+Pillow==8.3.2
+PyQt5==5.15.4
+pyserial==3.5
