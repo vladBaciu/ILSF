@@ -33,9 +33,9 @@ class PPGDashboard:
     def ppg_chart(self, df):
         fig = px.line(df, x="Sample", y="Amplitude")
         fig.update_traces(line=dict(color='#456987', width=3))
-        fig.update_layout(height=500, width=900)
+        fig.update_layout(height=400, width=900)
         fig.update_yaxes(showticklabels=False)
-        fig.update_yaxes(range = [-400,1300])
+        #fig.update_yaxes(range = [-400,1300])
         self.chart_placeholder.write(fig)
        
     def bpm_gauge(self, heart_rate, previous_heart_rate):
@@ -99,7 +99,7 @@ def main():
     spo_color = "red"
     j = 0
     counter = 0
-    plot_samples = 3
+    plot_samples = 2
     chart_size = 200
     
     dashboard.bpm_gauge(0, 0)
