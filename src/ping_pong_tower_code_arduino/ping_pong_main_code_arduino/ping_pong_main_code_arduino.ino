@@ -14,7 +14,9 @@
 #define GREEN_CHANNEL (1U)
 #define IR_CHANNEL    (2U)
 
-/* @brief Some config macros */
+/* @brief Some config macros */ 
+#define PING_PONG_TOWER_VER                      1U
+
 #define SERIAL_FRAME_LENGTH_MAX               (300U)
 #define USE_CUSTOM_SENSOR_CFG                  TRUE
 #define SHOW_DEBUG_DATA                        TRUE
@@ -28,10 +30,24 @@
 #define SPO2_AVERAGE_RATE         (8U)
 #define debug                     Serial
 
-#define PI_KI_VALUE               (0.0026)
-#define PI_KI_MAX_ERROR           (26000)
+#if(PING_PONG_TOWER_VER == 1U)
+
+#define PI_KI_VALUE               (0.0027)
+#define PI_KI_MAX_ERROR           (27000)
 #define PI_KP_VALUE               (0.34)
 
+#elif(PING_PONG_TOWER_VER == 2U)
+
+#define PI_KI_VALUE               (0.0027)
+#define PI_KI_MAX_ERROR           (27000)
+#define PI_KP_VALUE               (0.35)
+
+#else
+
+#define PI_KI_VALUE               (0.0)
+#define PI_KI_MAX_ERROR           (0)
+#define PI_KP_VALUE               (0.0)
+#endif
 #define PI_MIN_OUTPUT_VALUE       (0U)
 #define PI_MAX_OUTPUT_VALUE       (200U)
 
@@ -49,14 +65,20 @@
 #define NO_OF_ELEMENTS(arr)        (sizeof(arr)/sizeof(arr[0]))
 /**************************************************** GLOBAL VARIABLES **********************************************************/
 /* @brief Look up tables for HR and voltage */
+#if(PING_PONG_TOWER_VER == 1U)
 uint8_t hr_lookup_table[] =    {50  ,   60,   70,   80,   90,  100, 110, 120};
-float voltage_lookup_table[] = {1.15, 1.43, 1.76, 2.09, 2.42, 2.7, 3.0, 3.3};
-
+float voltage_lookup_table[] = {1.15, 1.43, 1.70, 2.09, 2.42, 2.7, 3.0, 3.3};
+#elif(PING_PONG_TOWER_VER == 2U)
+uint8_t hr_lookup_table[] =    {50  ,   60,   70,   80,   90,  100, 110, 120};
+float voltage_lookup_table[] = {1.20, 1.49, 1.84, 2.13, 2.49, 2.73, 3.2, 3.3};
+#else
+#error Lookup table not defined for this ping pong tower
+#endif
 /* @brief Volatile variables used for PI controller inside ISR */
 volatile float voltageValue = 0;
 volatile uint8_t lookup_index = 0;
 volatile float v_in, duty_cycle_out, v_set = 100;
-volatile int error = 0;
+volatile float error = 0;
 volatile float integral = 0;
 
 #if (SET_MANUAL_BEAT_AVG == TRUE) 
@@ -379,7 +401,7 @@ uint8_t searchLookUpIndex(uint8_t bmpValue)
   }
   else
   {
-    for(uint8_t i = 1; i < NO_OF_ELEMENTS(hr_lookup_table) - 2; i++)
+    for(uint8_t i = 1; i < NO_OF_ELEMENTS(hr_lookup_table) - 1; i++)
     { 
       if((bmpValue >= hr_lookup_table[i]) && (bmpValue <= hr_lookup_table[i+1]))
       {
@@ -501,6 +523,11 @@ void loop()
    {
       maxim_heart_rate_and_oxygen_saturation(&FIFO_Buffer[IR_CHANNEL * FIFO_NUMBER_OF_SAMPLES], FIFO_NUMBER_OF_SAMPLES, &FIFO_Buffer[RED_CHANNEL * FIFO_NUMBER_OF_SAMPLES], &spo2, &validSPO2, &heartRate, &validHeartRate);
    }
+
+   for (byte x = 0 ; x < BPM_AVERAGE_RATE ; x++)
+   {
+      gBpmBuff[x] = 80;
+   }
 #endif
    while(1)
    {
@@ -541,10 +568,6 @@ void loop()
       if(FALSE == gTissueDetected)
       {
         gTempbeatAvg = 80;
-        for (byte x = 0 ; x < BPM_AVERAGE_RATE ; x++)
-        {
-           gBpmBuff[x] = 80;
-        }
       }
 #endif
 #if (SET_MANUAL_BEAT_AVG == TRUE)
@@ -565,6 +588,9 @@ void loop()
        debug.write(10);
        debug.print("BPM: ");
        debug.print(gTempbeatAvg);
+       debug.write(13);
+       debug.write(10);
+       debug.print(heartRate);
        debug.write(13);
        debug.write(10);
        debug.print("V_SET: ");
@@ -591,9 +617,9 @@ ISR(TCB0_INT_vect)
  TCB0.INTFLAGS = TCB_CAPT_bm;
   
   v_in = analogRead(ANALOG_PIN) * (ADC_REF_VOLTAGE / (float)(ADC_MAX_VALUE - 1.0));
-  lookup_index = searchLookUpIndex(gTempbeatAvg);
+  lookup_index = searchLookUpIndex((uint8_t) gTempbeatAvg);
   v_set = getControlVoltage(lookup_index,gTempbeatAvg);
-  error = (v_set - v_in) * 100;
+  error = (v_set - v_in) * 100.0;
 
 #if(USE_PID_CONTROLLER == FALSE)
   duty_cycle_out = (int) ((PI_KP_VALUE * error) + (PI_KI_VALUE * integral));
