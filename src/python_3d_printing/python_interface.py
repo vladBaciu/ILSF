@@ -26,6 +26,8 @@ import threading
 import subprocess
 import os, os.path, inspect
 import sys
+import glob 
+import requests
 
 matplotlib.use("Qt5Agg")
 
@@ -71,14 +73,14 @@ class CustomMainWindow(QMainWindow):
 
         # Create the stop button
         self.stopBtn = QPushButton(text='Stop data aquisition')
-        setCustomSize(self.stopBtn, 100, 50)
+        setCustomSize(self.stopBtn, 125, 50)
         self.stopBtn.setStyleSheet('QPushButton {background-color: lightgrey; color: black;}')
         self.stopBtn.setCheckable(True)
 
         # Create the convert button
         self.convertBtn = QPushButton(text='Convert and print')
         self.convertBtn.setStyleSheet('QPushButton {background-color: #39B3C4; color: black;}')
-        setCustomSize(self.convertBtn, 100, 50)
+        setCustomSize(self.convertBtn, 120, 50)
 
         # Set an action for each button
         self.stopBtn.clicked.connect(self.stopBtnAction)
@@ -130,11 +132,13 @@ class CustomMainWindow(QMainWindow):
     # Callback function for Convert button. Saves the selection as a PNG picture,
     # converts the PNG picture to STL and calls prusaSlicer to create the G-CODE.
     def convert_and_print(self):
-        
+        API_KEY = "2D1E9F694C9A451883E44608084CE69A"
+        IP_ADDR = "10.0.0.1"
+        URL = "http://"+ IP_ADDR +"/api/files/{}"
 
-        out_png_path = self.dir_path + "\out\ppg_selection_" + str(self.counter) + ".png"
-        out_stl_path = self.dir_path + "\out\ppg_selection_" + str(self.counter) + ".stl"
-        out_conf_path = self.dir_path + "\in\PrusaSlicer_config_bundle2.ini"
+        out_png_path = self.dir_path + "/out/ppg_selection_" + str(self.counter) + ".png"
+        out_stl_path = self.dir_path + "/out/ppg_selection_" + str(self.counter) + ".stl"
+        out_conf_path = self.dir_path + "/in/PrusaSlicer_config_bundle2.ini"
         self.counter = self.counter + 1
         self.myFig2.print_figure(out_png_path, pad_inches=0)
         image = Image.open(out_png_path).convert('L')
@@ -162,11 +166,20 @@ class CustomMainWindow(QMainWindow):
         matplotlib.pyplot.imshow(A)
         numpy2stl(A, out_stl_path, scale=0.07, mask_val=0.1, solid=True, max_width=40, max_height = 20, max_depth=10)
 
-        command = "prusa-slicer-console.exe -printer-technology FFF -center 125,105 -g {} -load {}".format(out_stl_path,
+        command = "prusa-slicer -printer-technology FFF -center 125,105 -g {} -load {}".format(out_stl_path,
                                                                                                            out_conf_path)
 
         subprocess.run(command, shell=True)
-
+        
+        filename = "./out/ppg_selection_" + str(self.counter - 1)
+        filename = "{}*.gcode".format(filename)
+        filename = glob.glob(filename)[0]
+        fle={'file': open(filename, 'rb'), 'filename': filename}
+        url=URL.format('local')
+        payload={'select': 'false','print': 'true' }
+        header={'X-Api-Key': API_KEY }
+        response = requests.post(url, files=fle,data=payload,headers=header)
+        print(response)
     # Callback function for Stop data aquisition button.
     def stopBtnAction(self):
         if self.stopBtn.isChecked():
@@ -352,7 +365,7 @@ if __name__ == '__main__':
     if '__file__' not in locals():
         __file__ = inspect.getframeinfo(inspect.currentframe())[0]
         
-    ini_file_path = os.path.dirname(os.path.abspath(__file__)) + "\serial.ini"
+    ini_file_path = os.path.dirname(os.path.abspath(__file__)) + "/serial.ini"
     ini_file = open(ini_file_path, "r")
     com_port = ini_file.readline().rstrip()
     baud = int(ini_file.readline().rstrip())
