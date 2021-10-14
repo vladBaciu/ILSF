@@ -20,6 +20,7 @@
 
 
 /* @brief Some config macros */
+#define PRINTING_APP                               TRUE
 #define NO_FINGER_THRESHOLD                   (50000UL)
 
 #define READ_FROM_FIFO_BUFFER                 TRUE
@@ -467,7 +468,7 @@ void loop()
      sendFrame(gpFrame);
      debug.print('\n');
 
-  
+#if(PRINTING_APP == TRUE) 
      memset(&frameParam, 0x00, sizeof(frameParam));
 
      frameParam.frameType = CHANNEL_DATA;
@@ -477,7 +478,7 @@ void loop()
 
      sendFrame(gpFrame);
      debug.print('\n');
-
+#endif
    }
 }
 
