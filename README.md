@@ -41,6 +41,10 @@ Run the ping pong tower application
 
 * To test that the newly created lookup tables, set the `SET_MANUAL_BEAT_AVG` to `TRUE`, compile, load and from a serial terminal send the desired HR value. The ball should be floating at the desired height according to the serial input value.
 
+The fan control is done using a PI loop. An external PID library can be used by setting `USE_PID_CONTROLLER` to `TRUE`. The `K` constants has to be determined and are not the same as in the case of the implemented PI controller.
+
+![image](https://user-images.githubusercontent.com/24388880/137920019-55cfe34a-41a6-4d69-a914-817fedebcdab.png)
+
 
 Run the 3D printing application
 --------------------------------
