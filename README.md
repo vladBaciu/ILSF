@@ -42,7 +42,7 @@ Run the 3D printing application
 --------------------------------
 
 * Install the requirements list from `src\python_3d_printing` 
-
+* Install `PrusaSclier`.
 ```bash
 cd src\python_3d_printing
 pip install -r requirements.txt
@@ -58,4 +58,8 @@ pip install -r requirements.txt
 ![image](https://user-images.githubusercontent.com/24388880/137910745-142c6d15-794f-4ab6-a7ed-4b152163ae47.png)
 
 * In Spyder/PyCharm or other Python IDEs run `src\python_3d_printing\python_interface.py`.
-![image](https://user-images.githubusercontent.com/24388880/137910175-db4adfbd-8bb5-452d-8d44-10d8ad05f401.png)
+
+![3d_app](https://user-images.githubusercontent.com/24388880/137912410-f131e715-e6da-4f01-b389-f0644210b549.gif)
+
+* The `src\python_3d_printing\out` directory contains the image that was selected, the `stl` version of the image and the `gcode` output from `PrusaSlicer`.
+
