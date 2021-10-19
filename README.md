@@ -1,5 +1,9 @@
 # ILSF Documentation
 
+
+
+
+
 The `src` directory contains different applications that were presented at the ILSF (I Love Science Festival).
 
 * In `src\atmel_studio_project` an example of Arduino project ported to Atmel Studio can be found. Using Atmel Studio as an IDE offers you a higher flexibility and transparence over your code. The script `avrdude_program_nano_every.bat` is an example on how to program an Arduino Nano Every board directly from the IDE. More informations on how to setup an external programmer in Atmel Studio can be found [here](http://web.engr.oregonstate.edu/~jinyo/ece375/pdf/Setup_External_programmer_in_Atmel_Studio.pdf).
@@ -42,12 +46,11 @@ Run the 3D printing application
 --------------------------------
 
 * Install the requirements list from `src\python_3d_printing` 
-* Install `PrusaSclier`.
 ```bash
 cd src\python_3d_printing
 pip install -r requirements.txt
 ```
-
+* Install `PrusaSclier`.
 * Export your configuration bundle from `PrusaSlicer` and save it to `src\python_3d_printing\in`. Modify the path in code:
 ![image](https://user-images.githubusercontent.com/24388880/137909272-6b6f9491-ae16-42be-9696-09929ad0e730.png)
 
@@ -62,4 +65,32 @@ pip install -r requirements.txt
 ![3d_app](https://user-images.githubusercontent.com/24388880/137912410-f131e715-e6da-4f01-b389-f0644210b549.gif)
 
 * The `src\python_3d_printing\out` directory contains the image that was selected, the `stl` version of the image and the `gcode` output from `PrusaSlicer`.
+
+* The response from the printer can be found in the console. Refer to the [HTTP status codes](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes) in order to find out what is going on. If the answer is `201` the printer should start printing the PPG capture.
+
+Run the PPG dashboard application
+--------------------------------
+* Install the requirements list from `src\python_dashboard` 
+```bash
+cd src\python_dashboard
+pip install -r requirements.txt
+```
+* Compile and load the code from `src\max3010_main_code_arduino`, where the `PRINTING_APP` is set to `FALSE`.
+* Connect the Arduino board. Check the serial COM and modify the file `src\python_dashboard\serial.ini`.
+* In Spyder/PyCharm or other Python IDEs run `src\python_dashboard\project\ppg_dashboard.py` and close the console.
+
+![image](https://user-images.githubusercontent.com/24388880/137914189-4fc1e350-be5c-4bb4-971a-31da35f6a1a0.png)
+
+* Open the command line and run the command `streamlit run ..\src\python_dashboard\project\ppg_dashboard.py`.
+
+* Open the local host URL.
+
+![dashboard_app1](https://user-images.githubusercontent.com/24388880/137915819-b22966f6-fc20-419a-9f07-b21021818e7d.gif)
+
+
+* If the current console in Spyder/PyCharm was not closed the serial port can not be opened.
+
+![image](https://user-images.githubusercontent.com/24388880/137914711-8c1dfe60-5bcd-49ef-ae7d-ffba7fe87830.png)
+
+
 
