@@ -48,3 +48,14 @@ cd src\python_3d_printing
 pip install -r requirements.txt
 ```
 
+* Export your configuration bundle from `PrusaSlicer` and save it to `src\python_3d_printing\in`. Modify the path in code:
+![image](https://user-images.githubusercontent.com/24388880/137909272-6b6f9491-ae16-42be-9696-09929ad0e730.png)
+
+* Compile and load the code from `src\max3010_main_code_arduino`, where the `PRINTING_APP` is set to `TRUE`.
+* Connect the Arduino board. Check the serial COM and modify the file `src\python_3d_printing\serial.ini`.
+* Create a new `API_KEY` in OctoPrint (info [here](https://docs.octoprint.org/en/master/api/general.html)  and assign to RaspberryPi the address `10.0.0.1`. Set the new `API_KEY` in `src\python_3d_printing\python_interface.py`
+
+![image](https://user-images.githubusercontent.com/24388880/137910745-142c6d15-794f-4ab6-a7ed-4b152163ae47.png)
+
+* In Spyder/PyCharm or other Python IDEs run `src\python_3d_printing\python_interface.py`.
+![image](https://user-images.githubusercontent.com/24388880/137910175-db4adfbd-8bb5-452d-8d44-10d8ad05f401.png)
