@@ -1,0 +1,18 @@
+# PSOC_PPG
+# 2021-10-28 08:03:58Z
+
+dont_use_location SMIF -1 -1 0
+dont_use_location p4usbcell -1 -1 0
+dont_use_location USB -1 -1 0
+dont_use_location usbcell -1 -1 0
+set_location "ClockGenBlock" CLK_GEN -1 -1 0
+set_io "CY_CPUSS_SWJ_SWCLK_TCLK(0)" iocell 6 7
+set_io "CY_CPUSS_SWJ_SWDIO_TMS(0)" iocell 6 6
+set_io "\I2C_MAX30105:scl(0)\" iocell 6 4
+set_io "\I2C_MAX30105:sda(0)\" iocell 6 5
+set_io "LE(0)" iocell 12 7
+set_io "OE(0)" iocell 7 2
+set_io "SDI(0)" iocell 0 5
+set_io "CLK(0)" iocell 12 6
+set_io "AMP_DIFF_OUTPUT(0)" iocell 5 5
+set_location "\ADC_INVERTING_AMP:SAR\" SARADC -1 -1 0

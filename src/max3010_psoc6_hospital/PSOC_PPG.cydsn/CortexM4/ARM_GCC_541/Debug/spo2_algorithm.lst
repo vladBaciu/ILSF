@@ -1,0 +1,3374 @@
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m4
+   3              		.eabi_attribute 27, 1
+   4              		.fpu fpv4-sp-d16
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 6
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.thumb
+  15              		.syntax unified
+  16              		.file	"spo2_algorithm.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.global	uch_spo2_table
+  21              		.section	.rodata
+  22              		.align	2
+  23              		.type	uch_spo2_table, %object
+  24              		.size	uch_spo2_table, 184
+  25              	uch_spo2_table:
+  26 0000 5F       		.byte	95
+  27 0001 5F       		.byte	95
+  28 0002 5F       		.byte	95
+  29 0003 60       		.byte	96
+  30 0004 60       		.byte	96
+  31 0005 60       		.byte	96
+  32 0006 61       		.byte	97
+  33 0007 61       		.byte	97
+  34 0008 61       		.byte	97
+  35 0009 61       		.byte	97
+  36 000a 61       		.byte	97
+  37 000b 62       		.byte	98
+  38 000c 62       		.byte	98
+  39 000d 62       		.byte	98
+  40 000e 62       		.byte	98
+  41 000f 62       		.byte	98
+  42 0010 63       		.byte	99
+  43 0011 63       		.byte	99
+  44 0012 63       		.byte	99
+  45 0013 63       		.byte	99
+  46 0014 63       		.byte	99
+  47 0015 63       		.byte	99
+  48 0016 63       		.byte	99
+  49 0017 63       		.byte	99
+  50 0018 64       		.byte	100
+  51 0019 64       		.byte	100
+  52 001a 64       		.byte	100
+  53 001b 64       		.byte	100
+  54 001c 64       		.byte	100
+  55 001d 64       		.byte	100
+  56 001e 64       		.byte	100
+  57 001f 64       		.byte	100
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 2
+
+
+  58 0020 64       		.byte	100
+  59 0021 64       		.byte	100
+  60 0022 64       		.byte	100
+  61 0023 64       		.byte	100
+  62 0024 64       		.byte	100
+  63 0025 64       		.byte	100
+  64 0026 64       		.byte	100
+  65 0027 64       		.byte	100
+  66 0028 64       		.byte	100
+  67 0029 64       		.byte	100
+  68 002a 64       		.byte	100
+  69 002b 64       		.byte	100
+  70 002c 63       		.byte	99
+  71 002d 63       		.byte	99
+  72 002e 63       		.byte	99
+  73 002f 63       		.byte	99
+  74 0030 63       		.byte	99
+  75 0031 63       		.byte	99
+  76 0032 63       		.byte	99
+  77 0033 63       		.byte	99
+  78 0034 62       		.byte	98
+  79 0035 62       		.byte	98
+  80 0036 62       		.byte	98
+  81 0037 62       		.byte	98
+  82 0038 62       		.byte	98
+  83 0039 62       		.byte	98
+  84 003a 61       		.byte	97
+  85 003b 61       		.byte	97
+  86 003c 61       		.byte	97
+  87 003d 61       		.byte	97
+  88 003e 60       		.byte	96
+  89 003f 60       		.byte	96
+  90 0040 60       		.byte	96
+  91 0041 60       		.byte	96
+  92 0042 5F       		.byte	95
+  93 0043 5F       		.byte	95
+  94 0044 5F       		.byte	95
+  95 0045 5E       		.byte	94
+  96 0046 5E       		.byte	94
+  97 0047 5E       		.byte	94
+  98 0048 5D       		.byte	93
+  99 0049 5D       		.byte	93
+ 100 004a 5D       		.byte	93
+ 101 004b 5C       		.byte	92
+ 102 004c 5C       		.byte	92
+ 103 004d 5C       		.byte	92
+ 104 004e 5B       		.byte	91
+ 105 004f 5B       		.byte	91
+ 106 0050 5A       		.byte	90
+ 107 0051 5A       		.byte	90
+ 108 0052 59       		.byte	89
+ 109 0053 59       		.byte	89
+ 110 0054 59       		.byte	89
+ 111 0055 58       		.byte	88
+ 112 0056 58       		.byte	88
+ 113 0057 57       		.byte	87
+ 114 0058 57       		.byte	87
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 3
+
+
+ 115 0059 56       		.byte	86
+ 116 005a 56       		.byte	86
+ 117 005b 55       		.byte	85
+ 118 005c 55       		.byte	85
+ 119 005d 54       		.byte	84
+ 120 005e 54       		.byte	84
+ 121 005f 53       		.byte	83
+ 122 0060 52       		.byte	82
+ 123 0061 52       		.byte	82
+ 124 0062 51       		.byte	81
+ 125 0063 51       		.byte	81
+ 126 0064 50       		.byte	80
+ 127 0065 50       		.byte	80
+ 128 0066 4F       		.byte	79
+ 129 0067 4E       		.byte	78
+ 130 0068 4E       		.byte	78
+ 131 0069 4D       		.byte	77
+ 132 006a 4C       		.byte	76
+ 133 006b 4C       		.byte	76
+ 134 006c 4B       		.byte	75
+ 135 006d 4A       		.byte	74
+ 136 006e 4A       		.byte	74
+ 137 006f 49       		.byte	73
+ 138 0070 48       		.byte	72
+ 139 0071 48       		.byte	72
+ 140 0072 47       		.byte	71
+ 141 0073 46       		.byte	70
+ 142 0074 45       		.byte	69
+ 143 0075 45       		.byte	69
+ 144 0076 44       		.byte	68
+ 145 0077 43       		.byte	67
+ 146 0078 42       		.byte	66
+ 147 0079 42       		.byte	66
+ 148 007a 41       		.byte	65
+ 149 007b 40       		.byte	64
+ 150 007c 3F       		.byte	63
+ 151 007d 3E       		.byte	62
+ 152 007e 3E       		.byte	62
+ 153 007f 3D       		.byte	61
+ 154 0080 3C       		.byte	60
+ 155 0081 3B       		.byte	59
+ 156 0082 3A       		.byte	58
+ 157 0083 39       		.byte	57
+ 158 0084 38       		.byte	56
+ 159 0085 38       		.byte	56
+ 160 0086 37       		.byte	55
+ 161 0087 36       		.byte	54
+ 162 0088 35       		.byte	53
+ 163 0089 34       		.byte	52
+ 164 008a 33       		.byte	51
+ 165 008b 32       		.byte	50
+ 166 008c 31       		.byte	49
+ 167 008d 30       		.byte	48
+ 168 008e 2F       		.byte	47
+ 169 008f 2E       		.byte	46
+ 170 0090 2D       		.byte	45
+ 171 0091 2C       		.byte	44
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 4
+
+
+ 172 0092 2B       		.byte	43
+ 173 0093 2A       		.byte	42
+ 174 0094 29       		.byte	41
+ 175 0095 28       		.byte	40
+ 176 0096 27       		.byte	39
+ 177 0097 26       		.byte	38
+ 178 0098 25       		.byte	37
+ 179 0099 24       		.byte	36
+ 180 009a 23       		.byte	35
+ 181 009b 22       		.byte	34
+ 182 009c 21       		.byte	33
+ 183 009d 1F       		.byte	31
+ 184 009e 1E       		.byte	30
+ 185 009f 1D       		.byte	29
+ 186 00a0 1C       		.byte	28
+ 187 00a1 1B       		.byte	27
+ 188 00a2 1A       		.byte	26
+ 189 00a3 19       		.byte	25
+ 190 00a4 17       		.byte	23
+ 191 00a5 16       		.byte	22
+ 192 00a6 15       		.byte	21
+ 193 00a7 14       		.byte	20
+ 194 00a8 13       		.byte	19
+ 195 00a9 11       		.byte	17
+ 196 00aa 10       		.byte	16
+ 197 00ab 0F       		.byte	15
+ 198 00ac 0E       		.byte	14
+ 199 00ad 0C       		.byte	12
+ 200 00ae 0B       		.byte	11
+ 201 00af 0A       		.byte	10
+ 202 00b0 09       		.byte	9
+ 203 00b1 07       		.byte	7
+ 204 00b2 06       		.byte	6
+ 205 00b3 05       		.byte	5
+ 206 00b4 03       		.byte	3
+ 207 00b5 02       		.byte	2
+ 208 00b6 01       		.byte	1
+ 209 00b7 00       		.space	1
+ 210              		.bss
+ 211              		.align	2
+ 212              	an_x:
+ 213 0000 00000000 		.space	400
+ 213      00000000 
+ 213      00000000 
+ 213      00000000 
+ 213      00000000 
+ 214              		.align	2
+ 215              	an_y:
+ 216 0190 00000000 		.space	400
+ 216      00000000 
+ 216      00000000 
+ 216      00000000 
+ 216      00000000 
+ 217              		.section	.text.maxim_heart_rate_and_oxygen_saturation,"ax",%progbits
+ 218              		.align	2
+ 219              		.global	maxim_heart_rate_and_oxygen_saturation
+ 220              		.thumb
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 5
+
+
+ 221              		.thumb_func
+ 222              		.type	maxim_heart_rate_and_oxygen_saturation, %function
+ 223              	maxim_heart_rate_and_oxygen_saturation:
+ 224              	.LFB0:
+ 225              		.file 1 "spo2_algorithm.c"
+   1:spo2_algorithm.c **** /* ========================================
+   2:spo2_algorithm.c ****  *
+   3:spo2_algorithm.c ****  * Copyright YOUR COMPANY, THE YEAR
+   4:spo2_algorithm.c ****  * All Rights Reserved
+   5:spo2_algorithm.c ****  * UNPUBLISHED, LICENSED SOFTWARE.
+   6:spo2_algorithm.c ****  *
+   7:spo2_algorithm.c ****  * CONFIDENTIAL AND PROPRIETARY INFORMATION
+   8:spo2_algorithm.c ****  * WHICH IS THE PROPERTY OF your company.
+   9:spo2_algorithm.c ****  *
+  10:spo2_algorithm.c ****  * ========================================
+  11:spo2_algorithm.c **** */
+  12:spo2_algorithm.c **** #include "spo2_algorithm.h"
+  13:spo2_algorithm.c **** 
+  14:spo2_algorithm.c **** #define MIN(a,b) (((a)<(b))?(a):(b))
+  15:spo2_algorithm.c **** #define MAX(a,b) (((a)>(b))?(a):(b))
+  16:spo2_algorithm.c **** 
+  17:spo2_algorithm.c **** const uint8_t uch_spo2_table[184]={ 95, 95, 95, 96, 96, 96, 97, 97, 97, 97, 97, 98, 98, 98, 98, 98,
+  18:spo2_algorithm.c ****               99, 99, 99, 99, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100,
+  19:spo2_algorithm.c ****               100, 100, 100, 100, 99, 99, 99, 99, 99, 99, 99, 99, 98, 98, 98, 98, 98, 98, 97, 97, 
+  20:spo2_algorithm.c ****               97, 97, 96, 96, 96, 96, 95, 95, 95, 94, 94, 94, 93, 93, 93, 92, 92, 92, 91, 91, 
+  21:spo2_algorithm.c ****               90, 90, 89, 89, 89, 88, 88, 87, 87, 86, 86, 85, 85, 84, 84, 83, 82, 82, 81, 81, 
+  22:spo2_algorithm.c ****               80, 80, 79, 78, 78, 77, 76, 76, 75, 74, 74, 73, 72, 72, 71, 70, 69, 69, 68, 67, 
+  23:spo2_algorithm.c ****               66, 66, 65, 64, 63, 62, 62, 61, 60, 59, 58, 57, 56, 56, 55, 54, 53, 52, 51, 50, 
+  24:spo2_algorithm.c ****               49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 31, 30, 29, 
+  25:spo2_algorithm.c ****               28, 27, 26, 25, 23, 22, 21, 20, 19, 17, 16, 15, 14, 12, 11, 10, 9, 7, 6, 5, 
+  26:spo2_algorithm.c ****               3, 2, 1 } ;
+  27:spo2_algorithm.c **** 
+  28:spo2_algorithm.c **** static  int32_t an_x[ BUFFER_SIZE]; //ir
+  29:spo2_algorithm.c **** static  int32_t an_y[ BUFFER_SIZE]; //red
+  30:spo2_algorithm.c **** 
+  31:spo2_algorithm.c **** 
+  32:spo2_algorithm.c **** void maxim_heart_rate_and_oxygen_saturation(uint16_t *pun_ir_buffer, int32_t n_ir_buffer_length, ui
+  33:spo2_algorithm.c ****                 int32_t *pn_heart_rate, int8_t *pch_hr_valid)
+  34:spo2_algorithm.c **** /**
+  35:spo2_algorithm.c **** * \brief        Calculate the heart rate and SpO2 level
+  36:spo2_algorithm.c **** * \par          Details
+  37:spo2_algorithm.c **** *               By detecting  peaks of PPG cycle and corresponding AC/DC of red/infra-red signal, t
+  38:spo2_algorithm.c **** *               Since this algorithm is aiming for Arm M0/M3. formaula for SPO2 did not achieve the
+  39:spo2_algorithm.c **** *               Thus, accurate SPO2 is precalculated and save longo uch_spo2_table[] per each an_ra
+  40:spo2_algorithm.c **** *
+  41:spo2_algorithm.c **** * \param[in]    *pun_ir_buffer           - IR sensor data buffer
+  42:spo2_algorithm.c **** * \param[in]    n_ir_buffer_length      - IR sensor data buffer length
+  43:spo2_algorithm.c **** * \param[in]    *pun_red_buffer          - Red sensor data buffer
+  44:spo2_algorithm.c **** * \param[out]    *pn_spo2                - Calculated SpO2 value
+  45:spo2_algorithm.c **** * \param[out]    *pch_spo2_valid         - 1 if the calculated SpO2 value is valid
+  46:spo2_algorithm.c **** * \param[out]    *pn_heart_rate          - Calculated heart rate value
+  47:spo2_algorithm.c **** * \param[out]    *pch_hr_valid           - 1 if the calculated heart rate value is valid
+  48:spo2_algorithm.c **** *
+  49:spo2_algorithm.c **** * \retval       None
+  50:spo2_algorithm.c **** */
+  51:spo2_algorithm.c **** {
+ 226              		.loc 1 51 0
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 6
+
+
+ 227              		.cfi_startproc
+ 228              		@ args = 12, pretend = 0, frame = 176
+ 229              		@ frame_needed = 1, uses_anonymous_args = 0
+ 230 0000 80B5     		push	{r7, lr}
+ 231              		.cfi_def_cfa_offset 8
+ 232              		.cfi_offset 7, -8
+ 233              		.cfi_offset 14, -4
+ 234 0002 B0B0     		sub	sp, sp, #192
+ 235              		.cfi_def_cfa_offset 200
+ 236 0004 04AF     		add	r7, sp, #16
+ 237              		.cfi_def_cfa 7, 184
+ 238 0006 F860     		str	r0, [r7, #12]
+ 239 0008 B960     		str	r1, [r7, #8]
+ 240 000a 7A60     		str	r2, [r7, #4]
+ 241 000c 3B60     		str	r3, [r7]
+  52:spo2_algorithm.c ****   uint32_t un_ir_mean;
+  53:spo2_algorithm.c ****   int32_t k, n_i_ratio_count;
+  54:spo2_algorithm.c ****   int32_t i, n_exact_ir_valley_locs_count, n_middle_idx;
+  55:spo2_algorithm.c ****   int32_t n_th1, n_npks;   
+  56:spo2_algorithm.c ****   int32_t an_ir_valley_locs[15] ;
+  57:spo2_algorithm.c ****   int32_t n_peak_interval_sum;
+  58:spo2_algorithm.c ****   
+  59:spo2_algorithm.c ****   int32_t n_y_ac, n_x_ac;
+  60:spo2_algorithm.c ****   int32_t n_spo2_calc; 
+  61:spo2_algorithm.c ****   int32_t n_y_dc_max, n_x_dc_max; 
+  62:spo2_algorithm.c ****   int32_t n_y_dc_max_idx = 0;
+ 242              		.loc 1 62 0
+ 243 000e 0023     		movs	r3, #0
+ 244 0010 C7F88C30 		str	r3, [r7, #140]
+  63:spo2_algorithm.c ****   int32_t n_x_dc_max_idx = 0; 
+ 245              		.loc 1 63 0
+ 246 0014 0023     		movs	r3, #0
+ 247 0016 C7F88830 		str	r3, [r7, #136]
+  64:spo2_algorithm.c ****   int32_t an_ratio[5], n_ratio_average; 
+  65:spo2_algorithm.c ****   int32_t n_nume, n_denom ;
+  66:spo2_algorithm.c **** 
+  67:spo2_algorithm.c ****   // calculates DC mean and subtract DC from ir
+  68:spo2_algorithm.c ****   un_ir_mean =0; 
+ 248              		.loc 1 68 0
+ 249 001a 0023     		movs	r3, #0
+ 250 001c C7F8AC30 		str	r3, [r7, #172]
+  69:spo2_algorithm.c ****   for (k=0 ; k<n_ir_buffer_length ; k++ ) un_ir_mean += pun_ir_buffer[k] ;
+ 251              		.loc 1 69 0
+ 252 0020 0023     		movs	r3, #0
+ 253 0022 C7F8A830 		str	r3, [r7, #168]
+ 254 0026 10E0     		b	.L2
+ 255              	.L3:
+ 256              		.loc 1 69 0 is_stmt 0 discriminator 3
+ 257 0028 D7F8A830 		ldr	r3, [r7, #168]
+ 258 002c 5B00     		lsls	r3, r3, #1
+ 259 002e FA68     		ldr	r2, [r7, #12]
+ 260 0030 1344     		add	r3, r3, r2
+ 261 0032 1B88     		ldrh	r3, [r3]
+ 262 0034 1A46     		mov	r2, r3
+ 263 0036 D7F8AC30 		ldr	r3, [r7, #172]
+ 264 003a 1344     		add	r3, r3, r2
+ 265 003c C7F8AC30 		str	r3, [r7, #172]
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 7
+
+
+ 266 0040 D7F8A830 		ldr	r3, [r7, #168]
+ 267 0044 0133     		adds	r3, r3, #1
+ 268 0046 C7F8A830 		str	r3, [r7, #168]
+ 269              	.L2:
+ 270              		.loc 1 69 0 discriminator 1
+ 271 004a D7F8A820 		ldr	r2, [r7, #168]
+ 272 004e BB68     		ldr	r3, [r7, #8]
+ 273 0050 9A42     		cmp	r2, r3
+ 274 0052 E9DB     		blt	.L3
+  70:spo2_algorithm.c ****   un_ir_mean =un_ir_mean/n_ir_buffer_length ;
+ 275              		.loc 1 70 0 is_stmt 1
+ 276 0054 BB68     		ldr	r3, [r7, #8]
+ 277 0056 D7F8AC20 		ldr	r2, [r7, #172]
+ 278 005a B2FBF3F3 		udiv	r3, r2, r3
+ 279 005e C7F8AC30 		str	r3, [r7, #172]
+  71:spo2_algorithm.c ****     
+  72:spo2_algorithm.c ****   // remove DC and invert signal so that we can use peak detector as valley detector
+  73:spo2_algorithm.c ****   for (k=0 ; k<n_ir_buffer_length ; k++ )  
+ 280              		.loc 1 73 0
+ 281 0062 0023     		movs	r3, #0
+ 282 0064 C7F8A830 		str	r3, [r7, #168]
+ 283 0068 14E0     		b	.L4
+ 284              	.L5:
+  74:spo2_algorithm.c ****     an_x[k] = -1*(pun_ir_buffer[k] - un_ir_mean) ; 
+ 285              		.loc 1 74 0 discriminator 3
+ 286 006a D7F8A830 		ldr	r3, [r7, #168]
+ 287 006e 5B00     		lsls	r3, r3, #1
+ 288 0070 FA68     		ldr	r2, [r7, #12]
+ 289 0072 1344     		add	r3, r3, r2
+ 290 0074 1B88     		ldrh	r3, [r3]
+ 291 0076 1A46     		mov	r2, r3
+ 292 0078 D7F8AC30 		ldr	r3, [r7, #172]
+ 293 007c 9B1A     		subs	r3, r3, r2
+ 294 007e 1946     		mov	r1, r3
+ 295 0080 B84A     		ldr	r2, .L38
+ 296 0082 D7F8A830 		ldr	r3, [r7, #168]
+ 297 0086 42F82310 		str	r1, [r2, r3, lsl #2]
+  73:spo2_algorithm.c ****     an_x[k] = -1*(pun_ir_buffer[k] - un_ir_mean) ; 
+ 298              		.loc 1 73 0 discriminator 3
+ 299 008a D7F8A830 		ldr	r3, [r7, #168]
+ 300 008e 0133     		adds	r3, r3, #1
+ 301 0090 C7F8A830 		str	r3, [r7, #168]
+ 302              	.L4:
+  73:spo2_algorithm.c ****     an_x[k] = -1*(pun_ir_buffer[k] - un_ir_mean) ; 
+ 303              		.loc 1 73 0 is_stmt 0 discriminator 1
+ 304 0094 D7F8A820 		ldr	r2, [r7, #168]
+ 305 0098 BB68     		ldr	r3, [r7, #8]
+ 306 009a 9A42     		cmp	r2, r3
+ 307 009c E5DB     		blt	.L5
+  75:spo2_algorithm.c ****     
+  76:spo2_algorithm.c ****   // 4 pt Moving Average
+  77:spo2_algorithm.c ****   for(k=0; k< BUFFER_SIZE-MA4_SIZE; k++){
+ 308              		.loc 1 77 0 is_stmt 1
+ 309 009e 0023     		movs	r3, #0
+ 310 00a0 C7F8A830 		str	r3, [r7, #168]
+ 311 00a4 28E0     		b	.L6
+ 312              	.L8:
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 8
+
+
+  78:spo2_algorithm.c ****     an_x[k]=( an_x[k]+an_x[k+1]+ an_x[k+2]+ an_x[k+3])/(int)4;        
+ 313              		.loc 1 78 0 discriminator 3
+ 314 00a6 AF4A     		ldr	r2, .L38
+ 315 00a8 D7F8A830 		ldr	r3, [r7, #168]
+ 316 00ac 52F82320 		ldr	r2, [r2, r3, lsl #2]
+ 317 00b0 D7F8A830 		ldr	r3, [r7, #168]
+ 318 00b4 0133     		adds	r3, r3, #1
+ 319 00b6 AB49     		ldr	r1, .L38
+ 320 00b8 51F82330 		ldr	r3, [r1, r3, lsl #2]
+ 321 00bc 1A44     		add	r2, r2, r3
+ 322 00be D7F8A830 		ldr	r3, [r7, #168]
+ 323 00c2 0233     		adds	r3, r3, #2
+ 324 00c4 A749     		ldr	r1, .L38
+ 325 00c6 51F82330 		ldr	r3, [r1, r3, lsl #2]
+ 326 00ca 1A44     		add	r2, r2, r3
+ 327 00cc D7F8A830 		ldr	r3, [r7, #168]
+ 328 00d0 0333     		adds	r3, r3, #3
+ 329 00d2 A449     		ldr	r1, .L38
+ 330 00d4 51F82330 		ldr	r3, [r1, r3, lsl #2]
+ 331 00d8 1344     		add	r3, r3, r2
+ 332 00da 002B     		cmp	r3, #0
+ 333 00dc 00DA     		bge	.L7
+ 334 00de 0333     		adds	r3, r3, #3
+ 335              	.L7:
+ 336 00e0 9B10     		asrs	r3, r3, #2
+ 337 00e2 1946     		mov	r1, r3
+ 338 00e4 9F4A     		ldr	r2, .L38
+ 339 00e6 D7F8A830 		ldr	r3, [r7, #168]
+ 340 00ea 42F82310 		str	r1, [r2, r3, lsl #2]
+  77:spo2_algorithm.c ****     an_x[k]=( an_x[k]+an_x[k+1]+ an_x[k+2]+ an_x[k+3])/(int)4;        
+ 341              		.loc 1 77 0 discriminator 3
+ 342 00ee D7F8A830 		ldr	r3, [r7, #168]
+ 343 00f2 0133     		adds	r3, r3, #1
+ 344 00f4 C7F8A830 		str	r3, [r7, #168]
+ 345              	.L6:
+  77:spo2_algorithm.c ****     an_x[k]=( an_x[k]+an_x[k+1]+ an_x[k+2]+ an_x[k+3])/(int)4;        
+ 346              		.loc 1 77 0 is_stmt 0 discriminator 1
+ 347 00f8 D7F8A830 		ldr	r3, [r7, #168]
+ 348 00fc 5F2B     		cmp	r3, #95
+ 349 00fe D2DD     		ble	.L8
+  79:spo2_algorithm.c ****   }
+  80:spo2_algorithm.c ****   // calculate threshold  
+  81:spo2_algorithm.c ****   n_th1=0; 
+ 350              		.loc 1 81 0 is_stmt 1
+ 351 0100 0023     		movs	r3, #0
+ 352 0102 C7F89C30 		str	r3, [r7, #156]
+  82:spo2_algorithm.c ****   for ( k=0 ; k<BUFFER_SIZE ;k++){
+ 353              		.loc 1 82 0
+ 354 0106 0023     		movs	r3, #0
+ 355 0108 C7F8A830 		str	r3, [r7, #168]
+ 356 010c 0EE0     		b	.L9
+ 357              	.L10:
+  83:spo2_algorithm.c ****     n_th1 +=  an_x[k];
+ 358              		.loc 1 83 0 discriminator 3
+ 359 010e 954A     		ldr	r2, .L38
+ 360 0110 D7F8A830 		ldr	r3, [r7, #168]
+ 361 0114 52F82330 		ldr	r3, [r2, r3, lsl #2]
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 9
+
+
+ 362 0118 D7F89C20 		ldr	r2, [r7, #156]
+ 363 011c 1344     		add	r3, r3, r2
+ 364 011e C7F89C30 		str	r3, [r7, #156]
+  82:spo2_algorithm.c ****   for ( k=0 ; k<BUFFER_SIZE ;k++){
+ 365              		.loc 1 82 0 discriminator 3
+ 366 0122 D7F8A830 		ldr	r3, [r7, #168]
+ 367 0126 0133     		adds	r3, r3, #1
+ 368 0128 C7F8A830 		str	r3, [r7, #168]
+ 369              	.L9:
+  82:spo2_algorithm.c ****   for ( k=0 ; k<BUFFER_SIZE ;k++){
+ 370              		.loc 1 82 0 is_stmt 0 discriminator 1
+ 371 012c D7F8A830 		ldr	r3, [r7, #168]
+ 372 0130 632B     		cmp	r3, #99
+ 373 0132 ECDD     		ble	.L10
+  84:spo2_algorithm.c ****   }
+  85:spo2_algorithm.c ****   n_th1=  n_th1/ ( BUFFER_SIZE);
+ 374              		.loc 1 85 0 is_stmt 1
+ 375 0134 D7F89C30 		ldr	r3, [r7, #156]
+ 376 0138 8B4A     		ldr	r2, .L38+4
+ 377 013a 82FB0312 		smull	r1, r2, r2, r3
+ 378 013e 5211     		asrs	r2, r2, #5
+ 379 0140 DB17     		asrs	r3, r3, #31
+ 380 0142 D31A     		subs	r3, r2, r3
+ 381 0144 C7F89C30 		str	r3, [r7, #156]
+  86:spo2_algorithm.c ****   if( n_th1<30) n_th1=30; // min allowed
+ 382              		.loc 1 86 0
+ 383 0148 D7F89C30 		ldr	r3, [r7, #156]
+ 384 014c 1D2B     		cmp	r3, #29
+ 385 014e 02DC     		bgt	.L11
+ 386              		.loc 1 86 0 is_stmt 0 discriminator 1
+ 387 0150 1E23     		movs	r3, #30
+ 388 0152 C7F89C30 		str	r3, [r7, #156]
+ 389              	.L11:
+  87:spo2_algorithm.c ****   if( n_th1>60) n_th1=60; // max allowed
+ 390              		.loc 1 87 0 is_stmt 1
+ 391 0156 D7F89C30 		ldr	r3, [r7, #156]
+ 392 015a 3C2B     		cmp	r3, #60
+ 393 015c 02DD     		ble	.L12
+ 394              		.loc 1 87 0 is_stmt 0 discriminator 1
+ 395 015e 3C23     		movs	r3, #60
+ 396 0160 C7F89C30 		str	r3, [r7, #156]
+ 397              	.L12:
+  88:spo2_algorithm.c **** 
+  89:spo2_algorithm.c ****   for ( k=0 ; k<15;k++) an_ir_valley_locs[k]=0;
+ 398              		.loc 1 89 0 is_stmt 1
+ 399 0164 0023     		movs	r3, #0
+ 400 0166 C7F8A830 		str	r3, [r7, #168]
+ 401 016a 0DE0     		b	.L13
+ 402              	.L14:
+ 403              		.loc 1 89 0 is_stmt 0 discriminator 3
+ 404 016c D7F8A830 		ldr	r3, [r7, #168]
+ 405 0170 9B00     		lsls	r3, r3, #2
+ 406 0172 07F1B002 		add	r2, r7, #176
+ 407 0176 1344     		add	r3, r3, r2
+ 408 0178 0022     		movs	r2, #0
+ 409 017a 43F8882C 		str	r2, [r3, #-136]
+ 410 017e D7F8A830 		ldr	r3, [r7, #168]
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 10
+
+
+ 411 0182 0133     		adds	r3, r3, #1
+ 412 0184 C7F8A830 		str	r3, [r7, #168]
+ 413              	.L13:
+ 414              		.loc 1 89 0 discriminator 1
+ 415 0188 D7F8A830 		ldr	r3, [r7, #168]
+ 416 018c 0E2B     		cmp	r3, #14
+ 417 018e EDDD     		ble	.L14
+  90:spo2_algorithm.c ****   // since we flipped signal, we use peak detector as valley detector
+  91:spo2_algorithm.c ****   maxim_find_peaks( an_ir_valley_locs, &n_npks, an_x, BUFFER_SIZE, n_th1, 4, 15 );//peak_height, pe
+ 418              		.loc 1 91 0 is_stmt 1
+ 419 0190 07F16401 		add	r1, r7, #100
+ 420 0194 07F12800 		add	r0, r7, #40
+ 421 0198 0F23     		movs	r3, #15
+ 422 019a 0293     		str	r3, [sp, #8]
+ 423 019c 0423     		movs	r3, #4
+ 424 019e 0193     		str	r3, [sp, #4]
+ 425 01a0 D7F89C30 		ldr	r3, [r7, #156]
+ 426 01a4 0093     		str	r3, [sp]
+ 427 01a6 6423     		movs	r3, #100
+ 428 01a8 6E4A     		ldr	r2, .L38
+ 429 01aa FFF7FEFF 		bl	maxim_find_peaks
+  92:spo2_algorithm.c ****   n_peak_interval_sum =0;
+ 430              		.loc 1 92 0
+ 431 01ae 0023     		movs	r3, #0
+ 432 01b0 C7F89830 		str	r3, [r7, #152]
+  93:spo2_algorithm.c ****   if (n_npks>=2){
+ 433              		.loc 1 93 0
+ 434 01b4 7B6E     		ldr	r3, [r7, #100]
+ 435 01b6 012B     		cmp	r3, #1
+ 436 01b8 3ADD     		ble	.L15
+  94:spo2_algorithm.c ****     for (k=1; k<n_npks; k++) n_peak_interval_sum += (an_ir_valley_locs[k] -an_ir_valley_locs[k -1] 
+ 437              		.loc 1 94 0
+ 438 01ba 0123     		movs	r3, #1
+ 439 01bc C7F8A830 		str	r3, [r7, #168]
+ 440 01c0 1BE0     		b	.L16
+ 441              	.L17:
+ 442              		.loc 1 94 0 is_stmt 0 discriminator 3
+ 443 01c2 D7F8A830 		ldr	r3, [r7, #168]
+ 444 01c6 9B00     		lsls	r3, r3, #2
+ 445 01c8 07F1B002 		add	r2, r7, #176
+ 446 01cc 1344     		add	r3, r3, r2
+ 447 01ce 53F8882C 		ldr	r2, [r3, #-136]
+ 448 01d2 D7F8A830 		ldr	r3, [r7, #168]
+ 449 01d6 013B     		subs	r3, r3, #1
+ 450 01d8 9B00     		lsls	r3, r3, #2
+ 451 01da 07F1B001 		add	r1, r7, #176
+ 452 01de 0B44     		add	r3, r3, r1
+ 453 01e0 53F8883C 		ldr	r3, [r3, #-136]
+ 454 01e4 D31A     		subs	r3, r2, r3
+ 455 01e6 D7F89820 		ldr	r2, [r7, #152]
+ 456 01ea 1344     		add	r3, r3, r2
+ 457 01ec C7F89830 		str	r3, [r7, #152]
+ 458 01f0 D7F8A830 		ldr	r3, [r7, #168]
+ 459 01f4 0133     		adds	r3, r3, #1
+ 460 01f6 C7F8A830 		str	r3, [r7, #168]
+ 461              	.L16:
+ 462              		.loc 1 94 0 discriminator 1
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 11
+
+
+ 463 01fa 7B6E     		ldr	r3, [r7, #100]
+ 464 01fc D7F8A820 		ldr	r2, [r7, #168]
+ 465 0200 9A42     		cmp	r2, r3
+ 466 0202 DEDB     		blt	.L17
+  95:spo2_algorithm.c ****     n_peak_interval_sum =n_peak_interval_sum/(n_npks-1);
+ 467              		.loc 1 95 0 is_stmt 1
+ 468 0204 7B6E     		ldr	r3, [r7, #100]
+ 469 0206 013B     		subs	r3, r3, #1
+ 470 0208 D7F89820 		ldr	r2, [r7, #152]
+ 471 020c 92FBF3F3 		sdiv	r3, r2, r3
+ 472 0210 C7F89830 		str	r3, [r7, #152]
+  96:spo2_algorithm.c ****     *pn_heart_rate =(int32_t)( (FreqS*60)/ n_peak_interval_sum );
+ 473              		.loc 1 96 0
+ 474 0214 40F2DC52 		movw	r2, #1500
+ 475 0218 D7F89830 		ldr	r3, [r7, #152]
+ 476 021c 92FBF3F2 		sdiv	r2, r2, r3
+ 477 0220 D7F8BC30 		ldr	r3, [r7, #188]
+ 478 0224 1A60     		str	r2, [r3]
+  97:spo2_algorithm.c ****     *pch_hr_valid  = 1;
+ 479              		.loc 1 97 0
+ 480 0226 D7F8C030 		ldr	r3, [r7, #192]
+ 481 022a 0122     		movs	r2, #1
+ 482 022c 1A70     		strb	r2, [r3]
+ 483 022e 07E0     		b	.L18
+ 484              	.L15:
+  98:spo2_algorithm.c ****   }
+  99:spo2_algorithm.c ****   else  { 
+ 100:spo2_algorithm.c ****     *pn_heart_rate = -999; // unable to calculate because # of peaks are too small
+ 485              		.loc 1 100 0
+ 486 0230 D7F8BC30 		ldr	r3, [r7, #188]
+ 487 0234 4D4A     		ldr	r2, .L38+8
+ 488 0236 1A60     		str	r2, [r3]
+ 101:spo2_algorithm.c ****     *pch_hr_valid  = 0;
+ 489              		.loc 1 101 0
+ 490 0238 D7F8C030 		ldr	r3, [r7, #192]
+ 491 023c 0022     		movs	r2, #0
+ 492 023e 1A70     		strb	r2, [r3]
+ 493              	.L18:
+ 102:spo2_algorithm.c ****   }
+ 103:spo2_algorithm.c **** 
+ 104:spo2_algorithm.c ****   //  load raw value again for SPO2 calculation : RED(=y) and IR(=X)
+ 105:spo2_algorithm.c ****   for (k=0 ; k<n_ir_buffer_length ; k++ )  {
+ 494              		.loc 1 105 0
+ 495 0240 0023     		movs	r3, #0
+ 496 0242 C7F8A830 		str	r3, [r7, #168]
+ 497 0246 1CE0     		b	.L19
+ 498              	.L20:
+ 106:spo2_algorithm.c ****       an_x[k] =  pun_ir_buffer[k] ; 
+ 499              		.loc 1 106 0 discriminator 3
+ 500 0248 D7F8A830 		ldr	r3, [r7, #168]
+ 501 024c 5B00     		lsls	r3, r3, #1
+ 502 024e FA68     		ldr	r2, [r7, #12]
+ 503 0250 1344     		add	r3, r3, r2
+ 504 0252 1B88     		ldrh	r3, [r3]
+ 505 0254 1946     		mov	r1, r3
+ 506 0256 434A     		ldr	r2, .L38
+ 507 0258 D7F8A830 		ldr	r3, [r7, #168]
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 12
+
+
+ 508 025c 42F82310 		str	r1, [r2, r3, lsl #2]
+ 107:spo2_algorithm.c ****       an_y[k] =  pun_red_buffer[k] ; 
+ 509              		.loc 1 107 0 discriminator 3
+ 510 0260 D7F8A830 		ldr	r3, [r7, #168]
+ 511 0264 5B00     		lsls	r3, r3, #1
+ 512 0266 7A68     		ldr	r2, [r7, #4]
+ 513 0268 1344     		add	r3, r3, r2
+ 514 026a 1B88     		ldrh	r3, [r3]
+ 515 026c 1946     		mov	r1, r3
+ 516 026e 404A     		ldr	r2, .L38+12
+ 517 0270 D7F8A830 		ldr	r3, [r7, #168]
+ 518 0274 42F82310 		str	r1, [r2, r3, lsl #2]
+ 105:spo2_algorithm.c ****       an_x[k] =  pun_ir_buffer[k] ; 
+ 519              		.loc 1 105 0 discriminator 3
+ 520 0278 D7F8A830 		ldr	r3, [r7, #168]
+ 521 027c 0133     		adds	r3, r3, #1
+ 522 027e C7F8A830 		str	r3, [r7, #168]
+ 523              	.L19:
+ 105:spo2_algorithm.c ****       an_x[k] =  pun_ir_buffer[k] ; 
+ 524              		.loc 1 105 0 is_stmt 0 discriminator 1
+ 525 0282 D7F8A820 		ldr	r2, [r7, #168]
+ 526 0286 BB68     		ldr	r3, [r7, #8]
+ 527 0288 9A42     		cmp	r2, r3
+ 528 028a DDDB     		blt	.L20
+ 108:spo2_algorithm.c ****   }
+ 109:spo2_algorithm.c **** 
+ 110:spo2_algorithm.c ****   // find precise min near an_ir_valley_locs
+ 111:spo2_algorithm.c ****   n_exact_ir_valley_locs_count =n_npks; 
+ 529              		.loc 1 111 0 is_stmt 1
+ 530 028c 7B6E     		ldr	r3, [r7, #100]
+ 531 028e C7F88030 		str	r3, [r7, #128]
+ 112:spo2_algorithm.c ****   
+ 113:spo2_algorithm.c ****   //using exact_ir_valley_locs , find ir-red DC andir-red AC for SPO2 calibration an_ratio
+ 114:spo2_algorithm.c ****   //finding AC/DC maximum of raw
+ 115:spo2_algorithm.c **** 
+ 116:spo2_algorithm.c ****   n_ratio_average =0; 
+ 532              		.loc 1 116 0
+ 533 0292 0023     		movs	r3, #0
+ 534 0294 C7F88430 		str	r3, [r7, #132]
+ 117:spo2_algorithm.c ****   n_i_ratio_count = 0; 
+ 535              		.loc 1 117 0
+ 536 0298 0023     		movs	r3, #0
+ 537 029a C7F8A430 		str	r3, [r7, #164]
+ 118:spo2_algorithm.c ****   for(k=0; k< 5; k++) an_ratio[k]=0;
+ 538              		.loc 1 118 0
+ 539 029e 0023     		movs	r3, #0
+ 540 02a0 C7F8A830 		str	r3, [r7, #168]
+ 541 02a4 0DE0     		b	.L21
+ 542              	.L22:
+ 543              		.loc 1 118 0 is_stmt 0 discriminator 3
+ 544 02a6 D7F8A830 		ldr	r3, [r7, #168]
+ 545 02aa 9B00     		lsls	r3, r3, #2
+ 546 02ac 07F1B002 		add	r2, r7, #176
+ 547 02b0 1344     		add	r3, r3, r2
+ 548 02b2 0022     		movs	r2, #0
+ 549 02b4 43F89C2C 		str	r2, [r3, #-156]
+ 550 02b8 D7F8A830 		ldr	r3, [r7, #168]
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 13
+
+
+ 551 02bc 0133     		adds	r3, r3, #1
+ 552 02be C7F8A830 		str	r3, [r7, #168]
+ 553              	.L21:
+ 554              		.loc 1 118 0 discriminator 1
+ 555 02c2 D7F8A830 		ldr	r3, [r7, #168]
+ 556 02c6 042B     		cmp	r3, #4
+ 557 02c8 EDDD     		ble	.L22
+ 119:spo2_algorithm.c ****   for (k=0; k< n_exact_ir_valley_locs_count; k++){
+ 558              		.loc 1 119 0 is_stmt 1
+ 559 02ca 0023     		movs	r3, #0
+ 560 02cc C7F8A830 		str	r3, [r7, #168]
+ 561 02d0 16E0     		b	.L23
+ 562              	.L26:
+ 120:spo2_algorithm.c ****     if (an_ir_valley_locs[k] > BUFFER_SIZE ){
+ 563              		.loc 1 120 0
+ 564 02d2 D7F8A830 		ldr	r3, [r7, #168]
+ 565 02d6 9B00     		lsls	r3, r3, #2
+ 566 02d8 07F1B002 		add	r2, r7, #176
+ 567 02dc 1344     		add	r3, r3, r2
+ 568 02de 53F8883C 		ldr	r3, [r3, #-136]
+ 569 02e2 642B     		cmp	r3, #100
+ 570 02e4 07DD     		ble	.L24
+ 121:spo2_algorithm.c ****       *pn_spo2 =  -999 ; // do not use SPO2 since valley loc is out of range
+ 571              		.loc 1 121 0
+ 572 02e6 3B68     		ldr	r3, [r7]
+ 573 02e8 204A     		ldr	r2, .L38+8
+ 574 02ea 1A60     		str	r2, [r3]
+ 122:spo2_algorithm.c ****       *pch_spo2_valid  = 0; 
+ 575              		.loc 1 122 0
+ 576 02ec D7F8B830 		ldr	r3, [r7, #184]
+ 577 02f0 0022     		movs	r2, #0
+ 578 02f2 1A70     		strb	r2, [r3]
+ 579 02f4 9DE1     		b	.L1
+ 580              	.L24:
+ 119:spo2_algorithm.c ****     if (an_ir_valley_locs[k] > BUFFER_SIZE ){
+ 581              		.loc 1 119 0 discriminator 2
+ 582 02f6 D7F8A830 		ldr	r3, [r7, #168]
+ 583 02fa 0133     		adds	r3, r3, #1
+ 584 02fc C7F8A830 		str	r3, [r7, #168]
+ 585              	.L23:
+ 119:spo2_algorithm.c ****     if (an_ir_valley_locs[k] > BUFFER_SIZE ){
+ 586              		.loc 1 119 0 is_stmt 0 discriminator 1
+ 587 0300 D7F8A820 		ldr	r2, [r7, #168]
+ 588 0304 D7F88030 		ldr	r3, [r7, #128]
+ 589 0308 9A42     		cmp	r2, r3
+ 590 030a E2DB     		blt	.L26
+ 123:spo2_algorithm.c ****       return;
+ 124:spo2_algorithm.c ****     }
+ 125:spo2_algorithm.c ****   }
+ 126:spo2_algorithm.c ****   // find max between two valley locations 
+ 127:spo2_algorithm.c ****   // and use an_ratio betwen AC compoent of Ir & Red and DC compoent of Ir & Red for SPO2 
+ 128:spo2_algorithm.c ****   for (k=0; k< n_exact_ir_valley_locs_count-1; k++){
+ 591              		.loc 1 128 0 is_stmt 1
+ 592 030c 0023     		movs	r3, #0
+ 593 030e C7F8A830 		str	r3, [r7, #168]
+ 594 0312 3AE1     		b	.L27
+ 595              	.L33:
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 14
+
+
+ 129:spo2_algorithm.c ****     n_y_dc_max= -16777216 ; 
+ 596              		.loc 1 129 0
+ 597 0314 4FF07F43 		mov	r3, #-16777216
+ 598 0318 C7F89430 		str	r3, [r7, #148]
+ 130:spo2_algorithm.c ****     n_x_dc_max= -16777216; 
+ 599              		.loc 1 130 0
+ 600 031c 4FF07F43 		mov	r3, #-16777216
+ 601 0320 C7F89030 		str	r3, [r7, #144]
+ 131:spo2_algorithm.c ****     if (an_ir_valley_locs[k+1]-an_ir_valley_locs[k] >3){
+ 602              		.loc 1 131 0
+ 603 0324 D7F8A830 		ldr	r3, [r7, #168]
+ 604 0328 0133     		adds	r3, r3, #1
+ 605 032a 9B00     		lsls	r3, r3, #2
+ 606 032c 07F1B002 		add	r2, r7, #176
+ 607 0330 1344     		add	r3, r3, r2
+ 608 0332 53F8882C 		ldr	r2, [r3, #-136]
+ 609 0336 D7F8A830 		ldr	r3, [r7, #168]
+ 610 033a 9B00     		lsls	r3, r3, #2
+ 611 033c 07F1B001 		add	r1, r7, #176
+ 612 0340 0B44     		add	r3, r3, r1
+ 613 0342 53F8883C 		ldr	r3, [r3, #-136]
+ 614 0346 D31A     		subs	r3, r2, r3
+ 615 0348 032B     		cmp	r3, #3
+ 616 034a 40F31981 		ble	.L28
+ 132:spo2_algorithm.c ****         for (i=an_ir_valley_locs[k]; i< an_ir_valley_locs[k+1]; i++){
+ 617              		.loc 1 132 0
+ 618 034e D7F8A830 		ldr	r3, [r7, #168]
+ 619 0352 9B00     		lsls	r3, r3, #2
+ 620 0354 07F1B002 		add	r2, r7, #176
+ 621 0358 1344     		add	r3, r3, r2
+ 622 035a 53F8883C 		ldr	r3, [r3, #-136]
+ 623 035e C7F8A030 		str	r3, [r7, #160]
+ 624 0362 34E0     		b	.L29
+ 625              	.L39:
+ 626              		.align	2
+ 627              	.L38:
+ 628 0364 00000000 		.word	an_x
+ 629 0368 1F85EB51 		.word	1374389535
+ 630 036c 19FCFFFF 		.word	-999
+ 631 0370 90010000 		.word	an_y
+ 632              	.L32:
+ 133:spo2_algorithm.c ****           if (an_x[i]> n_x_dc_max) {n_x_dc_max =an_x[i]; n_x_dc_max_idx=i;}
+ 633              		.loc 1 133 0
+ 634 0374 B04A     		ldr	r2, .L40
+ 635 0376 D7F8A030 		ldr	r3, [r7, #160]
+ 636 037a 52F82320 		ldr	r2, [r2, r3, lsl #2]
+ 637 037e D7F89030 		ldr	r3, [r7, #144]
+ 638 0382 9A42     		cmp	r2, r3
+ 639 0384 0ADD     		ble	.L30
+ 640              		.loc 1 133 0 is_stmt 0 discriminator 1
+ 641 0386 AC4A     		ldr	r2, .L40
+ 642 0388 D7F8A030 		ldr	r3, [r7, #160]
+ 643 038c 52F82330 		ldr	r3, [r2, r3, lsl #2]
+ 644 0390 C7F89030 		str	r3, [r7, #144]
+ 645 0394 D7F8A030 		ldr	r3, [r7, #160]
+ 646 0398 C7F88830 		str	r3, [r7, #136]
+ 647              	.L30:
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 15
+
+
+ 134:spo2_algorithm.c ****           if (an_y[i]> n_y_dc_max) {n_y_dc_max =an_y[i]; n_y_dc_max_idx=i;}
+ 648              		.loc 1 134 0 is_stmt 1
+ 649 039c A74A     		ldr	r2, .L40+4
+ 650 039e D7F8A030 		ldr	r3, [r7, #160]
+ 651 03a2 52F82320 		ldr	r2, [r2, r3, lsl #2]
+ 652 03a6 D7F89430 		ldr	r3, [r7, #148]
+ 653 03aa 9A42     		cmp	r2, r3
+ 654 03ac 0ADD     		ble	.L31
+ 655              		.loc 1 134 0 is_stmt 0 discriminator 1
+ 656 03ae A34A     		ldr	r2, .L40+4
+ 657 03b0 D7F8A030 		ldr	r3, [r7, #160]
+ 658 03b4 52F82330 		ldr	r3, [r2, r3, lsl #2]
+ 659 03b8 C7F89430 		str	r3, [r7, #148]
+ 660 03bc D7F8A030 		ldr	r3, [r7, #160]
+ 661 03c0 C7F88C30 		str	r3, [r7, #140]
+ 662              	.L31:
+ 132:spo2_algorithm.c ****         for (i=an_ir_valley_locs[k]; i< an_ir_valley_locs[k+1]; i++){
+ 663              		.loc 1 132 0 is_stmt 1 discriminator 2
+ 664 03c4 D7F8A030 		ldr	r3, [r7, #160]
+ 665 03c8 0133     		adds	r3, r3, #1
+ 666 03ca C7F8A030 		str	r3, [r7, #160]
+ 667              	.L29:
+ 132:spo2_algorithm.c ****         for (i=an_ir_valley_locs[k]; i< an_ir_valley_locs[k+1]; i++){
+ 668              		.loc 1 132 0 is_stmt 0 discriminator 1
+ 669 03ce D7F8A830 		ldr	r3, [r7, #168]
+ 670 03d2 0133     		adds	r3, r3, #1
+ 671 03d4 9B00     		lsls	r3, r3, #2
+ 672 03d6 07F1B002 		add	r2, r7, #176
+ 673 03da 1344     		add	r3, r3, r2
+ 674 03dc 53F8882C 		ldr	r2, [r3, #-136]
+ 675 03e0 D7F8A030 		ldr	r3, [r7, #160]
+ 676 03e4 9A42     		cmp	r2, r3
+ 677 03e6 C5DC     		bgt	.L32
+ 135:spo2_algorithm.c ****       }
+ 136:spo2_algorithm.c ****       n_y_ac= (an_y[an_ir_valley_locs[k+1]] - an_y[an_ir_valley_locs[k] ] )*(n_y_dc_max_idx -an_ir_
+ 678              		.loc 1 136 0 is_stmt 1
+ 679 03e8 D7F8A830 		ldr	r3, [r7, #168]
+ 680 03ec 0133     		adds	r3, r3, #1
+ 681 03ee 9B00     		lsls	r3, r3, #2
+ 682 03f0 07F1B002 		add	r2, r7, #176
+ 683 03f4 1344     		add	r3, r3, r2
+ 684 03f6 53F8883C 		ldr	r3, [r3, #-136]
+ 685 03fa 904A     		ldr	r2, .L40+4
+ 686 03fc 52F82320 		ldr	r2, [r2, r3, lsl #2]
+ 687 0400 D7F8A830 		ldr	r3, [r7, #168]
+ 688 0404 9B00     		lsls	r3, r3, #2
+ 689 0406 07F1B001 		add	r1, r7, #176
+ 690 040a 0B44     		add	r3, r3, r1
+ 691 040c 53F8883C 		ldr	r3, [r3, #-136]
+ 692 0410 8A49     		ldr	r1, .L40+4
+ 693 0412 51F82330 		ldr	r3, [r1, r3, lsl #2]
+ 694 0416 D21A     		subs	r2, r2, r3
+ 695 0418 D7F8A830 		ldr	r3, [r7, #168]
+ 696 041c 9B00     		lsls	r3, r3, #2
+ 697 041e 07F1B001 		add	r1, r7, #176
+ 698 0422 0B44     		add	r3, r3, r1
+ 699 0424 53F8883C 		ldr	r3, [r3, #-136]
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 16
+
+
+ 700 0428 D7F88C10 		ldr	r1, [r7, #140]
+ 701 042c CB1A     		subs	r3, r1, r3
+ 702 042e 03FB02F3 		mul	r3, r3, r2
+ 703 0432 FB67     		str	r3, [r7, #124]
+ 137:spo2_algorithm.c ****       n_y_ac=  an_y[an_ir_valley_locs[k]] + n_y_ac/ (an_ir_valley_locs[k+1] - an_ir_valley_locs[k])
+ 704              		.loc 1 137 0
+ 705 0434 D7F8A830 		ldr	r3, [r7, #168]
+ 706 0438 9B00     		lsls	r3, r3, #2
+ 707 043a 07F1B002 		add	r2, r7, #176
+ 708 043e 1344     		add	r3, r3, r2
+ 709 0440 53F8883C 		ldr	r3, [r3, #-136]
+ 710 0444 7D4A     		ldr	r2, .L40+4
+ 711 0446 52F82320 		ldr	r2, [r2, r3, lsl #2]
+ 712 044a D7F8A830 		ldr	r3, [r7, #168]
+ 713 044e 0133     		adds	r3, r3, #1
+ 714 0450 9B00     		lsls	r3, r3, #2
+ 715 0452 07F1B001 		add	r1, r7, #176
+ 716 0456 0B44     		add	r3, r3, r1
+ 717 0458 53F8881C 		ldr	r1, [r3, #-136]
+ 718 045c D7F8A830 		ldr	r3, [r7, #168]
+ 719 0460 9B00     		lsls	r3, r3, #2
+ 720 0462 07F1B000 		add	r0, r7, #176
+ 721 0466 0344     		add	r3, r3, r0
+ 722 0468 53F8883C 		ldr	r3, [r3, #-136]
+ 723 046c CB1A     		subs	r3, r1, r3
+ 724 046e F96F     		ldr	r1, [r7, #124]
+ 725 0470 91FBF3F3 		sdiv	r3, r1, r3
+ 726 0474 1344     		add	r3, r3, r2
+ 727 0476 FB67     		str	r3, [r7, #124]
+ 138:spo2_algorithm.c ****       n_y_ac=  an_y[n_y_dc_max_idx] - n_y_ac;    // subracting linear DC compoenents from raw 
+ 728              		.loc 1 138 0
+ 729 0478 704A     		ldr	r2, .L40+4
+ 730 047a D7F88C30 		ldr	r3, [r7, #140]
+ 731 047e 52F82320 		ldr	r2, [r2, r3, lsl #2]
+ 732 0482 FB6F     		ldr	r3, [r7, #124]
+ 733 0484 D31A     		subs	r3, r2, r3
+ 734 0486 FB67     		str	r3, [r7, #124]
+ 139:spo2_algorithm.c ****       n_x_ac= (an_x[an_ir_valley_locs[k+1]] - an_x[an_ir_valley_locs[k] ] )*(n_x_dc_max_idx -an_ir_
+ 735              		.loc 1 139 0
+ 736 0488 D7F8A830 		ldr	r3, [r7, #168]
+ 737 048c 0133     		adds	r3, r3, #1
+ 738 048e 9B00     		lsls	r3, r3, #2
+ 739 0490 07F1B002 		add	r2, r7, #176
+ 740 0494 1344     		add	r3, r3, r2
+ 741 0496 53F8883C 		ldr	r3, [r3, #-136]
+ 742 049a 674A     		ldr	r2, .L40
+ 743 049c 52F82320 		ldr	r2, [r2, r3, lsl #2]
+ 744 04a0 D7F8A830 		ldr	r3, [r7, #168]
+ 745 04a4 9B00     		lsls	r3, r3, #2
+ 746 04a6 07F1B001 		add	r1, r7, #176
+ 747 04aa 0B44     		add	r3, r3, r1
+ 748 04ac 53F8883C 		ldr	r3, [r3, #-136]
+ 749 04b0 6149     		ldr	r1, .L40
+ 750 04b2 51F82330 		ldr	r3, [r1, r3, lsl #2]
+ 751 04b6 D21A     		subs	r2, r2, r3
+ 752 04b8 D7F8A830 		ldr	r3, [r7, #168]
+ 753 04bc 9B00     		lsls	r3, r3, #2
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 17
+
+
+ 754 04be 07F1B001 		add	r1, r7, #176
+ 755 04c2 0B44     		add	r3, r3, r1
+ 756 04c4 53F8883C 		ldr	r3, [r3, #-136]
+ 757 04c8 D7F88810 		ldr	r1, [r7, #136]
+ 758 04cc CB1A     		subs	r3, r1, r3
+ 759 04ce 03FB02F3 		mul	r3, r3, r2
+ 760 04d2 BB67     		str	r3, [r7, #120]
+ 140:spo2_algorithm.c ****       n_x_ac=  an_x[an_ir_valley_locs[k]] + n_x_ac/ (an_ir_valley_locs[k+1] - an_ir_valley_locs[k])
+ 761              		.loc 1 140 0
+ 762 04d4 D7F8A830 		ldr	r3, [r7, #168]
+ 763 04d8 9B00     		lsls	r3, r3, #2
+ 764 04da 07F1B002 		add	r2, r7, #176
+ 765 04de 1344     		add	r3, r3, r2
+ 766 04e0 53F8883C 		ldr	r3, [r3, #-136]
+ 767 04e4 544A     		ldr	r2, .L40
+ 768 04e6 52F82320 		ldr	r2, [r2, r3, lsl #2]
+ 769 04ea D7F8A830 		ldr	r3, [r7, #168]
+ 770 04ee 0133     		adds	r3, r3, #1
+ 771 04f0 9B00     		lsls	r3, r3, #2
+ 772 04f2 07F1B001 		add	r1, r7, #176
+ 773 04f6 0B44     		add	r3, r3, r1
+ 774 04f8 53F8881C 		ldr	r1, [r3, #-136]
+ 775 04fc D7F8A830 		ldr	r3, [r7, #168]
+ 776 0500 9B00     		lsls	r3, r3, #2
+ 777 0502 07F1B000 		add	r0, r7, #176
+ 778 0506 0344     		add	r3, r3, r0
+ 779 0508 53F8883C 		ldr	r3, [r3, #-136]
+ 780 050c CB1A     		subs	r3, r1, r3
+ 781 050e B96F     		ldr	r1, [r7, #120]
+ 782 0510 91FBF3F3 		sdiv	r3, r1, r3
+ 783 0514 1344     		add	r3, r3, r2
+ 784 0516 BB67     		str	r3, [r7, #120]
+ 141:spo2_algorithm.c ****       n_x_ac=  an_x[n_y_dc_max_idx] - n_x_ac;      // subracting linear DC compoenents from raw 
+ 785              		.loc 1 141 0
+ 786 0518 474A     		ldr	r2, .L40
+ 787 051a D7F88C30 		ldr	r3, [r7, #140]
+ 788 051e 52F82320 		ldr	r2, [r2, r3, lsl #2]
+ 789 0522 BB6F     		ldr	r3, [r7, #120]
+ 790 0524 D31A     		subs	r3, r2, r3
+ 791 0526 BB67     		str	r3, [r7, #120]
+ 142:spo2_algorithm.c ****       n_nume=( n_y_ac *n_x_dc_max)>>7 ; //prepare X100 to preserve floating value
+ 792              		.loc 1 142 0
+ 793 0528 FB6F     		ldr	r3, [r7, #124]
+ 794 052a D7F89020 		ldr	r2, [r7, #144]
+ 795 052e 02FB03F3 		mul	r3, r2, r3
+ 796 0532 DB11     		asrs	r3, r3, #7
+ 797 0534 7B67     		str	r3, [r7, #116]
+ 143:spo2_algorithm.c ****       n_denom= ( n_x_ac *n_y_dc_max)>>7;
+ 798              		.loc 1 143 0
+ 799 0536 BB6F     		ldr	r3, [r7, #120]
+ 800 0538 D7F89420 		ldr	r2, [r7, #148]
+ 801 053c 02FB03F3 		mul	r3, r2, r3
+ 802 0540 DB11     		asrs	r3, r3, #7
+ 803 0542 3B67     		str	r3, [r7, #112]
+ 144:spo2_algorithm.c ****       if (n_denom>0  && n_i_ratio_count <5 &&  n_nume != 0)
+ 804              		.loc 1 144 0
+ 805 0544 3B6F     		ldr	r3, [r7, #112]
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 18
+
+
+ 806 0546 002B     		cmp	r3, #0
+ 807 0548 1ADD     		ble	.L28
+ 808              		.loc 1 144 0 is_stmt 0 discriminator 1
+ 809 054a D7F8A430 		ldr	r3, [r7, #164]
+ 810 054e 042B     		cmp	r3, #4
+ 811 0550 16DC     		bgt	.L28
+ 812              		.loc 1 144 0 discriminator 2
+ 813 0552 7B6F     		ldr	r3, [r7, #116]
+ 814 0554 002B     		cmp	r3, #0
+ 815 0556 13D0     		beq	.L28
+ 145:spo2_algorithm.c ****       {   
+ 146:spo2_algorithm.c ****         an_ratio[n_i_ratio_count]= (n_nume*100)/n_denom ; //formular is ( n_y_ac *n_x_dc_max) / ( n
+ 816              		.loc 1 146 0 is_stmt 1
+ 817 0558 7B6F     		ldr	r3, [r7, #116]
+ 818 055a 6422     		movs	r2, #100
+ 819 055c 02FB03F2 		mul	r2, r2, r3
+ 820 0560 3B6F     		ldr	r3, [r7, #112]
+ 821 0562 92FBF3F2 		sdiv	r2, r2, r3
+ 822 0566 D7F8A430 		ldr	r3, [r7, #164]
+ 823 056a 9B00     		lsls	r3, r3, #2
+ 824 056c 07F1B001 		add	r1, r7, #176
+ 825 0570 0B44     		add	r3, r3, r1
+ 826 0572 43F89C2C 		str	r2, [r3, #-156]
+ 147:spo2_algorithm.c ****         n_i_ratio_count++;
+ 827              		.loc 1 147 0
+ 828 0576 D7F8A430 		ldr	r3, [r7, #164]
+ 829 057a 0133     		adds	r3, r3, #1
+ 830 057c C7F8A430 		str	r3, [r7, #164]
+ 831              	.L28:
+ 128:spo2_algorithm.c ****     n_y_dc_max= -16777216 ; 
+ 832              		.loc 1 128 0 discriminator 2
+ 833 0580 D7F8A830 		ldr	r3, [r7, #168]
+ 834 0584 0133     		adds	r3, r3, #1
+ 835 0586 C7F8A830 		str	r3, [r7, #168]
+ 836              	.L27:
+ 128:spo2_algorithm.c ****     n_y_dc_max= -16777216 ; 
+ 837              		.loc 1 128 0 is_stmt 0 discriminator 1
+ 838 058a D7F88030 		ldr	r3, [r7, #128]
+ 839 058e 5A1E     		subs	r2, r3, #1
+ 840 0590 D7F8A830 		ldr	r3, [r7, #168]
+ 841 0594 9A42     		cmp	r2, r3
+ 842 0596 3FF7BDAE 		bgt	.L33
+ 148:spo2_algorithm.c ****       }
+ 149:spo2_algorithm.c ****     }
+ 150:spo2_algorithm.c ****   }
+ 151:spo2_algorithm.c ****   // choose median value since PPG signal may varies from beat to beat
+ 152:spo2_algorithm.c ****   maxim_sort_ascend(an_ratio, n_i_ratio_count);
+ 843              		.loc 1 152 0 is_stmt 1
+ 844 059a 07F11403 		add	r3, r7, #20
+ 845 059e D7F8A410 		ldr	r1, [r7, #164]
+ 846 05a2 1846     		mov	r0, r3
+ 847 05a4 FFF7FEFF 		bl	maxim_sort_ascend
+ 153:spo2_algorithm.c ****   n_middle_idx= n_i_ratio_count/2;
+ 848              		.loc 1 153 0
+ 849 05a8 D7F8A430 		ldr	r3, [r7, #164]
+ 850 05ac DA0F     		lsrs	r2, r3, #31
+ 851 05ae 1344     		add	r3, r3, r2
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 19
+
+
+ 852 05b0 5B10     		asrs	r3, r3, #1
+ 853 05b2 FB66     		str	r3, [r7, #108]
+ 154:spo2_algorithm.c **** 
+ 155:spo2_algorithm.c ****   if (n_middle_idx >1)
+ 854              		.loc 1 155 0
+ 855 05b4 FB6E     		ldr	r3, [r7, #108]
+ 856 05b6 012B     		cmp	r3, #1
+ 857 05b8 15DD     		ble	.L34
+ 156:spo2_algorithm.c ****     n_ratio_average =( an_ratio[n_middle_idx-1] +an_ratio[n_middle_idx])/2; // use median
+ 858              		.loc 1 156 0
+ 859 05ba FB6E     		ldr	r3, [r7, #108]
+ 860 05bc 013B     		subs	r3, r3, #1
+ 861 05be 9B00     		lsls	r3, r3, #2
+ 862 05c0 07F1B002 		add	r2, r7, #176
+ 863 05c4 1344     		add	r3, r3, r2
+ 864 05c6 53F89C2C 		ldr	r2, [r3, #-156]
+ 865 05ca FB6E     		ldr	r3, [r7, #108]
+ 866 05cc 9B00     		lsls	r3, r3, #2
+ 867 05ce 07F1B001 		add	r1, r7, #176
+ 868 05d2 0B44     		add	r3, r3, r1
+ 869 05d4 53F89C3C 		ldr	r3, [r3, #-156]
+ 870 05d8 1344     		add	r3, r3, r2
+ 871 05da DA0F     		lsrs	r2, r3, #31
+ 872 05dc 1344     		add	r3, r3, r2
+ 873 05de 5B10     		asrs	r3, r3, #1
+ 874 05e0 C7F88430 		str	r3, [r7, #132]
+ 875 05e4 08E0     		b	.L35
+ 876              	.L34:
+ 157:spo2_algorithm.c ****   else
+ 158:spo2_algorithm.c ****     n_ratio_average = an_ratio[n_middle_idx ];
+ 877              		.loc 1 158 0
+ 878 05e6 FB6E     		ldr	r3, [r7, #108]
+ 879 05e8 9B00     		lsls	r3, r3, #2
+ 880 05ea 07F1B002 		add	r2, r7, #176
+ 881 05ee 1344     		add	r3, r3, r2
+ 882 05f0 53F89C3C 		ldr	r3, [r3, #-156]
+ 883 05f4 C7F88430 		str	r3, [r7, #132]
+ 884              	.L35:
+ 159:spo2_algorithm.c **** 
+ 160:spo2_algorithm.c ****   if( n_ratio_average>2 && n_ratio_average <184){
+ 885              		.loc 1 160 0
+ 886 05f8 D7F88430 		ldr	r3, [r7, #132]
+ 887 05fc 022B     		cmp	r3, #2
+ 888 05fe 11DD     		ble	.L36
+ 889              		.loc 1 160 0 is_stmt 0 discriminator 1
+ 890 0600 D7F88430 		ldr	r3, [r7, #132]
+ 891 0604 B72B     		cmp	r3, #183
+ 892 0606 0DDC     		bgt	.L36
+ 161:spo2_algorithm.c ****     n_spo2_calc= uch_spo2_table[n_ratio_average] ;
+ 893              		.loc 1 161 0 is_stmt 1
+ 894 0608 0D4A     		ldr	r2, .L40+8
+ 895 060a D7F88430 		ldr	r3, [r7, #132]
+ 896 060e 1344     		add	r3, r3, r2
+ 897 0610 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 898 0612 BB66     		str	r3, [r7, #104]
+ 162:spo2_algorithm.c ****     *pn_spo2 = n_spo2_calc ;
+ 899              		.loc 1 162 0
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 20
+
+
+ 900 0614 3B68     		ldr	r3, [r7]
+ 901 0616 BA6E     		ldr	r2, [r7, #104]
+ 902 0618 1A60     		str	r2, [r3]
+ 163:spo2_algorithm.c ****     *pch_spo2_valid  = 1;//  float_SPO2 =  -45.060*n_ratio_average* n_ratio_average/10000 + 30.354 
+ 903              		.loc 1 163 0
+ 904 061a D7F8B830 		ldr	r3, [r7, #184]
+ 905 061e 0122     		movs	r2, #1
+ 906 0620 1A70     		strb	r2, [r3]
+ 907 0622 06E0     		b	.L1
+ 908              	.L36:
+ 164:spo2_algorithm.c ****   }
+ 165:spo2_algorithm.c ****   else{
+ 166:spo2_algorithm.c ****     *pn_spo2 =  -999 ; // do not use SPO2 since signal an_ratio is out of range
+ 909              		.loc 1 166 0
+ 910 0624 3B68     		ldr	r3, [r7]
+ 911 0626 074A     		ldr	r2, .L40+12
+ 912 0628 1A60     		str	r2, [r3]
+ 167:spo2_algorithm.c ****     *pch_spo2_valid  = 0; 
+ 913              		.loc 1 167 0
+ 914 062a D7F8B830 		ldr	r3, [r7, #184]
+ 915 062e 0022     		movs	r2, #0
+ 916 0630 1A70     		strb	r2, [r3]
+ 917              	.L1:
+ 168:spo2_algorithm.c ****   }
+ 169:spo2_algorithm.c **** }
+ 918              		.loc 1 169 0
+ 919 0632 B037     		adds	r7, r7, #176
+ 920              		.cfi_def_cfa_offset 8
+ 921 0634 BD46     		mov	sp, r7
+ 922              		.cfi_def_cfa_register 13
+ 923              		@ sp needed
+ 924 0636 80BD     		pop	{r7, pc}
+ 925              	.L41:
+ 926              		.align	2
+ 927              	.L40:
+ 928 0638 00000000 		.word	an_x
+ 929 063c 90010000 		.word	an_y
+ 930 0640 00000000 		.word	uch_spo2_table
+ 931 0644 19FCFFFF 		.word	-999
+ 932              		.cfi_endproc
+ 933              	.LFE0:
+ 934              		.size	maxim_heart_rate_and_oxygen_saturation, .-maxim_heart_rate_and_oxygen_saturation
+ 935              		.section	.text.maxim_find_peaks,"ax",%progbits
+ 936              		.align	2
+ 937              		.global	maxim_find_peaks
+ 938              		.thumb
+ 939              		.thumb_func
+ 940              		.type	maxim_find_peaks, %function
+ 941              	maxim_find_peaks:
+ 942              	.LFB1:
+ 170:spo2_algorithm.c **** 
+ 171:spo2_algorithm.c **** 
+ 172:spo2_algorithm.c **** void maxim_find_peaks( int32_t *pn_locs, int32_t *n_npks,  int32_t  *pn_x, int32_t n_size, int32_t 
+ 173:spo2_algorithm.c **** /**
+ 174:spo2_algorithm.c **** * \brief        Find peaks
+ 175:spo2_algorithm.c **** * \par          Details
+ 176:spo2_algorithm.c **** *               Find at most MAX_NUM peaks above MIN_HEIGHT separated by at least MIN_DISTANCE
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 21
+
+
+ 177:spo2_algorithm.c **** *
+ 178:spo2_algorithm.c **** * \retval       None
+ 179:spo2_algorithm.c **** */
+ 180:spo2_algorithm.c **** {
+ 943              		.loc 1 180 0
+ 944              		.cfi_startproc
+ 945              		@ args = 12, pretend = 0, frame = 16
+ 946              		@ frame_needed = 1, uses_anonymous_args = 0
+ 947 0000 80B5     		push	{r7, lr}
+ 948              		.cfi_def_cfa_offset 8
+ 949              		.cfi_offset 7, -8
+ 950              		.cfi_offset 14, -4
+ 951 0002 86B0     		sub	sp, sp, #24
+ 952              		.cfi_def_cfa_offset 32
+ 953 0004 02AF     		add	r7, sp, #8
+ 954              		.cfi_def_cfa 7, 24
+ 955 0006 F860     		str	r0, [r7, #12]
+ 956 0008 B960     		str	r1, [r7, #8]
+ 957 000a 7A60     		str	r2, [r7, #4]
+ 958 000c 3B60     		str	r3, [r7]
+ 181:spo2_algorithm.c ****   maxim_peaks_above_min_height( pn_locs, n_npks, pn_x, n_size, n_min_height );
+ 959              		.loc 1 181 0
+ 960 000e BB69     		ldr	r3, [r7, #24]
+ 961 0010 0093     		str	r3, [sp]
+ 962 0012 3B68     		ldr	r3, [r7]
+ 963 0014 7A68     		ldr	r2, [r7, #4]
+ 964 0016 B968     		ldr	r1, [r7, #8]
+ 965 0018 F868     		ldr	r0, [r7, #12]
+ 966 001a FFF7FEFF 		bl	maxim_peaks_above_min_height
+ 182:spo2_algorithm.c ****   maxim_remove_close_peaks( pn_locs, n_npks, pn_x, n_min_distance );
+ 967              		.loc 1 182 0
+ 968 001e FB69     		ldr	r3, [r7, #28]
+ 969 0020 7A68     		ldr	r2, [r7, #4]
+ 970 0022 B968     		ldr	r1, [r7, #8]
+ 971 0024 F868     		ldr	r0, [r7, #12]
+ 972 0026 FFF7FEFF 		bl	maxim_remove_close_peaks
+ 183:spo2_algorithm.c ****   *n_npks = MIN( *n_npks, n_max_num );
+ 973              		.loc 1 183 0
+ 974 002a BB68     		ldr	r3, [r7, #8]
+ 975 002c 1A68     		ldr	r2, [r3]
+ 976 002e 3B6A     		ldr	r3, [r7, #32]
+ 977 0030 9A42     		cmp	r2, r3
+ 978 0032 A8BF     		it	ge
+ 979 0034 1A46     		movge	r2, r3
+ 980 0036 BB68     		ldr	r3, [r7, #8]
+ 981 0038 1A60     		str	r2, [r3]
+ 184:spo2_algorithm.c **** }
+ 982              		.loc 1 184 0
+ 983 003a 00BF     		nop
+ 984 003c 1037     		adds	r7, r7, #16
+ 985              		.cfi_def_cfa_offset 8
+ 986 003e BD46     		mov	sp, r7
+ 987              		.cfi_def_cfa_register 13
+ 988              		@ sp needed
+ 989 0040 80BD     		pop	{r7, pc}
+ 990              		.cfi_endproc
+ 991              	.LFE1:
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 22
+
+
+ 992              		.size	maxim_find_peaks, .-maxim_find_peaks
+ 993 0042 00BF     		.section	.text.maxim_peaks_above_min_height,"ax",%progbits
+ 994              		.align	2
+ 995              		.global	maxim_peaks_above_min_height
+ 996              		.thumb
+ 997              		.thumb_func
+ 998              		.type	maxim_peaks_above_min_height, %function
+ 999              	maxim_peaks_above_min_height:
+ 1000              	.LFB2:
+ 185:spo2_algorithm.c **** 
+ 186:spo2_algorithm.c **** void maxim_peaks_above_min_height( int32_t *pn_locs, int32_t *n_npks,  int32_t  *pn_x, int32_t n_si
+ 187:spo2_algorithm.c **** /**
+ 188:spo2_algorithm.c **** * \brief        Find peaks above n_min_height
+ 189:spo2_algorithm.c **** * \par          Details
+ 190:spo2_algorithm.c **** *               Find all peaks above MIN_HEIGHT
+ 191:spo2_algorithm.c **** *
+ 192:spo2_algorithm.c **** * \retval       None
+ 193:spo2_algorithm.c **** */
+ 194:spo2_algorithm.c **** {
+ 1001              		.loc 1 194 0
+ 1002              		.cfi_startproc
+ 1003              		@ args = 4, pretend = 0, frame = 24
+ 1004              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1005              		@ link register save eliminated.
+ 1006 0000 80B4     		push	{r7}
+ 1007              		.cfi_def_cfa_offset 4
+ 1008              		.cfi_offset 7, -4
+ 1009 0002 87B0     		sub	sp, sp, #28
+ 1010              		.cfi_def_cfa_offset 32
+ 1011 0004 00AF     		add	r7, sp, #0
+ 1012              		.cfi_def_cfa_register 7
+ 1013 0006 F860     		str	r0, [r7, #12]
+ 1014 0008 B960     		str	r1, [r7, #8]
+ 1015 000a 7A60     		str	r2, [r7, #4]
+ 1016 000c 3B60     		str	r3, [r7]
+ 195:spo2_algorithm.c ****   int32_t i = 1, n_width;
+ 1017              		.loc 1 195 0
+ 1018 000e 0123     		movs	r3, #1
+ 1019 0010 7B61     		str	r3, [r7, #20]
+ 196:spo2_algorithm.c ****   *n_npks = 0;
+ 1020              		.loc 1 196 0
+ 1021 0012 BB68     		ldr	r3, [r7, #8]
+ 1022 0014 0022     		movs	r2, #0
+ 1023 0016 1A60     		str	r2, [r3]
+ 197:spo2_algorithm.c ****   
+ 198:spo2_algorithm.c ****   while (i < n_size-1){
+ 1024              		.loc 1 198 0
+ 1025 0018 5AE0     		b	.L44
+ 1026              	.L51:
+ 199:spo2_algorithm.c ****     if (pn_x[i] > n_min_height && pn_x[i] > pn_x[i-1]){      // find left edge of potential peaks
+ 1027              		.loc 1 199 0
+ 1028 001a 7B69     		ldr	r3, [r7, #20]
+ 1029 001c 9B00     		lsls	r3, r3, #2
+ 1030 001e 7A68     		ldr	r2, [r7, #4]
+ 1031 0020 1344     		add	r3, r3, r2
+ 1032 0022 1A68     		ldr	r2, [r3]
+ 1033 0024 3B6A     		ldr	r3, [r7, #32]
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 23
+
+
+ 1034 0026 9A42     		cmp	r2, r3
+ 1035 0028 4FDD     		ble	.L45
+ 1036              		.loc 1 199 0 is_stmt 0 discriminator 1
+ 1037 002a 7B69     		ldr	r3, [r7, #20]
+ 1038 002c 9B00     		lsls	r3, r3, #2
+ 1039 002e 7A68     		ldr	r2, [r7, #4]
+ 1040 0030 1344     		add	r3, r3, r2
+ 1041 0032 1A68     		ldr	r2, [r3]
+ 1042 0034 7B69     		ldr	r3, [r7, #20]
+ 1043 0036 03F18043 		add	r3, r3, #1073741824
+ 1044 003a 013B     		subs	r3, r3, #1
+ 1045 003c 9B00     		lsls	r3, r3, #2
+ 1046 003e 7968     		ldr	r1, [r7, #4]
+ 1047 0040 0B44     		add	r3, r3, r1
+ 1048 0042 1B68     		ldr	r3, [r3]
+ 1049 0044 9A42     		cmp	r2, r3
+ 1050 0046 40DD     		ble	.L45
+ 200:spo2_algorithm.c ****       n_width = 1;
+ 1051              		.loc 1 200 0 is_stmt 1
+ 1052 0048 0123     		movs	r3, #1
+ 1053 004a 3B61     		str	r3, [r7, #16]
+ 201:spo2_algorithm.c ****       while (i+n_width < n_size && pn_x[i] == pn_x[i+n_width])  // find flat peaks
+ 1054              		.loc 1 201 0
+ 1055 004c 02E0     		b	.L46
+ 1056              	.L48:
+ 202:spo2_algorithm.c ****         n_width++;
+ 1057              		.loc 1 202 0
+ 1058 004e 3B69     		ldr	r3, [r7, #16]
+ 1059 0050 0133     		adds	r3, r3, #1
+ 1060 0052 3B61     		str	r3, [r7, #16]
+ 1061              	.L46:
+ 201:spo2_algorithm.c ****       while (i+n_width < n_size && pn_x[i] == pn_x[i+n_width])  // find flat peaks
+ 1062              		.loc 1 201 0
+ 1063 0054 7A69     		ldr	r2, [r7, #20]
+ 1064 0056 3B69     		ldr	r3, [r7, #16]
+ 1065 0058 1A44     		add	r2, r2, r3
+ 1066 005a 3B68     		ldr	r3, [r7]
+ 1067 005c 9A42     		cmp	r2, r3
+ 1068 005e 0DDA     		bge	.L47
+ 201:spo2_algorithm.c ****       while (i+n_width < n_size && pn_x[i] == pn_x[i+n_width])  // find flat peaks
+ 1069              		.loc 1 201 0 is_stmt 0 discriminator 1
+ 1070 0060 7B69     		ldr	r3, [r7, #20]
+ 1071 0062 9B00     		lsls	r3, r3, #2
+ 1072 0064 7A68     		ldr	r2, [r7, #4]
+ 1073 0066 1344     		add	r3, r3, r2
+ 1074 0068 1A68     		ldr	r2, [r3]
+ 1075 006a 7969     		ldr	r1, [r7, #20]
+ 1076 006c 3B69     		ldr	r3, [r7, #16]
+ 1077 006e 0B44     		add	r3, r3, r1
+ 1078 0070 9B00     		lsls	r3, r3, #2
+ 1079 0072 7968     		ldr	r1, [r7, #4]
+ 1080 0074 0B44     		add	r3, r3, r1
+ 1081 0076 1B68     		ldr	r3, [r3]
+ 1082 0078 9A42     		cmp	r2, r3
+ 1083 007a E8D0     		beq	.L48
+ 1084              	.L47:
+ 203:spo2_algorithm.c ****       if (pn_x[i] > pn_x[i+n_width] && (*n_npks) < 15 ){      // find right edge of peaks
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 24
+
+
+ 1085              		.loc 1 203 0 is_stmt 1
+ 1086 007c 7B69     		ldr	r3, [r7, #20]
+ 1087 007e 9B00     		lsls	r3, r3, #2
+ 1088 0080 7A68     		ldr	r2, [r7, #4]
+ 1089 0082 1344     		add	r3, r3, r2
+ 1090 0084 1A68     		ldr	r2, [r3]
+ 1091 0086 7969     		ldr	r1, [r7, #20]
+ 1092 0088 3B69     		ldr	r3, [r7, #16]
+ 1093 008a 0B44     		add	r3, r3, r1
+ 1094 008c 9B00     		lsls	r3, r3, #2
+ 1095 008e 7968     		ldr	r1, [r7, #4]
+ 1096 0090 0B44     		add	r3, r3, r1
+ 1097 0092 1B68     		ldr	r3, [r3]
+ 1098 0094 9A42     		cmp	r2, r3
+ 1099 0096 13DD     		ble	.L49
+ 1100              		.loc 1 203 0 is_stmt 0 discriminator 1
+ 1101 0098 BB68     		ldr	r3, [r7, #8]
+ 1102 009a 1B68     		ldr	r3, [r3]
+ 1103 009c 0E2B     		cmp	r3, #14
+ 1104 009e 0FDC     		bgt	.L49
+ 204:spo2_algorithm.c ****         pn_locs[(*n_npks)++] = i;    
+ 1105              		.loc 1 204 0 is_stmt 1
+ 1106 00a0 BB68     		ldr	r3, [r7, #8]
+ 1107 00a2 1B68     		ldr	r3, [r3]
+ 1108 00a4 591C     		adds	r1, r3, #1
+ 1109 00a6 BA68     		ldr	r2, [r7, #8]
+ 1110 00a8 1160     		str	r1, [r2]
+ 1111 00aa 9B00     		lsls	r3, r3, #2
+ 1112 00ac FA68     		ldr	r2, [r7, #12]
+ 1113 00ae 1344     		add	r3, r3, r2
+ 1114 00b0 7A69     		ldr	r2, [r7, #20]
+ 1115 00b2 1A60     		str	r2, [r3]
+ 205:spo2_algorithm.c ****         // for flat peaks, peak location is left edge
+ 206:spo2_algorithm.c ****         i += n_width+1;
+ 1116              		.loc 1 206 0
+ 1117 00b4 3B69     		ldr	r3, [r7, #16]
+ 1118 00b6 0133     		adds	r3, r3, #1
+ 1119 00b8 7A69     		ldr	r2, [r7, #20]
+ 1120 00ba 1344     		add	r3, r3, r2
+ 1121 00bc 7B61     		str	r3, [r7, #20]
+ 1122 00be 03E0     		b	.L50
+ 1123              	.L49:
+ 207:spo2_algorithm.c ****       }
+ 208:spo2_algorithm.c ****       else
+ 209:spo2_algorithm.c ****         i += n_width;
+ 1124              		.loc 1 209 0
+ 1125 00c0 7A69     		ldr	r2, [r7, #20]
+ 1126 00c2 3B69     		ldr	r3, [r7, #16]
+ 1127 00c4 1344     		add	r3, r3, r2
+ 1128 00c6 7B61     		str	r3, [r7, #20]
+ 1129              	.L50:
+ 203:spo2_algorithm.c ****         pn_locs[(*n_npks)++] = i;    
+ 1130              		.loc 1 203 0
+ 1131 00c8 02E0     		b	.L44
+ 1132              	.L45:
+ 210:spo2_algorithm.c ****     }
+ 211:spo2_algorithm.c ****     else
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 25
+
+
+ 212:spo2_algorithm.c ****       i++;
+ 1133              		.loc 1 212 0
+ 1134 00ca 7B69     		ldr	r3, [r7, #20]
+ 1135 00cc 0133     		adds	r3, r3, #1
+ 1136 00ce 7B61     		str	r3, [r7, #20]
+ 1137              	.L44:
+ 198:spo2_algorithm.c ****     if (pn_x[i] > n_min_height && pn_x[i] > pn_x[i-1]){      // find left edge of potential peaks
+ 1138              		.loc 1 198 0
+ 1139 00d0 3B68     		ldr	r3, [r7]
+ 1140 00d2 5A1E     		subs	r2, r3, #1
+ 1141 00d4 7B69     		ldr	r3, [r7, #20]
+ 1142 00d6 9A42     		cmp	r2, r3
+ 1143 00d8 9FDC     		bgt	.L51
+ 213:spo2_algorithm.c ****   }
+ 214:spo2_algorithm.c **** }
+ 1144              		.loc 1 214 0
+ 1145 00da 00BF     		nop
+ 1146 00dc 1C37     		adds	r7, r7, #28
+ 1147              		.cfi_def_cfa_offset 4
+ 1148 00de BD46     		mov	sp, r7
+ 1149              		.cfi_def_cfa_register 13
+ 1150              		@ sp needed
+ 1151 00e0 5DF8047B 		ldr	r7, [sp], #4
+ 1152              		.cfi_restore 7
+ 1153              		.cfi_def_cfa_offset 0
+ 1154 00e4 7047     		bx	lr
+ 1155              		.cfi_endproc
+ 1156              	.LFE2:
+ 1157              		.size	maxim_peaks_above_min_height, .-maxim_peaks_above_min_height
+ 1158 00e6 00BF     		.section	.text.maxim_remove_close_peaks,"ax",%progbits
+ 1159              		.align	2
+ 1160              		.global	maxim_remove_close_peaks
+ 1161              		.thumb
+ 1162              		.thumb_func
+ 1163              		.type	maxim_remove_close_peaks, %function
+ 1164              	maxim_remove_close_peaks:
+ 1165              	.LFB3:
+ 215:spo2_algorithm.c **** 
+ 216:spo2_algorithm.c **** void maxim_remove_close_peaks(int32_t *pn_locs, int32_t *pn_npks, int32_t *pn_x, int32_t n_min_dist
+ 217:spo2_algorithm.c **** /**
+ 218:spo2_algorithm.c **** * \brief        Remove peaks
+ 219:spo2_algorithm.c **** * \par          Details
+ 220:spo2_algorithm.c **** *               Remove peaks separated by less than MIN_DISTANCE
+ 221:spo2_algorithm.c **** *
+ 222:spo2_algorithm.c **** * \retval       None
+ 223:spo2_algorithm.c **** */
+ 224:spo2_algorithm.c **** {
+ 1166              		.loc 1 224 0
+ 1167              		.cfi_startproc
+ 1168              		@ args = 0, pretend = 0, frame = 32
+ 1169              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1170 0000 80B5     		push	{r7, lr}
+ 1171              		.cfi_def_cfa_offset 8
+ 1172              		.cfi_offset 7, -8
+ 1173              		.cfi_offset 14, -4
+ 1174 0002 88B0     		sub	sp, sp, #32
+ 1175              		.cfi_def_cfa_offset 40
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 26
+
+
+ 1176 0004 00AF     		add	r7, sp, #0
+ 1177              		.cfi_def_cfa_register 7
+ 1178 0006 F860     		str	r0, [r7, #12]
+ 1179 0008 B960     		str	r1, [r7, #8]
+ 1180 000a 7A60     		str	r2, [r7, #4]
+ 1181 000c 3B60     		str	r3, [r7]
+ 225:spo2_algorithm.c ****     
+ 226:spo2_algorithm.c ****   int32_t i, j, n_old_npks, n_dist;
+ 227:spo2_algorithm.c ****     
+ 228:spo2_algorithm.c ****   /* Order peaks from large to small */
+ 229:spo2_algorithm.c ****   maxim_sort_indices_descend( pn_x, pn_locs, *pn_npks );
+ 1182              		.loc 1 229 0
+ 1183 000e BB68     		ldr	r3, [r7, #8]
+ 1184 0010 1B68     		ldr	r3, [r3]
+ 1185 0012 1A46     		mov	r2, r3
+ 1186 0014 F968     		ldr	r1, [r7, #12]
+ 1187 0016 7868     		ldr	r0, [r7, #4]
+ 1188 0018 FFF7FEFF 		bl	maxim_sort_indices_descend
+ 230:spo2_algorithm.c **** 
+ 231:spo2_algorithm.c ****   for ( i = -1; i < *pn_npks; i++ ){
+ 1189              		.loc 1 231 0
+ 1190 001c 4FF0FF33 		mov	r3, #-1
+ 1191 0020 FB61     		str	r3, [r7, #28]
+ 1192 0022 3EE0     		b	.L53
+ 1193              	.L60:
+ 232:spo2_algorithm.c ****     n_old_npks = *pn_npks;
+ 1194              		.loc 1 232 0
+ 1195 0024 BB68     		ldr	r3, [r7, #8]
+ 1196 0026 1B68     		ldr	r3, [r3]
+ 1197 0028 7B61     		str	r3, [r7, #20]
+ 233:spo2_algorithm.c ****     *pn_npks = i+1;
+ 1198              		.loc 1 233 0
+ 1199 002a FB69     		ldr	r3, [r7, #28]
+ 1200 002c 5A1C     		adds	r2, r3, #1
+ 1201 002e BB68     		ldr	r3, [r7, #8]
+ 1202 0030 1A60     		str	r2, [r3]
+ 234:spo2_algorithm.c ****     for ( j = i+1; j < n_old_npks; j++ ){
+ 1203              		.loc 1 234 0
+ 1204 0032 FB69     		ldr	r3, [r7, #28]
+ 1205 0034 0133     		adds	r3, r3, #1
+ 1206 0036 BB61     		str	r3, [r7, #24]
+ 1207 0038 2CE0     		b	.L54
+ 1208              	.L59:
+ 235:spo2_algorithm.c ****       n_dist =  pn_locs[j] - ( i == -1 ? -1 : pn_locs[i] ); // lag-zero peak of autocorr is at inde
+ 1209              		.loc 1 235 0
+ 1210 003a BB69     		ldr	r3, [r7, #24]
+ 1211 003c 9B00     		lsls	r3, r3, #2
+ 1212 003e FA68     		ldr	r2, [r7, #12]
+ 1213 0040 1344     		add	r3, r3, r2
+ 1214 0042 1A68     		ldr	r2, [r3]
+ 1215 0044 FB69     		ldr	r3, [r7, #28]
+ 1216 0046 B3F1FF3F 		cmp	r3, #-1
+ 1217 004a 05D0     		beq	.L55
+ 1218              		.loc 1 235 0 is_stmt 0 discriminator 1
+ 1219 004c FB69     		ldr	r3, [r7, #28]
+ 1220 004e 9B00     		lsls	r3, r3, #2
+ 1221 0050 F968     		ldr	r1, [r7, #12]
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 27
+
+
+ 1222 0052 0B44     		add	r3, r3, r1
+ 1223 0054 1B68     		ldr	r3, [r3]
+ 1224 0056 01E0     		b	.L56
+ 1225              	.L55:
+ 1226              		.loc 1 235 0 discriminator 2
+ 1227 0058 4FF0FF33 		mov	r3, #-1
+ 1228              	.L56:
+ 1229              		.loc 1 235 0 discriminator 4
+ 1230 005c D31A     		subs	r3, r2, r3
+ 1231 005e 3B61     		str	r3, [r7, #16]
+ 236:spo2_algorithm.c ****       if ( n_dist > n_min_distance || n_dist < -n_min_distance )
+ 1232              		.loc 1 236 0 is_stmt 1 discriminator 4
+ 1233 0060 3A69     		ldr	r2, [r7, #16]
+ 1234 0062 3B68     		ldr	r3, [r7]
+ 1235 0064 9A42     		cmp	r2, r3
+ 1236 0066 04DC     		bgt	.L57
+ 1237              		.loc 1 236 0 is_stmt 0 discriminator 1
+ 1238 0068 3B68     		ldr	r3, [r7]
+ 1239 006a 5A42     		negs	r2, r3
+ 1240 006c 3B69     		ldr	r3, [r7, #16]
+ 1241 006e 9A42     		cmp	r2, r3
+ 1242 0070 0DDD     		ble	.L58
+ 1243              	.L57:
+ 237:spo2_algorithm.c ****         pn_locs[(*pn_npks)++] = pn_locs[j];
+ 1244              		.loc 1 237 0 is_stmt 1
+ 1245 0072 BB68     		ldr	r3, [r7, #8]
+ 1246 0074 1B68     		ldr	r3, [r3]
+ 1247 0076 591C     		adds	r1, r3, #1
+ 1248 0078 BA68     		ldr	r2, [r7, #8]
+ 1249 007a 1160     		str	r1, [r2]
+ 1250 007c 9B00     		lsls	r3, r3, #2
+ 1251 007e FA68     		ldr	r2, [r7, #12]
+ 1252 0080 1344     		add	r3, r3, r2
+ 1253 0082 BA69     		ldr	r2, [r7, #24]
+ 1254 0084 9200     		lsls	r2, r2, #2
+ 1255 0086 F968     		ldr	r1, [r7, #12]
+ 1256 0088 0A44     		add	r2, r2, r1
+ 1257 008a 1268     		ldr	r2, [r2]
+ 1258 008c 1A60     		str	r2, [r3]
+ 1259              	.L58:
+ 234:spo2_algorithm.c ****       n_dist =  pn_locs[j] - ( i == -1 ? -1 : pn_locs[i] ); // lag-zero peak of autocorr is at inde
+ 1260              		.loc 1 234 0 discriminator 2
+ 1261 008e BB69     		ldr	r3, [r7, #24]
+ 1262 0090 0133     		adds	r3, r3, #1
+ 1263 0092 BB61     		str	r3, [r7, #24]
+ 1264              	.L54:
+ 234:spo2_algorithm.c ****       n_dist =  pn_locs[j] - ( i == -1 ? -1 : pn_locs[i] ); // lag-zero peak of autocorr is at inde
+ 1265              		.loc 1 234 0 is_stmt 0 discriminator 1
+ 1266 0094 BA69     		ldr	r2, [r7, #24]
+ 1267 0096 7B69     		ldr	r3, [r7, #20]
+ 1268 0098 9A42     		cmp	r2, r3
+ 1269 009a CEDB     		blt	.L59
+ 231:spo2_algorithm.c ****     n_old_npks = *pn_npks;
+ 1270              		.loc 1 231 0 is_stmt 1 discriminator 2
+ 1271 009c FB69     		ldr	r3, [r7, #28]
+ 1272 009e 0133     		adds	r3, r3, #1
+ 1273 00a0 FB61     		str	r3, [r7, #28]
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 28
+
+
+ 1274              	.L53:
+ 231:spo2_algorithm.c ****     n_old_npks = *pn_npks;
+ 1275              		.loc 1 231 0 is_stmt 0 discriminator 1
+ 1276 00a2 BB68     		ldr	r3, [r7, #8]
+ 1277 00a4 1A68     		ldr	r2, [r3]
+ 1278 00a6 FB69     		ldr	r3, [r7, #28]
+ 1279 00a8 9A42     		cmp	r2, r3
+ 1280 00aa BBDC     		bgt	.L60
+ 238:spo2_algorithm.c ****     }
+ 239:spo2_algorithm.c ****   }
+ 240:spo2_algorithm.c **** 
+ 241:spo2_algorithm.c ****   // Resort indices int32_to ascending order
+ 242:spo2_algorithm.c ****   maxim_sort_ascend( pn_locs, *pn_npks );
+ 1281              		.loc 1 242 0 is_stmt 1
+ 1282 00ac BB68     		ldr	r3, [r7, #8]
+ 1283 00ae 1B68     		ldr	r3, [r3]
+ 1284 00b0 1946     		mov	r1, r3
+ 1285 00b2 F868     		ldr	r0, [r7, #12]
+ 1286 00b4 FFF7FEFF 		bl	maxim_sort_ascend
+ 243:spo2_algorithm.c **** }
+ 1287              		.loc 1 243 0
+ 1288 00b8 00BF     		nop
+ 1289 00ba 2037     		adds	r7, r7, #32
+ 1290              		.cfi_def_cfa_offset 8
+ 1291 00bc BD46     		mov	sp, r7
+ 1292              		.cfi_def_cfa_register 13
+ 1293              		@ sp needed
+ 1294 00be 80BD     		pop	{r7, pc}
+ 1295              		.cfi_endproc
+ 1296              	.LFE3:
+ 1297              		.size	maxim_remove_close_peaks, .-maxim_remove_close_peaks
+ 1298              		.section	.text.maxim_sort_ascend,"ax",%progbits
+ 1299              		.align	2
+ 1300              		.global	maxim_sort_ascend
+ 1301              		.thumb
+ 1302              		.thumb_func
+ 1303              		.type	maxim_sort_ascend, %function
+ 1304              	maxim_sort_ascend:
+ 1305              	.LFB4:
+ 244:spo2_algorithm.c **** 
+ 245:spo2_algorithm.c **** void maxim_sort_ascend(int32_t  *pn_x, int32_t n_size) 
+ 246:spo2_algorithm.c **** /**
+ 247:spo2_algorithm.c **** * \brief        Sort array
+ 248:spo2_algorithm.c **** * \par          Details
+ 249:spo2_algorithm.c **** *               Sort array in ascending order (insertion sort algorithm)
+ 250:spo2_algorithm.c **** *
+ 251:spo2_algorithm.c **** * \retval       None
+ 252:spo2_algorithm.c **** */
+ 253:spo2_algorithm.c **** {
+ 1306              		.loc 1 253 0
+ 1307              		.cfi_startproc
+ 1308              		@ args = 0, pretend = 0, frame = 24
+ 1309              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1310              		@ link register save eliminated.
+ 1311 0000 80B4     		push	{r7}
+ 1312              		.cfi_def_cfa_offset 4
+ 1313              		.cfi_offset 7, -4
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 29
+
+
+ 1314 0002 87B0     		sub	sp, sp, #28
+ 1315              		.cfi_def_cfa_offset 32
+ 1316 0004 00AF     		add	r7, sp, #0
+ 1317              		.cfi_def_cfa_register 7
+ 1318 0006 7860     		str	r0, [r7, #4]
+ 1319 0008 3960     		str	r1, [r7]
+ 254:spo2_algorithm.c ****   int32_t i, j, n_temp;
+ 255:spo2_algorithm.c ****   for (i = 1; i < n_size; i++) {
+ 1320              		.loc 1 255 0
+ 1321 000a 0123     		movs	r3, #1
+ 1322 000c 7B61     		str	r3, [r7, #20]
+ 1323 000e 2FE0     		b	.L62
+ 1324              	.L66:
+ 256:spo2_algorithm.c ****     n_temp = pn_x[i];
+ 1325              		.loc 1 256 0
+ 1326 0010 7B69     		ldr	r3, [r7, #20]
+ 1327 0012 9B00     		lsls	r3, r3, #2
+ 1328 0014 7A68     		ldr	r2, [r7, #4]
+ 1329 0016 1344     		add	r3, r3, r2
+ 1330 0018 1B68     		ldr	r3, [r3]
+ 1331 001a FB60     		str	r3, [r7, #12]
+ 257:spo2_algorithm.c ****     for (j = i; j > 0 && n_temp < pn_x[j-1]; j--)
+ 1332              		.loc 1 257 0
+ 1333 001c 7B69     		ldr	r3, [r7, #20]
+ 1334 001e 3B61     		str	r3, [r7, #16]
+ 1335 0020 0FE0     		b	.L63
+ 1336              	.L65:
+ 258:spo2_algorithm.c ****         pn_x[j] = pn_x[j-1];
+ 1337              		.loc 1 258 0 discriminator 4
+ 1338 0022 3B69     		ldr	r3, [r7, #16]
+ 1339 0024 9B00     		lsls	r3, r3, #2
+ 1340 0026 7A68     		ldr	r2, [r7, #4]
+ 1341 0028 1A44     		add	r2, r2, r3
+ 1342 002a 3B69     		ldr	r3, [r7, #16]
+ 1343 002c 03F18043 		add	r3, r3, #1073741824
+ 1344 0030 013B     		subs	r3, r3, #1
+ 1345 0032 9B00     		lsls	r3, r3, #2
+ 1346 0034 7968     		ldr	r1, [r7, #4]
+ 1347 0036 0B44     		add	r3, r3, r1
+ 1348 0038 1B68     		ldr	r3, [r3]
+ 1349 003a 1360     		str	r3, [r2]
+ 257:spo2_algorithm.c ****     for (j = i; j > 0 && n_temp < pn_x[j-1]; j--)
+ 1350              		.loc 1 257 0 discriminator 4
+ 1351 003c 3B69     		ldr	r3, [r7, #16]
+ 1352 003e 013B     		subs	r3, r3, #1
+ 1353 0040 3B61     		str	r3, [r7, #16]
+ 1354              	.L63:
+ 257:spo2_algorithm.c ****     for (j = i; j > 0 && n_temp < pn_x[j-1]; j--)
+ 1355              		.loc 1 257 0 is_stmt 0 discriminator 1
+ 1356 0042 3B69     		ldr	r3, [r7, #16]
+ 1357 0044 002B     		cmp	r3, #0
+ 1358 0046 0ADD     		ble	.L64
+ 257:spo2_algorithm.c ****     for (j = i; j > 0 && n_temp < pn_x[j-1]; j--)
+ 1359              		.loc 1 257 0 discriminator 3
+ 1360 0048 3B69     		ldr	r3, [r7, #16]
+ 1361 004a 03F18043 		add	r3, r3, #1073741824
+ 1362 004e 013B     		subs	r3, r3, #1
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 30
+
+
+ 1363 0050 9B00     		lsls	r3, r3, #2
+ 1364 0052 7A68     		ldr	r2, [r7, #4]
+ 1365 0054 1344     		add	r3, r3, r2
+ 1366 0056 1A68     		ldr	r2, [r3]
+ 1367 0058 FB68     		ldr	r3, [r7, #12]
+ 1368 005a 9A42     		cmp	r2, r3
+ 1369 005c E1DC     		bgt	.L65
+ 1370              	.L64:
+ 259:spo2_algorithm.c ****     pn_x[j] = n_temp;
+ 1371              		.loc 1 259 0 is_stmt 1 discriminator 2
+ 1372 005e 3B69     		ldr	r3, [r7, #16]
+ 1373 0060 9B00     		lsls	r3, r3, #2
+ 1374 0062 7A68     		ldr	r2, [r7, #4]
+ 1375 0064 1344     		add	r3, r3, r2
+ 1376 0066 FA68     		ldr	r2, [r7, #12]
+ 1377 0068 1A60     		str	r2, [r3]
+ 255:spo2_algorithm.c ****     n_temp = pn_x[i];
+ 1378              		.loc 1 255 0 discriminator 2
+ 1379 006a 7B69     		ldr	r3, [r7, #20]
+ 1380 006c 0133     		adds	r3, r3, #1
+ 1381 006e 7B61     		str	r3, [r7, #20]
+ 1382              	.L62:
+ 255:spo2_algorithm.c ****     n_temp = pn_x[i];
+ 1383              		.loc 1 255 0 is_stmt 0 discriminator 1
+ 1384 0070 7A69     		ldr	r2, [r7, #20]
+ 1385 0072 3B68     		ldr	r3, [r7]
+ 1386 0074 9A42     		cmp	r2, r3
+ 1387 0076 CBDB     		blt	.L66
+ 260:spo2_algorithm.c ****   }
+ 261:spo2_algorithm.c **** }
+ 1388              		.loc 1 261 0 is_stmt 1
+ 1389 0078 00BF     		nop
+ 1390 007a 1C37     		adds	r7, r7, #28
+ 1391              		.cfi_def_cfa_offset 4
+ 1392 007c BD46     		mov	sp, r7
+ 1393              		.cfi_def_cfa_register 13
+ 1394              		@ sp needed
+ 1395 007e 5DF8047B 		ldr	r7, [sp], #4
+ 1396              		.cfi_restore 7
+ 1397              		.cfi_def_cfa_offset 0
+ 1398 0082 7047     		bx	lr
+ 1399              		.cfi_endproc
+ 1400              	.LFE4:
+ 1401              		.size	maxim_sort_ascend, .-maxim_sort_ascend
+ 1402              		.section	.text.maxim_sort_indices_descend,"ax",%progbits
+ 1403              		.align	2
+ 1404              		.global	maxim_sort_indices_descend
+ 1405              		.thumb
+ 1406              		.thumb_func
+ 1407              		.type	maxim_sort_indices_descend, %function
+ 1408              	maxim_sort_indices_descend:
+ 1409              	.LFB5:
+ 262:spo2_algorithm.c **** 
+ 263:spo2_algorithm.c **** void maxim_sort_indices_descend(  int32_t  *pn_x, int32_t *pn_indx, int32_t n_size)
+ 264:spo2_algorithm.c **** /**
+ 265:spo2_algorithm.c **** * \brief        Sort indices
+ 266:spo2_algorithm.c **** * \par          Details
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 31
+
+
+ 267:spo2_algorithm.c **** *               Sort indices according to descending order (insertion sort algorithm)
+ 268:spo2_algorithm.c **** *
+ 269:spo2_algorithm.c **** * \retval       None
+ 270:spo2_algorithm.c **** */ 
+ 271:spo2_algorithm.c **** {
+ 1410              		.loc 1 271 0
+ 1411              		.cfi_startproc
+ 1412              		@ args = 0, pretend = 0, frame = 32
+ 1413              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1414              		@ link register save eliminated.
+ 1415 0000 80B4     		push	{r7}
+ 1416              		.cfi_def_cfa_offset 4
+ 1417              		.cfi_offset 7, -4
+ 1418 0002 89B0     		sub	sp, sp, #36
+ 1419              		.cfi_def_cfa_offset 40
+ 1420 0004 00AF     		add	r7, sp, #0
+ 1421              		.cfi_def_cfa_register 7
+ 1422 0006 F860     		str	r0, [r7, #12]
+ 1423 0008 B960     		str	r1, [r7, #8]
+ 1424 000a 7A60     		str	r2, [r7, #4]
+ 272:spo2_algorithm.c ****   int32_t i, j, n_temp;
+ 273:spo2_algorithm.c ****   for (i = 1; i < n_size; i++) {
+ 1425              		.loc 1 273 0
+ 1426 000c 0123     		movs	r3, #1
+ 1427 000e FB61     		str	r3, [r7, #28]
+ 1428 0010 37E0     		b	.L68
+ 1429              	.L72:
+ 274:spo2_algorithm.c ****     n_temp = pn_indx[i];
+ 1430              		.loc 1 274 0
+ 1431 0012 FB69     		ldr	r3, [r7, #28]
+ 1432 0014 9B00     		lsls	r3, r3, #2
+ 1433 0016 BA68     		ldr	r2, [r7, #8]
+ 1434 0018 1344     		add	r3, r3, r2
+ 1435 001a 1B68     		ldr	r3, [r3]
+ 1436 001c 7B61     		str	r3, [r7, #20]
+ 275:spo2_algorithm.c ****     for (j = i; j > 0 && pn_x[n_temp] > pn_x[pn_indx[j-1]]; j--)
+ 1437              		.loc 1 275 0
+ 1438 001e FB69     		ldr	r3, [r7, #28]
+ 1439 0020 BB61     		str	r3, [r7, #24]
+ 1440 0022 0FE0     		b	.L69
+ 1441              	.L71:
+ 276:spo2_algorithm.c ****       pn_indx[j] = pn_indx[j-1];
+ 1442              		.loc 1 276 0 discriminator 4
+ 1443 0024 BB69     		ldr	r3, [r7, #24]
+ 1444 0026 9B00     		lsls	r3, r3, #2
+ 1445 0028 BA68     		ldr	r2, [r7, #8]
+ 1446 002a 1A44     		add	r2, r2, r3
+ 1447 002c BB69     		ldr	r3, [r7, #24]
+ 1448 002e 03F18043 		add	r3, r3, #1073741824
+ 1449 0032 013B     		subs	r3, r3, #1
+ 1450 0034 9B00     		lsls	r3, r3, #2
+ 1451 0036 B968     		ldr	r1, [r7, #8]
+ 1452 0038 0B44     		add	r3, r3, r1
+ 1453 003a 1B68     		ldr	r3, [r3]
+ 1454 003c 1360     		str	r3, [r2]
+ 275:spo2_algorithm.c ****     for (j = i; j > 0 && pn_x[n_temp] > pn_x[pn_indx[j-1]]; j--)
+ 1455              		.loc 1 275 0 discriminator 4
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 32
+
+
+ 1456 003e BB69     		ldr	r3, [r7, #24]
+ 1457 0040 013B     		subs	r3, r3, #1
+ 1458 0042 BB61     		str	r3, [r7, #24]
+ 1459              	.L69:
+ 275:spo2_algorithm.c ****     for (j = i; j > 0 && pn_x[n_temp] > pn_x[pn_indx[j-1]]; j--)
+ 1460              		.loc 1 275 0 is_stmt 0 discriminator 1
+ 1461 0044 BB69     		ldr	r3, [r7, #24]
+ 1462 0046 002B     		cmp	r3, #0
+ 1463 0048 12DD     		ble	.L70
+ 275:spo2_algorithm.c ****     for (j = i; j > 0 && pn_x[n_temp] > pn_x[pn_indx[j-1]]; j--)
+ 1464              		.loc 1 275 0 discriminator 3
+ 1465 004a 7B69     		ldr	r3, [r7, #20]
+ 1466 004c 9B00     		lsls	r3, r3, #2
+ 1467 004e FA68     		ldr	r2, [r7, #12]
+ 1468 0050 1344     		add	r3, r3, r2
+ 1469 0052 1A68     		ldr	r2, [r3]
+ 1470 0054 BB69     		ldr	r3, [r7, #24]
+ 1471 0056 03F18043 		add	r3, r3, #1073741824
+ 1472 005a 013B     		subs	r3, r3, #1
+ 1473 005c 9B00     		lsls	r3, r3, #2
+ 1474 005e B968     		ldr	r1, [r7, #8]
+ 1475 0060 0B44     		add	r3, r3, r1
+ 1476 0062 1B68     		ldr	r3, [r3]
+ 1477 0064 9B00     		lsls	r3, r3, #2
+ 1478 0066 F968     		ldr	r1, [r7, #12]
+ 1479 0068 0B44     		add	r3, r3, r1
+ 1480 006a 1B68     		ldr	r3, [r3]
+ 1481 006c 9A42     		cmp	r2, r3
+ 1482 006e D9DC     		bgt	.L71
+ 1483              	.L70:
+ 277:spo2_algorithm.c ****     pn_indx[j] = n_temp;
+ 1484              		.loc 1 277 0 is_stmt 1 discriminator 2
+ 1485 0070 BB69     		ldr	r3, [r7, #24]
+ 1486 0072 9B00     		lsls	r3, r3, #2
+ 1487 0074 BA68     		ldr	r2, [r7, #8]
+ 1488 0076 1344     		add	r3, r3, r2
+ 1489 0078 7A69     		ldr	r2, [r7, #20]
+ 1490 007a 1A60     		str	r2, [r3]
+ 273:spo2_algorithm.c ****     n_temp = pn_indx[i];
+ 1491              		.loc 1 273 0 discriminator 2
+ 1492 007c FB69     		ldr	r3, [r7, #28]
+ 1493 007e 0133     		adds	r3, r3, #1
+ 1494 0080 FB61     		str	r3, [r7, #28]
+ 1495              	.L68:
+ 273:spo2_algorithm.c ****     n_temp = pn_indx[i];
+ 1496              		.loc 1 273 0 is_stmt 0 discriminator 1
+ 1497 0082 FA69     		ldr	r2, [r7, #28]
+ 1498 0084 7B68     		ldr	r3, [r7, #4]
+ 1499 0086 9A42     		cmp	r2, r3
+ 1500 0088 C3DB     		blt	.L72
+ 278:spo2_algorithm.c ****   }
+ 279:spo2_algorithm.c **** }
+ 1501              		.loc 1 279 0 is_stmt 1
+ 1502 008a 00BF     		nop
+ 1503 008c 2437     		adds	r7, r7, #36
+ 1504              		.cfi_def_cfa_offset 4
+ 1505 008e BD46     		mov	sp, r7
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 33
+
+
+ 1506              		.cfi_def_cfa_register 13
+ 1507              		@ sp needed
+ 1508 0090 5DF8047B 		ldr	r7, [sp], #4
+ 1509              		.cfi_restore 7
+ 1510              		.cfi_def_cfa_offset 0
+ 1511 0094 7047     		bx	lr
+ 1512              		.cfi_endproc
+ 1513              	.LFE5:
+ 1514              		.size	maxim_sort_indices_descend, .-maxim_sort_indices_descend
+ 1515 0096 00BF     		.text
+ 1516              	.Letext0:
+ 1517              		.file 2 "c:\\program files (x86)\\cypress\\psoc creator\\4.4\\psoc creator\\import\\gnu\\arm\\5.4.
+ 1518              		.file 3 "c:\\program files (x86)\\cypress\\psoc creator\\4.4\\psoc creator\\import\\gnu\\arm\\5.4.
+ 1519              		.section	.debug_info,"",%progbits
+ 1520              	.Ldebug_info0:
+ 1521 0000 46050000 		.4byte	0x546
+ 1522 0004 0400     		.2byte	0x4
+ 1523 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 1524 000a 04       		.byte	0x4
+ 1525 000b 01       		.uleb128 0x1
+ 1526 000c 73010000 		.4byte	.LASF66
+ 1527 0010 0C       		.byte	0xc
+ 1528 0011 58000000 		.4byte	.LASF67
+ 1529 0015 D2000000 		.4byte	.LASF68
+ 1530 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 1531 001d 00000000 		.4byte	0
+ 1532 0021 00000000 		.4byte	.Ldebug_line0
+ 1533 0025 02       		.uleb128 0x2
+ 1534 0026 19030000 		.4byte	.LASF0
+ 1535 002a 02       		.byte	0x2
+ 1536 002b 1B       		.byte	0x1b
+ 1537 002c 30000000 		.4byte	0x30
+ 1538 0030 03       		.uleb128 0x3
+ 1539 0031 01       		.byte	0x1
+ 1540 0032 06       		.byte	0x6
+ 1541 0033 B5020000 		.4byte	.LASF2
+ 1542 0037 02       		.uleb128 0x2
+ 1543 0038 4C020000 		.4byte	.LASF1
+ 1544 003c 02       		.byte	0x2
+ 1545 003d 1D       		.byte	0x1d
+ 1546 003e 42000000 		.4byte	0x42
+ 1547 0042 03       		.uleb128 0x3
+ 1548 0043 01       		.byte	0x1
+ 1549 0044 08       		.byte	0x8
+ 1550 0045 8A020000 		.4byte	.LASF3
+ 1551 0049 03       		.uleb128 0x3
+ 1552 004a 02       		.byte	0x2
+ 1553 004b 05       		.byte	0x5
+ 1554 004c 27000000 		.4byte	.LASF4
+ 1555 0050 02       		.uleb128 0x2
+ 1556 0051 B7000000 		.4byte	.LASF5
+ 1557 0055 02       		.byte	0x2
+ 1558 0056 2B       		.byte	0x2b
+ 1559 0057 5B000000 		.4byte	0x5b
+ 1560 005b 03       		.uleb128 0x3
+ 1561 005c 02       		.byte	0x2
+ 1562 005d 07       		.byte	0x7
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 34
+
+
+ 1563 005e 06030000 		.4byte	.LASF6
+ 1564 0062 02       		.uleb128 0x2
+ 1565 0063 C2030000 		.4byte	.LASF7
+ 1566 0067 02       		.byte	0x2
+ 1567 0068 3F       		.byte	0x3f
+ 1568 0069 6D000000 		.4byte	0x6d
+ 1569 006d 03       		.uleb128 0x3
+ 1570 006e 04       		.byte	0x4
+ 1571 006f 05       		.byte	0x5
+ 1572 0070 26020000 		.4byte	.LASF8
+ 1573 0074 02       		.uleb128 0x2
+ 1574 0075 7F000000 		.4byte	.LASF9
+ 1575 0079 02       		.byte	0x2
+ 1576 007a 41       		.byte	0x41
+ 1577 007b 7F000000 		.4byte	0x7f
+ 1578 007f 03       		.uleb128 0x3
+ 1579 0080 04       		.byte	0x4
+ 1580 0081 07       		.byte	0x7
+ 1581 0082 4D030000 		.4byte	.LASF10
+ 1582 0086 03       		.uleb128 0x3
+ 1583 0087 08       		.byte	0x8
+ 1584 0088 05       		.byte	0x5
+ 1585 0089 5E010000 		.4byte	.LASF11
+ 1586 008d 03       		.uleb128 0x3
+ 1587 008e 08       		.byte	0x8
+ 1588 008f 07       		.byte	0x7
+ 1589 0090 C1020000 		.4byte	.LASF12
+ 1590 0094 04       		.uleb128 0x4
+ 1591 0095 04       		.byte	0x4
+ 1592 0096 05       		.byte	0x5
+ 1593 0097 696E7400 		.ascii	"int\000"
+ 1594 009b 03       		.uleb128 0x3
+ 1595 009c 04       		.byte	0x4
+ 1596 009d 07       		.byte	0x7
+ 1597 009e E1020000 		.4byte	.LASF13
+ 1598 00a2 02       		.uleb128 0x2
+ 1599 00a3 20000000 		.4byte	.LASF14
+ 1600 00a7 03       		.byte	0x3
+ 1601 00a8 14       		.byte	0x14
+ 1602 00a9 25000000 		.4byte	0x25
+ 1603 00ad 02       		.uleb128 0x2
+ 1604 00ae CA000000 		.4byte	.LASF15
+ 1605 00b2 03       		.byte	0x3
+ 1606 00b3 18       		.byte	0x18
+ 1607 00b4 37000000 		.4byte	0x37
+ 1608 00b8 02       		.uleb128 0x2
+ 1609 00b9 EE020000 		.4byte	.LASF16
+ 1610 00bd 03       		.byte	0x3
+ 1611 00be 24       		.byte	0x24
+ 1612 00bf 50000000 		.4byte	0x50
+ 1613 00c3 02       		.uleb128 0x2
+ 1614 00c4 22030000 		.4byte	.LASF17
+ 1615 00c8 03       		.byte	0x3
+ 1616 00c9 2C       		.byte	0x2c
+ 1617 00ca 62000000 		.4byte	0x62
+ 1618 00ce 02       		.uleb128 0x2
+ 1619 00cf D8020000 		.4byte	.LASF18
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 35
+
+
+ 1620 00d3 03       		.byte	0x3
+ 1621 00d4 30       		.byte	0x30
+ 1622 00d5 74000000 		.4byte	0x74
+ 1623 00d9 05       		.uleb128 0x5
+ 1624 00da 5F030000 		.4byte	.LASF46
+ 1625 00de 01       		.byte	0x1
+ 1626 00df 20       		.byte	0x20
+ 1627 00e0 00000000 		.4byte	.LFB0
+ 1628 00e4 48060000 		.4byte	.LFE0-.LFB0
+ 1629 00e8 01       		.uleb128 0x1
+ 1630 00e9 9C       		.byte	0x9c
+ 1631 00ea 7E020000 		.4byte	0x27e
+ 1632 00ee 06       		.uleb128 0x6
+ 1633 00ef 3C040000 		.4byte	.LASF19
+ 1634 00f3 01       		.byte	0x1
+ 1635 00f4 20       		.byte	0x20
+ 1636 00f5 7E020000 		.4byte	0x27e
+ 1637 00f9 03       		.uleb128 0x3
+ 1638 00fa 91       		.byte	0x91
+ 1639 00fb D47E     		.sleb128 -172
+ 1640 00fd 06       		.uleb128 0x6
+ 1641 00fe 17040000 		.4byte	.LASF20
+ 1642 0102 01       		.byte	0x1
+ 1643 0103 20       		.byte	0x20
+ 1644 0104 C3000000 		.4byte	0xc3
+ 1645 0108 03       		.uleb128 0x3
+ 1646 0109 91       		.byte	0x91
+ 1647 010a D07E     		.sleb128 -176
+ 1648 010c 06       		.uleb128 0x6
+ 1649 010d 4F010000 		.4byte	.LASF21
+ 1650 0111 01       		.byte	0x1
+ 1651 0112 20       		.byte	0x20
+ 1652 0113 7E020000 		.4byte	0x27e
+ 1653 0117 03       		.uleb128 0x3
+ 1654 0118 91       		.byte	0x91
+ 1655 0119 CC7E     		.sleb128 -180
+ 1656 011b 06       		.uleb128 0x6
+ 1657 011c AD020000 		.4byte	.LASF22
+ 1658 0120 01       		.byte	0x1
+ 1659 0121 20       		.byte	0x20
+ 1660 0122 84020000 		.4byte	0x284
+ 1661 0126 03       		.uleb128 0x3
+ 1662 0127 91       		.byte	0x91
+ 1663 0128 C87E     		.sleb128 -184
+ 1664 012a 06       		.uleb128 0x6
+ 1665 012b 2F020000 		.4byte	.LASF23
+ 1666 012f 01       		.byte	0x1
+ 1667 0130 20       		.byte	0x20
+ 1668 0131 8A020000 		.4byte	0x28a
+ 1669 0135 02       		.uleb128 0x2
+ 1670 0136 91       		.byte	0x91
+ 1671 0137 00       		.sleb128 0
+ 1672 0138 06       		.uleb128 0x6
+ 1673 0139 3E020000 		.4byte	.LASF24
+ 1674 013d 01       		.byte	0x1
+ 1675 013e 21       		.byte	0x21
+ 1676 013f 84020000 		.4byte	0x284
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 36
+
+
+ 1677 0143 02       		.uleb128 0x2
+ 1678 0144 91       		.byte	0x91
+ 1679 0145 04       		.sleb128 4
+ 1680 0146 06       		.uleb128 0x6
+ 1681 0147 3A000000 		.4byte	.LASF25
+ 1682 014b 01       		.byte	0x1
+ 1683 014c 21       		.byte	0x21
+ 1684 014d 8A020000 		.4byte	0x28a
+ 1685 0151 02       		.uleb128 0x2
+ 1686 0152 91       		.byte	0x91
+ 1687 0153 08       		.sleb128 8
+ 1688 0154 07       		.uleb128 0x7
+ 1689 0155 42030000 		.4byte	.LASF26
+ 1690 0159 01       		.byte	0x1
+ 1691 015a 34       		.byte	0x34
+ 1692 015b CE000000 		.4byte	0xce
+ 1693 015f 02       		.uleb128 0x2
+ 1694 0160 91       		.byte	0x91
+ 1695 0161 74       		.sleb128 -12
+ 1696 0162 08       		.uleb128 0x8
+ 1697 0163 6B00     		.ascii	"k\000"
+ 1698 0165 01       		.byte	0x1
+ 1699 0166 35       		.byte	0x35
+ 1700 0167 C3000000 		.4byte	0xc3
+ 1701 016b 02       		.uleb128 0x2
+ 1702 016c 91       		.byte	0x91
+ 1703 016d 70       		.sleb128 -16
+ 1704 016e 07       		.uleb128 0x7
+ 1705 016f 3F010000 		.4byte	.LASF27
+ 1706 0173 01       		.byte	0x1
+ 1707 0174 35       		.byte	0x35
+ 1708 0175 C3000000 		.4byte	0xc3
+ 1709 0179 02       		.uleb128 0x2
+ 1710 017a 91       		.byte	0x91
+ 1711 017b 6C       		.sleb128 -20
+ 1712 017c 08       		.uleb128 0x8
+ 1713 017d 6900     		.ascii	"i\000"
+ 1714 017f 01       		.byte	0x1
+ 1715 0180 36       		.byte	0x36
+ 1716 0181 C3000000 		.4byte	0xc3
+ 1717 0185 02       		.uleb128 0x2
+ 1718 0186 91       		.byte	0x91
+ 1719 0187 68       		.sleb128 -24
+ 1720 0188 07       		.uleb128 0x7
+ 1721 0189 56020000 		.4byte	.LASF28
+ 1722 018d 01       		.byte	0x1
+ 1723 018e 36       		.byte	0x36
+ 1724 018f C3000000 		.4byte	0xc3
+ 1725 0193 02       		.uleb128 0x2
+ 1726 0194 91       		.byte	0x91
+ 1727 0195 48       		.sleb128 -56
+ 1728 0196 07       		.uleb128 0x7
+ 1729 0197 DE030000 		.4byte	.LASF29
+ 1730 019b 01       		.byte	0x1
+ 1731 019c 36       		.byte	0x36
+ 1732 019d C3000000 		.4byte	0xc3
+ 1733 01a1 03       		.uleb128 0x3
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 37
+
+
+ 1734 01a2 91       		.byte	0x91
+ 1735 01a3 B47F     		.sleb128 -76
+ 1736 01a5 07       		.uleb128 0x7
+ 1737 01a6 86030000 		.4byte	.LASF30
+ 1738 01aa 01       		.byte	0x1
+ 1739 01ab 37       		.byte	0x37
+ 1740 01ac C3000000 		.4byte	0xc3
+ 1741 01b0 02       		.uleb128 0x2
+ 1742 01b1 91       		.byte	0x91
+ 1743 01b2 64       		.sleb128 -28
+ 1744 01b3 07       		.uleb128 0x7
+ 1745 01b4 D7030000 		.4byte	.LASF31
+ 1746 01b8 01       		.byte	0x1
+ 1747 01b9 37       		.byte	0x37
+ 1748 01ba C3000000 		.4byte	0xc3
+ 1749 01be 03       		.uleb128 0x3
+ 1750 01bf 91       		.byte	0x91
+ 1751 01c0 AC7F     		.sleb128 -84
+ 1752 01c2 07       		.uleb128 0x7
+ 1753 01c3 12010000 		.4byte	.LASF32
+ 1754 01c7 01       		.byte	0x1
+ 1755 01c8 38       		.byte	0x38
+ 1756 01c9 90020000 		.4byte	0x290
+ 1757 01cd 03       		.uleb128 0x3
+ 1758 01ce 91       		.byte	0x91
+ 1759 01cf F07E     		.sleb128 -144
+ 1760 01d1 07       		.uleb128 0x7
+ 1761 01d2 2B010000 		.4byte	.LASF33
+ 1762 01d6 01       		.byte	0x1
+ 1763 01d7 39       		.byte	0x39
+ 1764 01d8 C3000000 		.4byte	0xc3
+ 1765 01dc 02       		.uleb128 0x2
+ 1766 01dd 91       		.byte	0x91
+ 1767 01de 60       		.sleb128 -32
+ 1768 01df 07       		.uleb128 0x7
+ 1769 01e0 19000000 		.4byte	.LASF34
+ 1770 01e4 01       		.byte	0x1
+ 1771 01e5 3B       		.byte	0x3b
+ 1772 01e6 C3000000 		.4byte	0xc3
+ 1773 01ea 02       		.uleb128 0x2
+ 1774 01eb 91       		.byte	0x91
+ 1775 01ec 44       		.sleb128 -60
+ 1776 01ed 07       		.uleb128 0x7
+ 1777 01ee 8C030000 		.4byte	.LASF35
+ 1778 01f2 01       		.byte	0x1
+ 1779 01f3 3B       		.byte	0x3b
+ 1780 01f4 C3000000 		.4byte	0xc3
+ 1781 01f8 02       		.uleb128 0x2
+ 1782 01f9 91       		.byte	0x91
+ 1783 01fa 40       		.sleb128 -64
+ 1784 01fb 07       		.uleb128 0x7
+ 1785 01fc 73000000 		.4byte	.LASF36
+ 1786 0200 01       		.byte	0x1
+ 1787 0201 3C       		.byte	0x3c
+ 1788 0202 C3000000 		.4byte	0xc3
+ 1789 0206 03       		.uleb128 0x3
+ 1790 0207 91       		.byte	0x91
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 38
+
+
+ 1791 0208 B07F     		.sleb128 -80
+ 1792 020a 07       		.uleb128 0x7
+ 1793 020b B2030000 		.4byte	.LASF37
+ 1794 020f 01       		.byte	0x1
+ 1795 0210 3D       		.byte	0x3d
+ 1796 0211 C3000000 		.4byte	0xc3
+ 1797 0215 02       		.uleb128 0x2
+ 1798 0216 91       		.byte	0x91
+ 1799 0217 5C       		.sleb128 -36
+ 1800 0218 07       		.uleb128 0x7
+ 1801 0219 CC030000 		.4byte	.LASF38
+ 1802 021d 01       		.byte	0x1
+ 1803 021e 3D       		.byte	0x3d
+ 1804 021f C3000000 		.4byte	0xc3
+ 1805 0223 02       		.uleb128 0x2
+ 1806 0224 91       		.byte	0x91
+ 1807 0225 58       		.sleb128 -40
+ 1808 0226 07       		.uleb128 0x7
+ 1809 0227 7B020000 		.4byte	.LASF39
+ 1810 022b 01       		.byte	0x1
+ 1811 022c 3E       		.byte	0x3e
+ 1812 022d C3000000 		.4byte	0xc3
+ 1813 0231 02       		.uleb128 0x2
+ 1814 0232 91       		.byte	0x91
+ 1815 0233 54       		.sleb128 -44
+ 1816 0234 07       		.uleb128 0x7
+ 1817 0235 93030000 		.4byte	.LASF40
+ 1818 0239 01       		.byte	0x1
+ 1819 023a 3F       		.byte	0x3f
+ 1820 023b C3000000 		.4byte	0xc3
+ 1821 023f 02       		.uleb128 0x2
+ 1822 0240 91       		.byte	0x91
+ 1823 0241 50       		.sleb128 -48
+ 1824 0242 07       		.uleb128 0x7
+ 1825 0243 39030000 		.4byte	.LASF41
+ 1826 0247 01       		.byte	0x1
+ 1827 0248 40       		.byte	0x40
+ 1828 0249 A7020000 		.4byte	0x2a7
+ 1829 024d 03       		.uleb128 0x3
+ 1830 024e 91       		.byte	0x91
+ 1831 024f DC7E     		.sleb128 -164
+ 1832 0251 07       		.uleb128 0x7
+ 1833 0252 A2030000 		.4byte	.LASF42
+ 1834 0256 01       		.byte	0x1
+ 1835 0257 40       		.byte	0x40
+ 1836 0258 C3000000 		.4byte	0xc3
+ 1837 025c 02       		.uleb128 0x2
+ 1838 025d 91       		.byte	0x91
+ 1839 025e 4C       		.sleb128 -52
+ 1840 025f 07       		.uleb128 0x7
+ 1841 0260 10040000 		.4byte	.LASF43
+ 1842 0264 01       		.byte	0x1
+ 1843 0265 41       		.byte	0x41
+ 1844 0266 C3000000 		.4byte	0xc3
+ 1845 026a 03       		.uleb128 0x3
+ 1846 026b 91       		.byte	0x91
+ 1847 026c BC7F     		.sleb128 -68
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 39
+
+
+ 1848 026e 07       		.uleb128 0x7
+ 1849 026f 08040000 		.4byte	.LASF44
+ 1850 0273 01       		.byte	0x1
+ 1851 0274 41       		.byte	0x41
+ 1852 0275 C3000000 		.4byte	0xc3
+ 1853 0279 03       		.uleb128 0x3
+ 1854 027a 91       		.byte	0x91
+ 1855 027b B87F     		.sleb128 -72
+ 1856 027d 00       		.byte	0
+ 1857 027e 09       		.uleb128 0x9
+ 1858 027f 04       		.byte	0x4
+ 1859 0280 B8000000 		.4byte	0xb8
+ 1860 0284 09       		.uleb128 0x9
+ 1861 0285 04       		.byte	0x4
+ 1862 0286 C3000000 		.4byte	0xc3
+ 1863 028a 09       		.uleb128 0x9
+ 1864 028b 04       		.byte	0x4
+ 1865 028c A2000000 		.4byte	0xa2
+ 1866 0290 0A       		.uleb128 0xa
+ 1867 0291 C3000000 		.4byte	0xc3
+ 1868 0295 A0020000 		.4byte	0x2a0
+ 1869 0299 0B       		.uleb128 0xb
+ 1870 029a A0020000 		.4byte	0x2a0
+ 1871 029e 0E       		.byte	0xe
+ 1872 029f 00       		.byte	0
+ 1873 02a0 03       		.uleb128 0x3
+ 1874 02a1 04       		.byte	0x4
+ 1875 02a2 07       		.byte	0x7
+ 1876 02a3 31000000 		.4byte	.LASF45
+ 1877 02a7 0A       		.uleb128 0xa
+ 1878 02a8 C3000000 		.4byte	0xc3
+ 1879 02ac B7020000 		.4byte	0x2b7
+ 1880 02b0 0B       		.uleb128 0xb
+ 1881 02b1 A0020000 		.4byte	0x2a0
+ 1882 02b5 04       		.byte	0x4
+ 1883 02b6 00       		.byte	0
+ 1884 02b7 05       		.uleb128 0x5
+ 1885 02b8 47000000 		.4byte	.LASF47
+ 1886 02bc 01       		.byte	0x1
+ 1887 02bd AC       		.byte	0xac
+ 1888 02be 00000000 		.4byte	.LFB1
+ 1889 02c2 42000000 		.4byte	.LFE1-.LFB1
+ 1890 02c6 01       		.uleb128 0x1
+ 1891 02c7 9C       		.byte	0x9c
+ 1892 02c8 2F030000 		.4byte	0x32f
+ 1893 02cc 06       		.uleb128 0x6
+ 1894 02cd 34040000 		.4byte	.LASF48
+ 1895 02d1 01       		.byte	0x1
+ 1896 02d2 AC       		.byte	0xac
+ 1897 02d3 84020000 		.4byte	0x284
+ 1898 02d7 02       		.uleb128 0x2
+ 1899 02d8 91       		.byte	0x91
+ 1900 02d9 74       		.sleb128 -12
+ 1901 02da 06       		.uleb128 0x6
+ 1902 02db D7030000 		.4byte	.LASF31
+ 1903 02df 01       		.byte	0x1
+ 1904 02e0 AC       		.byte	0xac
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 40
+
+
+ 1905 02e1 84020000 		.4byte	0x284
+ 1906 02e5 02       		.uleb128 0x2
+ 1907 02e6 91       		.byte	0x91
+ 1908 02e7 70       		.sleb128 -16
+ 1909 02e8 06       		.uleb128 0x6
+ 1910 02e9 BD030000 		.4byte	.LASF49
+ 1911 02ed 01       		.byte	0x1
+ 1912 02ee AC       		.byte	0xac
+ 1913 02ef 84020000 		.4byte	0x284
+ 1914 02f3 02       		.uleb128 0x2
+ 1915 02f4 91       		.byte	0x91
+ 1916 02f5 6C       		.sleb128 -20
+ 1917 02f6 06       		.uleb128 0x6
+ 1918 02f7 4A040000 		.4byte	.LASF50
+ 1919 02fb 01       		.byte	0x1
+ 1920 02fc AC       		.byte	0xac
+ 1921 02fd C3000000 		.4byte	0xc3
+ 1922 0301 02       		.uleb128 0x2
+ 1923 0302 91       		.byte	0x91
+ 1924 0303 68       		.sleb128 -24
+ 1925 0304 06       		.uleb128 0x6
+ 1926 0305 A0020000 		.4byte	.LASF51
+ 1927 0309 01       		.byte	0x1
+ 1928 030a AC       		.byte	0xac
+ 1929 030b C3000000 		.4byte	0xc3
+ 1930 030f 02       		.uleb128 0x2
+ 1931 0310 91       		.byte	0x91
+ 1932 0311 00       		.sleb128 0
+ 1933 0312 06       		.uleb128 0x6
+ 1934 0313 F7020000 		.4byte	.LASF52
+ 1935 0317 01       		.byte	0x1
+ 1936 0318 AC       		.byte	0xac
+ 1937 0319 C3000000 		.4byte	0xc3
+ 1938 031d 02       		.uleb128 0x2
+ 1939 031e 91       		.byte	0x91
+ 1940 031f 04       		.sleb128 4
+ 1941 0320 06       		.uleb128 0x6
+ 1942 0321 69000000 		.4byte	.LASF53
+ 1943 0325 01       		.byte	0x1
+ 1944 0326 AC       		.byte	0xac
+ 1945 0327 C3000000 		.4byte	0xc3
+ 1946 032b 02       		.uleb128 0x2
+ 1947 032c 91       		.byte	0x91
+ 1948 032d 08       		.sleb128 8
+ 1949 032e 00       		.byte	0
+ 1950 032f 0C       		.uleb128 0xc
+ 1951 0330 EB030000 		.4byte	.LASF54
+ 1952 0334 01       		.byte	0x1
+ 1953 0335 BA       		.byte	0xba
+ 1954 0336 00000000 		.4byte	.LFB2
+ 1955 033a E6000000 		.4byte	.LFE2-.LFB2
+ 1956 033e 01       		.uleb128 0x1
+ 1957 033f 9C       		.byte	0x9c
+ 1958 0340 A5030000 		.4byte	0x3a5
+ 1959 0344 06       		.uleb128 0x6
+ 1960 0345 34040000 		.4byte	.LASF48
+ 1961 0349 01       		.byte	0x1
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 41
+
+
+ 1962 034a BA       		.byte	0xba
+ 1963 034b 84020000 		.4byte	0x284
+ 1964 034f 02       		.uleb128 0x2
+ 1965 0350 91       		.byte	0x91
+ 1966 0351 6C       		.sleb128 -20
+ 1967 0352 06       		.uleb128 0x6
+ 1968 0353 D7030000 		.4byte	.LASF31
+ 1969 0357 01       		.byte	0x1
+ 1970 0358 BA       		.byte	0xba
+ 1971 0359 84020000 		.4byte	0x284
+ 1972 035d 02       		.uleb128 0x2
+ 1973 035e 91       		.byte	0x91
+ 1974 035f 68       		.sleb128 -24
+ 1975 0360 06       		.uleb128 0x6
+ 1976 0361 BD030000 		.4byte	.LASF49
+ 1977 0365 01       		.byte	0x1
+ 1978 0366 BA       		.byte	0xba
+ 1979 0367 84020000 		.4byte	0x284
+ 1980 036b 02       		.uleb128 0x2
+ 1981 036c 91       		.byte	0x91
+ 1982 036d 64       		.sleb128 -28
+ 1983 036e 06       		.uleb128 0x6
+ 1984 036f 4A040000 		.4byte	.LASF50
+ 1985 0373 01       		.byte	0x1
+ 1986 0374 BA       		.byte	0xba
+ 1987 0375 C3000000 		.4byte	0xc3
+ 1988 0379 02       		.uleb128 0x2
+ 1989 037a 91       		.byte	0x91
+ 1990 037b 60       		.sleb128 -32
+ 1991 037c 06       		.uleb128 0x6
+ 1992 037d A0020000 		.4byte	.LASF51
+ 1993 0381 01       		.byte	0x1
+ 1994 0382 BA       		.byte	0xba
+ 1995 0383 C3000000 		.4byte	0xc3
+ 1996 0387 02       		.uleb128 0x2
+ 1997 0388 91       		.byte	0x91
+ 1998 0389 00       		.sleb128 0
+ 1999 038a 08       		.uleb128 0x8
+ 2000 038b 6900     		.ascii	"i\000"
+ 2001 038d 01       		.byte	0x1
+ 2002 038e C3       		.byte	0xc3
+ 2003 038f C3000000 		.4byte	0xc3
+ 2004 0393 02       		.uleb128 0x2
+ 2005 0394 91       		.byte	0x91
+ 2006 0395 74       		.sleb128 -12
+ 2007 0396 07       		.uleb128 0x7
+ 2008 0397 C2000000 		.4byte	.LASF55
+ 2009 039b 01       		.byte	0x1
+ 2010 039c C3       		.byte	0xc3
+ 2011 039d C3000000 		.4byte	0xc3
+ 2012 03a1 02       		.uleb128 0x2
+ 2013 03a2 91       		.byte	0x91
+ 2014 03a3 70       		.sleb128 -16
+ 2015 03a4 00       		.byte	0
+ 2016 03a5 05       		.uleb128 0x5
+ 2017 03a6 00000000 		.4byte	.LASF56
+ 2018 03aa 01       		.byte	0x1
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 42
+
+
+ 2019 03ab D8       		.byte	0xd8
+ 2020 03ac 00000000 		.4byte	.LFB3
+ 2021 03b0 C0000000 		.4byte	.LFE3-.LFB3
+ 2022 03b4 01       		.uleb128 0x1
+ 2023 03b5 9C       		.byte	0x9c
+ 2024 03b6 27040000 		.4byte	0x427
+ 2025 03ba 06       		.uleb128 0x6
+ 2026 03bb 34040000 		.4byte	.LASF48
+ 2027 03bf 01       		.byte	0x1
+ 2028 03c0 D8       		.byte	0xd8
+ 2029 03c1 84020000 		.4byte	0x284
+ 2030 03c5 02       		.uleb128 0x2
+ 2031 03c6 91       		.byte	0x91
+ 2032 03c7 64       		.sleb128 -28
+ 2033 03c8 06       		.uleb128 0x6
+ 2034 03c9 73020000 		.4byte	.LASF57
+ 2035 03cd 01       		.byte	0x1
+ 2036 03ce D8       		.byte	0xd8
+ 2037 03cf 84020000 		.4byte	0x284
+ 2038 03d3 02       		.uleb128 0x2
+ 2039 03d4 91       		.byte	0x91
+ 2040 03d5 60       		.sleb128 -32
+ 2041 03d6 06       		.uleb128 0x6
+ 2042 03d7 BD030000 		.4byte	.LASF49
+ 2043 03db 01       		.byte	0x1
+ 2044 03dc D8       		.byte	0xd8
+ 2045 03dd 84020000 		.4byte	0x284
+ 2046 03e1 02       		.uleb128 0x2
+ 2047 03e2 91       		.byte	0x91
+ 2048 03e3 5C       		.sleb128 -36
+ 2049 03e4 06       		.uleb128 0x6
+ 2050 03e5 F7020000 		.4byte	.LASF52
+ 2051 03e9 01       		.byte	0x1
+ 2052 03ea D8       		.byte	0xd8
+ 2053 03eb C3000000 		.4byte	0xc3
+ 2054 03ef 02       		.uleb128 0x2
+ 2055 03f0 91       		.byte	0x91
+ 2056 03f1 58       		.sleb128 -40
+ 2057 03f2 08       		.uleb128 0x8
+ 2058 03f3 6900     		.ascii	"i\000"
+ 2059 03f5 01       		.byte	0x1
+ 2060 03f6 E2       		.byte	0xe2
+ 2061 03f7 C3000000 		.4byte	0xc3
+ 2062 03fb 02       		.uleb128 0x2
+ 2063 03fc 91       		.byte	0x91
+ 2064 03fd 74       		.sleb128 -12
+ 2065 03fe 08       		.uleb128 0x8
+ 2066 03ff 6A00     		.ascii	"j\000"
+ 2067 0401 01       		.byte	0x1
+ 2068 0402 E2       		.byte	0xe2
+ 2069 0403 C3000000 		.4byte	0xc3
+ 2070 0407 02       		.uleb128 0x2
+ 2071 0408 91       		.byte	0x91
+ 2072 0409 70       		.sleb128 -16
+ 2073 040a 07       		.uleb128 0x7
+ 2074 040b 07010000 		.4byte	.LASF58
+ 2075 040f 01       		.byte	0x1
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 43
+
+
+ 2076 0410 E2       		.byte	0xe2
+ 2077 0411 C3000000 		.4byte	0xc3
+ 2078 0415 02       		.uleb128 0x2
+ 2079 0416 91       		.byte	0x91
+ 2080 0417 6C       		.sleb128 -20
+ 2081 0418 07       		.uleb128 0x7
+ 2082 0419 6C010000 		.4byte	.LASF59
+ 2083 041d 01       		.byte	0x1
+ 2084 041e E2       		.byte	0xe2
+ 2085 041f C3000000 		.4byte	0xc3
+ 2086 0423 02       		.uleb128 0x2
+ 2087 0424 91       		.byte	0x91
+ 2088 0425 68       		.sleb128 -24
+ 2089 0426 00       		.byte	0
+ 2090 0427 0C       		.uleb128 0xc
+ 2091 0428 8A000000 		.4byte	.LASF60
+ 2092 042c 01       		.byte	0x1
+ 2093 042d F5       		.byte	0xf5
+ 2094 042e 00000000 		.4byte	.LFB4
+ 2095 0432 84000000 		.4byte	.LFE4-.LFB4
+ 2096 0436 01       		.uleb128 0x1
+ 2097 0437 9C       		.byte	0x9c
+ 2098 0438 7F040000 		.4byte	0x47f
+ 2099 043c 06       		.uleb128 0x6
+ 2100 043d BD030000 		.4byte	.LASF49
+ 2101 0441 01       		.byte	0x1
+ 2102 0442 F5       		.byte	0xf5
+ 2103 0443 84020000 		.4byte	0x284
+ 2104 0447 02       		.uleb128 0x2
+ 2105 0448 91       		.byte	0x91
+ 2106 0449 64       		.sleb128 -28
+ 2107 044a 06       		.uleb128 0x6
+ 2108 044b 4A040000 		.4byte	.LASF50
+ 2109 044f 01       		.byte	0x1
+ 2110 0450 F5       		.byte	0xf5
+ 2111 0451 C3000000 		.4byte	0xc3
+ 2112 0455 02       		.uleb128 0x2
+ 2113 0456 91       		.byte	0x91
+ 2114 0457 60       		.sleb128 -32
+ 2115 0458 08       		.uleb128 0x8
+ 2116 0459 6900     		.ascii	"i\000"
+ 2117 045b 01       		.byte	0x1
+ 2118 045c FE       		.byte	0xfe
+ 2119 045d C3000000 		.4byte	0xc3
+ 2120 0461 02       		.uleb128 0x2
+ 2121 0462 91       		.byte	0x91
+ 2122 0463 74       		.sleb128 -12
+ 2123 0464 08       		.uleb128 0x8
+ 2124 0465 6A00     		.ascii	"j\000"
+ 2125 0467 01       		.byte	0x1
+ 2126 0468 FE       		.byte	0xfe
+ 2127 0469 C3000000 		.4byte	0xc3
+ 2128 046d 02       		.uleb128 0x2
+ 2129 046e 91       		.byte	0x91
+ 2130 046f 70       		.sleb128 -16
+ 2131 0470 07       		.uleb128 0x7
+ 2132 0471 24010000 		.4byte	.LASF61
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 44
+
+
+ 2133 0475 01       		.byte	0x1
+ 2134 0476 FE       		.byte	0xfe
+ 2135 0477 C3000000 		.4byte	0xc3
+ 2136 047b 02       		.uleb128 0x2
+ 2137 047c 91       		.byte	0x91
+ 2138 047d 6C       		.sleb128 -20
+ 2139 047e 00       		.byte	0
+ 2140 047f 0D       		.uleb128 0xd
+ 2141 0480 9C000000 		.4byte	.LASF62
+ 2142 0484 01       		.byte	0x1
+ 2143 0485 0701     		.2byte	0x107
+ 2144 0487 00000000 		.4byte	.LFB5
+ 2145 048b 96000000 		.4byte	.LFE5-.LFB5
+ 2146 048f 01       		.uleb128 0x1
+ 2147 0490 9C       		.byte	0x9c
+ 2148 0491 EC040000 		.4byte	0x4ec
+ 2149 0495 0E       		.uleb128 0xe
+ 2150 0496 BD030000 		.4byte	.LASF49
+ 2151 049a 01       		.byte	0x1
+ 2152 049b 0701     		.2byte	0x107
+ 2153 049d 84020000 		.4byte	0x284
+ 2154 04a1 02       		.uleb128 0x2
+ 2155 04a2 91       		.byte	0x91
+ 2156 04a3 64       		.sleb128 -28
+ 2157 04a4 0E       		.uleb128 0xe
+ 2158 04a5 98020000 		.4byte	.LASF63
+ 2159 04a9 01       		.byte	0x1
+ 2160 04aa 0701     		.2byte	0x107
+ 2161 04ac 84020000 		.4byte	0x284
+ 2162 04b0 02       		.uleb128 0x2
+ 2163 04b1 91       		.byte	0x91
+ 2164 04b2 60       		.sleb128 -32
+ 2165 04b3 0E       		.uleb128 0xe
+ 2166 04b4 4A040000 		.4byte	.LASF50
+ 2167 04b8 01       		.byte	0x1
+ 2168 04b9 0701     		.2byte	0x107
+ 2169 04bb C3000000 		.4byte	0xc3
+ 2170 04bf 02       		.uleb128 0x2
+ 2171 04c0 91       		.byte	0x91
+ 2172 04c1 5C       		.sleb128 -36
+ 2173 04c2 0F       		.uleb128 0xf
+ 2174 04c3 6900     		.ascii	"i\000"
+ 2175 04c5 01       		.byte	0x1
+ 2176 04c6 1001     		.2byte	0x110
+ 2177 04c8 C3000000 		.4byte	0xc3
+ 2178 04cc 02       		.uleb128 0x2
+ 2179 04cd 91       		.byte	0x91
+ 2180 04ce 74       		.sleb128 -12
+ 2181 04cf 0F       		.uleb128 0xf
+ 2182 04d0 6A00     		.ascii	"j\000"
+ 2183 04d2 01       		.byte	0x1
+ 2184 04d3 1001     		.2byte	0x110
+ 2185 04d5 C3000000 		.4byte	0xc3
+ 2186 04d9 02       		.uleb128 0x2
+ 2187 04da 91       		.byte	0x91
+ 2188 04db 70       		.sleb128 -16
+ 2189 04dc 10       		.uleb128 0x10
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 45
+
+
+ 2190 04dd 24010000 		.4byte	.LASF61
+ 2191 04e1 01       		.byte	0x1
+ 2192 04e2 1001     		.2byte	0x110
+ 2193 04e4 C3000000 		.4byte	0xc3
+ 2194 04e8 02       		.uleb128 0x2
+ 2195 04e9 91       		.byte	0x91
+ 2196 04ea 6C       		.sleb128 -20
+ 2197 04eb 00       		.byte	0
+ 2198 04ec 0A       		.uleb128 0xa
+ 2199 04ed C3000000 		.4byte	0xc3
+ 2200 04f1 FC040000 		.4byte	0x4fc
+ 2201 04f5 0B       		.uleb128 0xb
+ 2202 04f6 A0020000 		.4byte	0x2a0
+ 2203 04fa 63       		.byte	0x63
+ 2204 04fb 00       		.byte	0
+ 2205 04fc 07       		.uleb128 0x7
+ 2206 04fd 2A040000 		.4byte	.LASF64
+ 2207 0501 01       		.byte	0x1
+ 2208 0502 1C       		.byte	0x1c
+ 2209 0503 EC040000 		.4byte	0x4ec
+ 2210 0507 05       		.uleb128 0x5
+ 2211 0508 03       		.byte	0x3
+ 2212 0509 00000000 		.4byte	an_x
+ 2213 050d 07       		.uleb128 0x7
+ 2214 050e 2F040000 		.4byte	.LASF65
+ 2215 0512 01       		.byte	0x1
+ 2216 0513 1D       		.byte	0x1d
+ 2217 0514 EC040000 		.4byte	0x4ec
+ 2218 0518 05       		.uleb128 0x5
+ 2219 0519 03       		.byte	0x3
+ 2220 051a 90010000 		.4byte	an_y
+ 2221 051e 0A       		.uleb128 0xa
+ 2222 051f 2E050000 		.4byte	0x52e
+ 2223 0523 2E050000 		.4byte	0x52e
+ 2224 0527 0B       		.uleb128 0xb
+ 2225 0528 A0020000 		.4byte	0x2a0
+ 2226 052c B7       		.byte	0xb7
+ 2227 052d 00       		.byte	0
+ 2228 052e 11       		.uleb128 0x11
+ 2229 052f AD000000 		.4byte	0xad
+ 2230 0533 12       		.uleb128 0x12
+ 2231 0534 2A030000 		.4byte	.LASF69
+ 2232 0538 01       		.byte	0x1
+ 2233 0539 11       		.byte	0x11
+ 2234 053a 44050000 		.4byte	0x544
+ 2235 053e 05       		.uleb128 0x5
+ 2236 053f 03       		.byte	0x3
+ 2237 0540 00000000 		.4byte	uch_spo2_table
+ 2238 0544 11       		.uleb128 0x11
+ 2239 0545 1E050000 		.4byte	0x51e
+ 2240 0549 00       		.byte	0
+ 2241              		.section	.debug_abbrev,"",%progbits
+ 2242              	.Ldebug_abbrev0:
+ 2243 0000 01       		.uleb128 0x1
+ 2244 0001 11       		.uleb128 0x11
+ 2245 0002 01       		.byte	0x1
+ 2246 0003 25       		.uleb128 0x25
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 46
+
+
+ 2247 0004 0E       		.uleb128 0xe
+ 2248 0005 13       		.uleb128 0x13
+ 2249 0006 0B       		.uleb128 0xb
+ 2250 0007 03       		.uleb128 0x3
+ 2251 0008 0E       		.uleb128 0xe
+ 2252 0009 1B       		.uleb128 0x1b
+ 2253 000a 0E       		.uleb128 0xe
+ 2254 000b 55       		.uleb128 0x55
+ 2255 000c 17       		.uleb128 0x17
+ 2256 000d 11       		.uleb128 0x11
+ 2257 000e 01       		.uleb128 0x1
+ 2258 000f 10       		.uleb128 0x10
+ 2259 0010 17       		.uleb128 0x17
+ 2260 0011 00       		.byte	0
+ 2261 0012 00       		.byte	0
+ 2262 0013 02       		.uleb128 0x2
+ 2263 0014 16       		.uleb128 0x16
+ 2264 0015 00       		.byte	0
+ 2265 0016 03       		.uleb128 0x3
+ 2266 0017 0E       		.uleb128 0xe
+ 2267 0018 3A       		.uleb128 0x3a
+ 2268 0019 0B       		.uleb128 0xb
+ 2269 001a 3B       		.uleb128 0x3b
+ 2270 001b 0B       		.uleb128 0xb
+ 2271 001c 49       		.uleb128 0x49
+ 2272 001d 13       		.uleb128 0x13
+ 2273 001e 00       		.byte	0
+ 2274 001f 00       		.byte	0
+ 2275 0020 03       		.uleb128 0x3
+ 2276 0021 24       		.uleb128 0x24
+ 2277 0022 00       		.byte	0
+ 2278 0023 0B       		.uleb128 0xb
+ 2279 0024 0B       		.uleb128 0xb
+ 2280 0025 3E       		.uleb128 0x3e
+ 2281 0026 0B       		.uleb128 0xb
+ 2282 0027 03       		.uleb128 0x3
+ 2283 0028 0E       		.uleb128 0xe
+ 2284 0029 00       		.byte	0
+ 2285 002a 00       		.byte	0
+ 2286 002b 04       		.uleb128 0x4
+ 2287 002c 24       		.uleb128 0x24
+ 2288 002d 00       		.byte	0
+ 2289 002e 0B       		.uleb128 0xb
+ 2290 002f 0B       		.uleb128 0xb
+ 2291 0030 3E       		.uleb128 0x3e
+ 2292 0031 0B       		.uleb128 0xb
+ 2293 0032 03       		.uleb128 0x3
+ 2294 0033 08       		.uleb128 0x8
+ 2295 0034 00       		.byte	0
+ 2296 0035 00       		.byte	0
+ 2297 0036 05       		.uleb128 0x5
+ 2298 0037 2E       		.uleb128 0x2e
+ 2299 0038 01       		.byte	0x1
+ 2300 0039 3F       		.uleb128 0x3f
+ 2301 003a 19       		.uleb128 0x19
+ 2302 003b 03       		.uleb128 0x3
+ 2303 003c 0E       		.uleb128 0xe
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 47
+
+
+ 2304 003d 3A       		.uleb128 0x3a
+ 2305 003e 0B       		.uleb128 0xb
+ 2306 003f 3B       		.uleb128 0x3b
+ 2307 0040 0B       		.uleb128 0xb
+ 2308 0041 27       		.uleb128 0x27
+ 2309 0042 19       		.uleb128 0x19
+ 2310 0043 11       		.uleb128 0x11
+ 2311 0044 01       		.uleb128 0x1
+ 2312 0045 12       		.uleb128 0x12
+ 2313 0046 06       		.uleb128 0x6
+ 2314 0047 40       		.uleb128 0x40
+ 2315 0048 18       		.uleb128 0x18
+ 2316 0049 9642     		.uleb128 0x2116
+ 2317 004b 19       		.uleb128 0x19
+ 2318 004c 01       		.uleb128 0x1
+ 2319 004d 13       		.uleb128 0x13
+ 2320 004e 00       		.byte	0
+ 2321 004f 00       		.byte	0
+ 2322 0050 06       		.uleb128 0x6
+ 2323 0051 05       		.uleb128 0x5
+ 2324 0052 00       		.byte	0
+ 2325 0053 03       		.uleb128 0x3
+ 2326 0054 0E       		.uleb128 0xe
+ 2327 0055 3A       		.uleb128 0x3a
+ 2328 0056 0B       		.uleb128 0xb
+ 2329 0057 3B       		.uleb128 0x3b
+ 2330 0058 0B       		.uleb128 0xb
+ 2331 0059 49       		.uleb128 0x49
+ 2332 005a 13       		.uleb128 0x13
+ 2333 005b 02       		.uleb128 0x2
+ 2334 005c 18       		.uleb128 0x18
+ 2335 005d 00       		.byte	0
+ 2336 005e 00       		.byte	0
+ 2337 005f 07       		.uleb128 0x7
+ 2338 0060 34       		.uleb128 0x34
+ 2339 0061 00       		.byte	0
+ 2340 0062 03       		.uleb128 0x3
+ 2341 0063 0E       		.uleb128 0xe
+ 2342 0064 3A       		.uleb128 0x3a
+ 2343 0065 0B       		.uleb128 0xb
+ 2344 0066 3B       		.uleb128 0x3b
+ 2345 0067 0B       		.uleb128 0xb
+ 2346 0068 49       		.uleb128 0x49
+ 2347 0069 13       		.uleb128 0x13
+ 2348 006a 02       		.uleb128 0x2
+ 2349 006b 18       		.uleb128 0x18
+ 2350 006c 00       		.byte	0
+ 2351 006d 00       		.byte	0
+ 2352 006e 08       		.uleb128 0x8
+ 2353 006f 34       		.uleb128 0x34
+ 2354 0070 00       		.byte	0
+ 2355 0071 03       		.uleb128 0x3
+ 2356 0072 08       		.uleb128 0x8
+ 2357 0073 3A       		.uleb128 0x3a
+ 2358 0074 0B       		.uleb128 0xb
+ 2359 0075 3B       		.uleb128 0x3b
+ 2360 0076 0B       		.uleb128 0xb
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 48
+
+
+ 2361 0077 49       		.uleb128 0x49
+ 2362 0078 13       		.uleb128 0x13
+ 2363 0079 02       		.uleb128 0x2
+ 2364 007a 18       		.uleb128 0x18
+ 2365 007b 00       		.byte	0
+ 2366 007c 00       		.byte	0
+ 2367 007d 09       		.uleb128 0x9
+ 2368 007e 0F       		.uleb128 0xf
+ 2369 007f 00       		.byte	0
+ 2370 0080 0B       		.uleb128 0xb
+ 2371 0081 0B       		.uleb128 0xb
+ 2372 0082 49       		.uleb128 0x49
+ 2373 0083 13       		.uleb128 0x13
+ 2374 0084 00       		.byte	0
+ 2375 0085 00       		.byte	0
+ 2376 0086 0A       		.uleb128 0xa
+ 2377 0087 01       		.uleb128 0x1
+ 2378 0088 01       		.byte	0x1
+ 2379 0089 49       		.uleb128 0x49
+ 2380 008a 13       		.uleb128 0x13
+ 2381 008b 01       		.uleb128 0x1
+ 2382 008c 13       		.uleb128 0x13
+ 2383 008d 00       		.byte	0
+ 2384 008e 00       		.byte	0
+ 2385 008f 0B       		.uleb128 0xb
+ 2386 0090 21       		.uleb128 0x21
+ 2387 0091 00       		.byte	0
+ 2388 0092 49       		.uleb128 0x49
+ 2389 0093 13       		.uleb128 0x13
+ 2390 0094 2F       		.uleb128 0x2f
+ 2391 0095 0B       		.uleb128 0xb
+ 2392 0096 00       		.byte	0
+ 2393 0097 00       		.byte	0
+ 2394 0098 0C       		.uleb128 0xc
+ 2395 0099 2E       		.uleb128 0x2e
+ 2396 009a 01       		.byte	0x1
+ 2397 009b 3F       		.uleb128 0x3f
+ 2398 009c 19       		.uleb128 0x19
+ 2399 009d 03       		.uleb128 0x3
+ 2400 009e 0E       		.uleb128 0xe
+ 2401 009f 3A       		.uleb128 0x3a
+ 2402 00a0 0B       		.uleb128 0xb
+ 2403 00a1 3B       		.uleb128 0x3b
+ 2404 00a2 0B       		.uleb128 0xb
+ 2405 00a3 27       		.uleb128 0x27
+ 2406 00a4 19       		.uleb128 0x19
+ 2407 00a5 11       		.uleb128 0x11
+ 2408 00a6 01       		.uleb128 0x1
+ 2409 00a7 12       		.uleb128 0x12
+ 2410 00a8 06       		.uleb128 0x6
+ 2411 00a9 40       		.uleb128 0x40
+ 2412 00aa 18       		.uleb128 0x18
+ 2413 00ab 9742     		.uleb128 0x2117
+ 2414 00ad 19       		.uleb128 0x19
+ 2415 00ae 01       		.uleb128 0x1
+ 2416 00af 13       		.uleb128 0x13
+ 2417 00b0 00       		.byte	0
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 49
+
+
+ 2418 00b1 00       		.byte	0
+ 2419 00b2 0D       		.uleb128 0xd
+ 2420 00b3 2E       		.uleb128 0x2e
+ 2421 00b4 01       		.byte	0x1
+ 2422 00b5 3F       		.uleb128 0x3f
+ 2423 00b6 19       		.uleb128 0x19
+ 2424 00b7 03       		.uleb128 0x3
+ 2425 00b8 0E       		.uleb128 0xe
+ 2426 00b9 3A       		.uleb128 0x3a
+ 2427 00ba 0B       		.uleb128 0xb
+ 2428 00bb 3B       		.uleb128 0x3b
+ 2429 00bc 05       		.uleb128 0x5
+ 2430 00bd 27       		.uleb128 0x27
+ 2431 00be 19       		.uleb128 0x19
+ 2432 00bf 11       		.uleb128 0x11
+ 2433 00c0 01       		.uleb128 0x1
+ 2434 00c1 12       		.uleb128 0x12
+ 2435 00c2 06       		.uleb128 0x6
+ 2436 00c3 40       		.uleb128 0x40
+ 2437 00c4 18       		.uleb128 0x18
+ 2438 00c5 9742     		.uleb128 0x2117
+ 2439 00c7 19       		.uleb128 0x19
+ 2440 00c8 01       		.uleb128 0x1
+ 2441 00c9 13       		.uleb128 0x13
+ 2442 00ca 00       		.byte	0
+ 2443 00cb 00       		.byte	0
+ 2444 00cc 0E       		.uleb128 0xe
+ 2445 00cd 05       		.uleb128 0x5
+ 2446 00ce 00       		.byte	0
+ 2447 00cf 03       		.uleb128 0x3
+ 2448 00d0 0E       		.uleb128 0xe
+ 2449 00d1 3A       		.uleb128 0x3a
+ 2450 00d2 0B       		.uleb128 0xb
+ 2451 00d3 3B       		.uleb128 0x3b
+ 2452 00d4 05       		.uleb128 0x5
+ 2453 00d5 49       		.uleb128 0x49
+ 2454 00d6 13       		.uleb128 0x13
+ 2455 00d7 02       		.uleb128 0x2
+ 2456 00d8 18       		.uleb128 0x18
+ 2457 00d9 00       		.byte	0
+ 2458 00da 00       		.byte	0
+ 2459 00db 0F       		.uleb128 0xf
+ 2460 00dc 34       		.uleb128 0x34
+ 2461 00dd 00       		.byte	0
+ 2462 00de 03       		.uleb128 0x3
+ 2463 00df 08       		.uleb128 0x8
+ 2464 00e0 3A       		.uleb128 0x3a
+ 2465 00e1 0B       		.uleb128 0xb
+ 2466 00e2 3B       		.uleb128 0x3b
+ 2467 00e3 05       		.uleb128 0x5
+ 2468 00e4 49       		.uleb128 0x49
+ 2469 00e5 13       		.uleb128 0x13
+ 2470 00e6 02       		.uleb128 0x2
+ 2471 00e7 18       		.uleb128 0x18
+ 2472 00e8 00       		.byte	0
+ 2473 00e9 00       		.byte	0
+ 2474 00ea 10       		.uleb128 0x10
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 50
+
+
+ 2475 00eb 34       		.uleb128 0x34
+ 2476 00ec 00       		.byte	0
+ 2477 00ed 03       		.uleb128 0x3
+ 2478 00ee 0E       		.uleb128 0xe
+ 2479 00ef 3A       		.uleb128 0x3a
+ 2480 00f0 0B       		.uleb128 0xb
+ 2481 00f1 3B       		.uleb128 0x3b
+ 2482 00f2 05       		.uleb128 0x5
+ 2483 00f3 49       		.uleb128 0x49
+ 2484 00f4 13       		.uleb128 0x13
+ 2485 00f5 02       		.uleb128 0x2
+ 2486 00f6 18       		.uleb128 0x18
+ 2487 00f7 00       		.byte	0
+ 2488 00f8 00       		.byte	0
+ 2489 00f9 11       		.uleb128 0x11
+ 2490 00fa 26       		.uleb128 0x26
+ 2491 00fb 00       		.byte	0
+ 2492 00fc 49       		.uleb128 0x49
+ 2493 00fd 13       		.uleb128 0x13
+ 2494 00fe 00       		.byte	0
+ 2495 00ff 00       		.byte	0
+ 2496 0100 12       		.uleb128 0x12
+ 2497 0101 34       		.uleb128 0x34
+ 2498 0102 00       		.byte	0
+ 2499 0103 03       		.uleb128 0x3
+ 2500 0104 0E       		.uleb128 0xe
+ 2501 0105 3A       		.uleb128 0x3a
+ 2502 0106 0B       		.uleb128 0xb
+ 2503 0107 3B       		.uleb128 0x3b
+ 2504 0108 0B       		.uleb128 0xb
+ 2505 0109 49       		.uleb128 0x49
+ 2506 010a 13       		.uleb128 0x13
+ 2507 010b 3F       		.uleb128 0x3f
+ 2508 010c 19       		.uleb128 0x19
+ 2509 010d 02       		.uleb128 0x2
+ 2510 010e 18       		.uleb128 0x18
+ 2511 010f 00       		.byte	0
+ 2512 0110 00       		.byte	0
+ 2513 0111 00       		.byte	0
+ 2514              		.section	.debug_aranges,"",%progbits
+ 2515 0000 44000000 		.4byte	0x44
+ 2516 0004 0200     		.2byte	0x2
+ 2517 0006 00000000 		.4byte	.Ldebug_info0
+ 2518 000a 04       		.byte	0x4
+ 2519 000b 00       		.byte	0
+ 2520 000c 0000     		.2byte	0
+ 2521 000e 0000     		.2byte	0
+ 2522 0010 00000000 		.4byte	.LFB0
+ 2523 0014 48060000 		.4byte	.LFE0-.LFB0
+ 2524 0018 00000000 		.4byte	.LFB1
+ 2525 001c 42000000 		.4byte	.LFE1-.LFB1
+ 2526 0020 00000000 		.4byte	.LFB2
+ 2527 0024 E6000000 		.4byte	.LFE2-.LFB2
+ 2528 0028 00000000 		.4byte	.LFB3
+ 2529 002c C0000000 		.4byte	.LFE3-.LFB3
+ 2530 0030 00000000 		.4byte	.LFB4
+ 2531 0034 84000000 		.4byte	.LFE4-.LFB4
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 51
+
+
+ 2532 0038 00000000 		.4byte	.LFB5
+ 2533 003c 96000000 		.4byte	.LFE5-.LFB5
+ 2534 0040 00000000 		.4byte	0
+ 2535 0044 00000000 		.4byte	0
+ 2536              		.section	.debug_ranges,"",%progbits
+ 2537              	.Ldebug_ranges0:
+ 2538 0000 00000000 		.4byte	.LFB0
+ 2539 0004 48060000 		.4byte	.LFE0
+ 2540 0008 00000000 		.4byte	.LFB1
+ 2541 000c 42000000 		.4byte	.LFE1
+ 2542 0010 00000000 		.4byte	.LFB2
+ 2543 0014 E6000000 		.4byte	.LFE2
+ 2544 0018 00000000 		.4byte	.LFB3
+ 2545 001c C0000000 		.4byte	.LFE3
+ 2546 0020 00000000 		.4byte	.LFB4
+ 2547 0024 84000000 		.4byte	.LFE4
+ 2548 0028 00000000 		.4byte	.LFB5
+ 2549 002c 96000000 		.4byte	.LFE5
+ 2550 0030 00000000 		.4byte	0
+ 2551 0034 00000000 		.4byte	0
+ 2552              		.section	.debug_line,"",%progbits
+ 2553              	.Ldebug_line0:
+ 2554 0000 71030000 		.section	.debug_str,"MS",%progbits,1
+ 2554      02002401 
+ 2554      00000201 
+ 2554      FB0E0D00 
+ 2554      01010101 
+ 2555              	.LASF56:
+ 2556 0000 6D617869 		.ascii	"maxim_remove_close_peaks\000"
+ 2556      6D5F7265 
+ 2556      6D6F7665 
+ 2556      5F636C6F 
+ 2556      73655F70 
+ 2557              	.LASF34:
+ 2558 0019 6E5F795F 		.ascii	"n_y_ac\000"
+ 2558      616300
+ 2559              	.LASF14:
+ 2560 0020 696E7438 		.ascii	"int8_t\000"
+ 2560      5F7400
+ 2561              	.LASF4:
+ 2562 0027 73686F72 		.ascii	"short int\000"
+ 2562      7420696E 
+ 2562      7400
+ 2563              	.LASF45:
+ 2564 0031 73697A65 		.ascii	"sizetype\000"
+ 2564      74797065 
+ 2564      00
+ 2565              	.LASF25:
+ 2566 003a 7063685F 		.ascii	"pch_hr_valid\000"
+ 2566      68725F76 
+ 2566      616C6964 
+ 2566      00
+ 2567              	.LASF47:
+ 2568 0047 6D617869 		.ascii	"maxim_find_peaks\000"
+ 2568      6D5F6669 
+ 2568      6E645F70 
+ 2568      65616B73 
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 52
+
+
+ 2568      00
+ 2569              	.LASF67:
+ 2570 0058 73706F32 		.ascii	"spo2_algorithm.c\000"
+ 2570      5F616C67 
+ 2570      6F726974 
+ 2570      686D2E63 
+ 2570      00
+ 2571              	.LASF53:
+ 2572 0069 6E5F6D61 		.ascii	"n_max_num\000"
+ 2572      785F6E75 
+ 2572      6D00
+ 2573              	.LASF36:
+ 2574 0073 6E5F7370 		.ascii	"n_spo2_calc\000"
+ 2574      6F325F63 
+ 2574      616C6300 
+ 2575              	.LASF9:
+ 2576 007f 5F5F7569 		.ascii	"__uint32_t\000"
+ 2576      6E743332 
+ 2576      5F7400
+ 2577              	.LASF60:
+ 2578 008a 6D617869 		.ascii	"maxim_sort_ascend\000"
+ 2578      6D5F736F 
+ 2578      72745F61 
+ 2578      7363656E 
+ 2578      6400
+ 2579              	.LASF62:
+ 2580 009c 6D617869 		.ascii	"maxim_sort_indices_descend\000"
+ 2580      6D5F736F 
+ 2580      72745F69 
+ 2580      6E646963 
+ 2580      65735F64 
+ 2581              	.LASF5:
+ 2582 00b7 5F5F7569 		.ascii	"__uint16_t\000"
+ 2582      6E743136 
+ 2582      5F7400
+ 2583              	.LASF55:
+ 2584 00c2 6E5F7769 		.ascii	"n_width\000"
+ 2584      64746800 
+ 2585              	.LASF15:
+ 2586 00ca 75696E74 		.ascii	"uint8_t\000"
+ 2586      385F7400 
+ 2587              	.LASF68:
+ 2588 00d2 443A5C56 		.ascii	"D:\\Vlad\\[4]_Hospital_APP\\PSOC_Project\\PSOC_PPG."
+ 2588      6C61645C 
+ 2588      5B345D5F 
+ 2588      486F7370 
+ 2588      6974616C 
+ 2589 0101 63796473 		.ascii	"cydsn\000"
+ 2589      6E00
+ 2590              	.LASF58:
+ 2591 0107 6E5F6F6C 		.ascii	"n_old_npks\000"
+ 2591      645F6E70 
+ 2591      6B7300
+ 2592              	.LASF32:
+ 2593 0112 616E5F69 		.ascii	"an_ir_valley_locs\000"
+ 2593      725F7661 
+ 2593      6C6C6579 
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 53
+
+
+ 2593      5F6C6F63 
+ 2593      7300
+ 2594              	.LASF61:
+ 2595 0124 6E5F7465 		.ascii	"n_temp\000"
+ 2595      6D7000
+ 2596              	.LASF33:
+ 2597 012b 6E5F7065 		.ascii	"n_peak_interval_sum\000"
+ 2597      616B5F69 
+ 2597      6E746572 
+ 2597      76616C5F 
+ 2597      73756D00 
+ 2598              	.LASF27:
+ 2599 013f 6E5F695F 		.ascii	"n_i_ratio_count\000"
+ 2599      72617469 
+ 2599      6F5F636F 
+ 2599      756E7400 
+ 2600              	.LASF21:
+ 2601 014f 70756E5F 		.ascii	"pun_red_buffer\000"
+ 2601      7265645F 
+ 2601      62756666 
+ 2601      657200
+ 2602              	.LASF11:
+ 2603 015e 6C6F6E67 		.ascii	"long long int\000"
+ 2603      206C6F6E 
+ 2603      6720696E 
+ 2603      7400
+ 2604              	.LASF59:
+ 2605 016c 6E5F6469 		.ascii	"n_dist\000"
+ 2605      737400
+ 2606              	.LASF66:
+ 2607 0173 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 2607      43313120 
+ 2607      352E342E 
+ 2607      31203230 
+ 2607      31363036 
+ 2608 01a6 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m4 -mfloat-abi=s"
+ 2608      20726576 
+ 2608      6973696F 
+ 2608      6E203233 
+ 2608      37373135 
+ 2609 01d9 6F667466 		.ascii	"oftfp -mfpu=fpv4-sp-d16 -mthumb -g -O0 -ffunction-s"
+ 2609      70202D6D 
+ 2609      6670753D 
+ 2609      66707634 
+ 2609      2D73702D 
+ 2610 020c 65637469 		.ascii	"ections -ffat-lto-objects\000"
+ 2610      6F6E7320 
+ 2610      2D666661 
+ 2610      742D6C74 
+ 2610      6F2D6F62 
+ 2611              	.LASF8:
+ 2612 0226 6C6F6E67 		.ascii	"long int\000"
+ 2612      20696E74 
+ 2612      00
+ 2613              	.LASF23:
+ 2614 022f 7063685F 		.ascii	"pch_spo2_valid\000"
+ 2614      73706F32 
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 54
+
+
+ 2614      5F76616C 
+ 2614      696400
+ 2615              	.LASF24:
+ 2616 023e 706E5F68 		.ascii	"pn_heart_rate\000"
+ 2616      65617274 
+ 2616      5F726174 
+ 2616      6500
+ 2617              	.LASF1:
+ 2618 024c 5F5F7569 		.ascii	"__uint8_t\000"
+ 2618      6E74385F 
+ 2618      7400
+ 2619              	.LASF28:
+ 2620 0256 6E5F6578 		.ascii	"n_exact_ir_valley_locs_count\000"
+ 2620      6163745F 
+ 2620      69725F76 
+ 2620      616C6C65 
+ 2620      795F6C6F 
+ 2621              	.LASF57:
+ 2622 0273 706E5F6E 		.ascii	"pn_npks\000"
+ 2622      706B7300 
+ 2623              	.LASF39:
+ 2624 027b 6E5F795F 		.ascii	"n_y_dc_max_idx\000"
+ 2624      64635F6D 
+ 2624      61785F69 
+ 2624      647800
+ 2625              	.LASF3:
+ 2626 028a 756E7369 		.ascii	"unsigned char\000"
+ 2626      676E6564 
+ 2626      20636861 
+ 2626      7200
+ 2627              	.LASF63:
+ 2628 0298 706E5F69 		.ascii	"pn_indx\000"
+ 2628      6E647800 
+ 2629              	.LASF51:
+ 2630 02a0 6E5F6D69 		.ascii	"n_min_height\000"
+ 2630      6E5F6865 
+ 2630      69676874 
+ 2630      00
+ 2631              	.LASF22:
+ 2632 02ad 706E5F73 		.ascii	"pn_spo2\000"
+ 2632      706F3200 
+ 2633              	.LASF2:
+ 2634 02b5 7369676E 		.ascii	"signed char\000"
+ 2634      65642063 
+ 2634      68617200 
+ 2635              	.LASF12:
+ 2636 02c1 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 2636      206C6F6E 
+ 2636      6720756E 
+ 2636      7369676E 
+ 2636      65642069 
+ 2637              	.LASF18:
+ 2638 02d8 75696E74 		.ascii	"uint32_t\000"
+ 2638      33325F74 
+ 2638      00
+ 2639              	.LASF13:
+ 2640 02e1 756E7369 		.ascii	"unsigned int\000"
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 55
+
+
+ 2640      676E6564 
+ 2640      20696E74 
+ 2640      00
+ 2641              	.LASF16:
+ 2642 02ee 75696E74 		.ascii	"uint16_t\000"
+ 2642      31365F74 
+ 2642      00
+ 2643              	.LASF52:
+ 2644 02f7 6E5F6D69 		.ascii	"n_min_distance\000"
+ 2644      6E5F6469 
+ 2644      7374616E 
+ 2644      636500
+ 2645              	.LASF6:
+ 2646 0306 73686F72 		.ascii	"short unsigned int\000"
+ 2646      7420756E 
+ 2646      7369676E 
+ 2646      65642069 
+ 2646      6E7400
+ 2647              	.LASF0:
+ 2648 0319 5F5F696E 		.ascii	"__int8_t\000"
+ 2648      74385F74 
+ 2648      00
+ 2649              	.LASF17:
+ 2650 0322 696E7433 		.ascii	"int32_t\000"
+ 2650      325F7400 
+ 2651              	.LASF69:
+ 2652 032a 7563685F 		.ascii	"uch_spo2_table\000"
+ 2652      73706F32 
+ 2652      5F746162 
+ 2652      6C6500
+ 2653              	.LASF41:
+ 2654 0339 616E5F72 		.ascii	"an_ratio\000"
+ 2654      6174696F 
+ 2654      00
+ 2655              	.LASF26:
+ 2656 0342 756E5F69 		.ascii	"un_ir_mean\000"
+ 2656      725F6D65 
+ 2656      616E00
+ 2657              	.LASF10:
+ 2658 034d 6C6F6E67 		.ascii	"long unsigned int\000"
+ 2658      20756E73 
+ 2658      69676E65 
+ 2658      6420696E 
+ 2658      7400
+ 2659              	.LASF46:
+ 2660 035f 6D617869 		.ascii	"maxim_heart_rate_and_oxygen_saturation\000"
+ 2660      6D5F6865 
+ 2660      6172745F 
+ 2660      72617465 
+ 2660      5F616E64 
+ 2661              	.LASF30:
+ 2662 0386 6E5F7468 		.ascii	"n_th1\000"
+ 2662      3100
+ 2663              	.LASF35:
+ 2664 038c 6E5F785F 		.ascii	"n_x_ac\000"
+ 2664      616300
+ 2665              	.LASF40:
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 56
+
+
+ 2666 0393 6E5F785F 		.ascii	"n_x_dc_max_idx\000"
+ 2666      64635F6D 
+ 2666      61785F69 
+ 2666      647800
+ 2667              	.LASF42:
+ 2668 03a2 6E5F7261 		.ascii	"n_ratio_average\000"
+ 2668      74696F5F 
+ 2668      61766572 
+ 2668      61676500 
+ 2669              	.LASF37:
+ 2670 03b2 6E5F795F 		.ascii	"n_y_dc_max\000"
+ 2670      64635F6D 
+ 2670      617800
+ 2671              	.LASF49:
+ 2672 03bd 706E5F78 		.ascii	"pn_x\000"
+ 2672      00
+ 2673              	.LASF7:
+ 2674 03c2 5F5F696E 		.ascii	"__int32_t\000"
+ 2674      7433325F 
+ 2674      7400
+ 2675              	.LASF38:
+ 2676 03cc 6E5F785F 		.ascii	"n_x_dc_max\000"
+ 2676      64635F6D 
+ 2676      617800
+ 2677              	.LASF31:
+ 2678 03d7 6E5F6E70 		.ascii	"n_npks\000"
+ 2678      6B7300
+ 2679              	.LASF29:
+ 2680 03de 6E5F6D69 		.ascii	"n_middle_idx\000"
+ 2680      64646C65 
+ 2680      5F696478 
+ 2680      00
+ 2681              	.LASF54:
+ 2682 03eb 6D617869 		.ascii	"maxim_peaks_above_min_height\000"
+ 2682      6D5F7065 
+ 2682      616B735F 
+ 2682      61626F76 
+ 2682      655F6D69 
+ 2683              	.LASF44:
+ 2684 0408 6E5F6465 		.ascii	"n_denom\000"
+ 2684      6E6F6D00 
+ 2685              	.LASF43:
+ 2686 0410 6E5F6E75 		.ascii	"n_nume\000"
+ 2686      6D6500
+ 2687              	.LASF20:
+ 2688 0417 6E5F6972 		.ascii	"n_ir_buffer_length\000"
+ 2688      5F627566 
+ 2688      6665725F 
+ 2688      6C656E67 
+ 2688      746800
+ 2689              	.LASF64:
+ 2690 042a 616E5F78 		.ascii	"an_x\000"
+ 2690      00
+ 2691              	.LASF65:
+ 2692 042f 616E5F79 		.ascii	"an_y\000"
+ 2692      00
+ 2693              	.LASF48:
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\cctOTT1e.s 			page 57
+
+
+ 2694 0434 706E5F6C 		.ascii	"pn_locs\000"
+ 2694      6F637300 
+ 2695              	.LASF19:
+ 2696 043c 70756E5F 		.ascii	"pun_ir_buffer\000"
+ 2696      69725F62 
+ 2696      75666665 
+ 2696      7200
+ 2697              	.LASF50:
+ 2698 044a 6E5F7369 		.ascii	"n_size\000"
+ 2698      7A6500
+ 2699              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

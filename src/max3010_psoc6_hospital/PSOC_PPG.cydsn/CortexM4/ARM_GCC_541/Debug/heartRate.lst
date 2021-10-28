@@ -1,0 +1,1571 @@
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m4
+   3              		.eabi_attribute 27, 1
+   4              		.fpu fpv4-sp-d16
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 6
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.thumb
+  15              		.syntax unified
+  16              		.file	"heartRate.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.global	IR_AC_Max
+  21              		.data
+  22              		.align	1
+  23              		.type	IR_AC_Max, %object
+  24              		.size	IR_AC_Max, 2
+  25              	IR_AC_Max:
+  26 0000 1400     		.short	20
+  27              		.global	IR_AC_Min
+  28              		.align	1
+  29              		.type	IR_AC_Min, %object
+  30              		.size	IR_AC_Min, 2
+  31              	IR_AC_Min:
+  32 0002 ECFF     		.short	-20
+  33              		.global	IR_AC_Signal_Current
+  34              		.bss
+  35              		.align	1
+  36              		.type	IR_AC_Signal_Current, %object
+  37              		.size	IR_AC_Signal_Current, 2
+  38              	IR_AC_Signal_Current:
+  39 0000 0000     		.space	2
+  40              		.comm	IR_AC_Signal_Previous,2,2
+  41              		.global	IR_AC_Signal_min
+  42              		.align	1
+  43              		.type	IR_AC_Signal_min, %object
+  44              		.size	IR_AC_Signal_min, 2
+  45              	IR_AC_Signal_min:
+  46 0002 0000     		.space	2
+  47              		.global	IR_AC_Signal_max
+  48              		.align	1
+  49              		.type	IR_AC_Signal_max, %object
+  50              		.size	IR_AC_Signal_max, 2
+  51              	IR_AC_Signal_max:
+  52 0004 0000     		.space	2
+  53              		.comm	IR_Average_Estimated,2,2
+  54              		.global	positiveEdge
+  55              		.align	1
+  56              		.type	positiveEdge, %object
+  57              		.size	positiveEdge, 2
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 2
+
+
+  58              	positiveEdge:
+  59 0006 0000     		.space	2
+  60              		.global	negativeEdge
+  61              		.align	1
+  62              		.type	negativeEdge, %object
+  63              		.size	negativeEdge, 2
+  64              	negativeEdge:
+  65 0008 0000     		.space	2
+  66              		.global	ir_avg_reg
+  67 000a 0000     		.align	2
+  68              		.type	ir_avg_reg, %object
+  69              		.size	ir_avg_reg, 4
+  70              	ir_avg_reg:
+  71 000c 00000000 		.space	4
+  72              		.comm	cbuf,64,4
+  73              		.global	offset
+  74              		.type	offset, %object
+  75              		.size	offset, 1
+  76              	offset:
+  77 0010 00       		.space	1
+  78              		.section	.rodata
+  79              		.align	2
+  80              		.type	FIRCoeffs, %object
+  81              		.size	FIRCoeffs, 24
+  82              	FIRCoeffs:
+  83 0000 AC00     		.short	172
+  84 0002 4101     		.short	321
+  85 0004 4302     		.short	579
+  86 0006 9F03     		.short	927
+  87 0008 5005     		.short	1360
+  88 000a 4207     		.short	1858
+  89 000c 5609     		.short	2390
+  90 000e 640B     		.short	2916
+  91 0010 3F0D     		.short	3391
+  92 0012 B80E     		.short	3768
+  93 0014 AC0F     		.short	4012
+  94 0016 0010     		.short	4096
+  95              		.section	.text.checkForBeat,"ax",%progbits
+  96              		.align	2
+  97              		.global	checkForBeat
+  98              		.thumb
+  99              		.thumb_func
+ 100              		.type	checkForBeat, %function
+ 101              	checkForBeat:
+ 102              	.LFB0:
+ 103              		.file 1 "heartRate.c"
+   1:heartRate.c   **** /* ========================================
+   2:heartRate.c   ****  *
+   3:heartRate.c   ****  * Copyright YOUR COMPANY, THE YEAR
+   4:heartRate.c   ****  * All Rights Reserved
+   5:heartRate.c   ****  * UNPUBLISHED, LICENSED SOFTWARE.
+   6:heartRate.c   ****  *
+   7:heartRate.c   ****  * CONFIDENTIAL AND PROPRIETARY INFORMATION
+   8:heartRate.c   ****  * WHICH IS THE PROPERTY OF your company.
+   9:heartRate.c   ****  *
+  10:heartRate.c   ****  * ========================================
+  11:heartRate.c   **** */
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 3
+
+
+  12:heartRate.c   **** #include "heartRate.h"
+  13:heartRate.c   **** 
+  14:heartRate.c   **** int16_t IR_AC_Max = 20;
+  15:heartRate.c   **** int16_t IR_AC_Min = -20;
+  16:heartRate.c   **** 
+  17:heartRate.c   **** int16_t IR_AC_Signal_Current = 0;
+  18:heartRate.c   **** int16_t IR_AC_Signal_Previous;
+  19:heartRate.c   **** int16_t IR_AC_Signal_min = 0;
+  20:heartRate.c   **** int16_t IR_AC_Signal_max = 0;
+  21:heartRate.c   **** int16_t IR_Average_Estimated;
+  22:heartRate.c   **** 
+  23:heartRate.c   **** int16_t positiveEdge = 0;
+  24:heartRate.c   **** int16_t negativeEdge = 0;
+  25:heartRate.c   **** int32_t ir_avg_reg = 0;
+  26:heartRate.c   **** 
+  27:heartRate.c   **** int16_t cbuf[32];
+  28:heartRate.c   **** uint8_t offset = 0;
+  29:heartRate.c   **** 
+  30:heartRate.c   **** static const uint16_t FIRCoeffs[12] = {172, 321, 579, 927, 1360, 1858, 2390, 2916, 3391, 3768, 4012
+  31:heartRate.c   **** 
+  32:heartRate.c   **** //  Heart Rate Monitor functions takes a sample value and the sample number
+  33:heartRate.c   **** //  Returns true if a beat is detected
+  34:heartRate.c   **** //  A running average of four samples is recommended for display on the screen.
+  35:heartRate.c   **** bool checkForBeat(int32_t sample)
+  36:heartRate.c   **** {
+ 104              		.loc 1 36 0
+ 105              		.cfi_startproc
+ 106              		@ args = 0, pretend = 0, frame = 16
+ 107              		@ frame_needed = 1, uses_anonymous_args = 0
+ 108 0000 80B5     		push	{r7, lr}
+ 109              		.cfi_def_cfa_offset 8
+ 110              		.cfi_offset 7, -8
+ 111              		.cfi_offset 14, -4
+ 112 0002 84B0     		sub	sp, sp, #16
+ 113              		.cfi_def_cfa_offset 24
+ 114 0004 00AF     		add	r7, sp, #0
+ 115              		.cfi_def_cfa_register 7
+ 116 0006 7860     		str	r0, [r7, #4]
+  37:heartRate.c   ****   bool beatDetected = false;
+ 117              		.loc 1 37 0
+ 118 0008 0023     		movs	r3, #0
+ 119 000a FB73     		strb	r3, [r7, #15]
+  38:heartRate.c   **** 
+  39:heartRate.c   ****   //  Save current state
+  40:heartRate.c   ****   IR_AC_Signal_Previous = IR_AC_Signal_Current;
+ 120              		.loc 1 40 0
+ 121 000c 5A4B     		ldr	r3, .L7
+ 122 000e B3F90020 		ldrsh	r2, [r3]
+ 123 0012 5A4B     		ldr	r3, .L7+4
+ 124 0014 1A80     		strh	r2, [r3]	@ movhi
+  41:heartRate.c   ****   
+  42:heartRate.c   ****   //This is good to view for debugging
+  43:heartRate.c   ****   //Serial.print("Signal_Current: ");
+  44:heartRate.c   ****   //Serial.println(IR_AC_Signal_Current);
+  45:heartRate.c   **** 
+  46:heartRate.c   ****   //  Process next data sample
+  47:heartRate.c   ****   IR_Average_Estimated = averageDCEstimator(&ir_avg_reg, sample);
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 4
+
+
+ 125              		.loc 1 47 0
+ 126 0016 7B68     		ldr	r3, [r7, #4]
+ 127 0018 9BB2     		uxth	r3, r3
+ 128 001a 1946     		mov	r1, r3
+ 129 001c 5848     		ldr	r0, .L7+8
+ 130 001e FFF7FEFF 		bl	averageDCEstimator
+ 131 0022 0346     		mov	r3, r0
+ 132 0024 1A46     		mov	r2, r3
+ 133 0026 574B     		ldr	r3, .L7+12
+ 134 0028 1A80     		strh	r2, [r3]	@ movhi
+  48:heartRate.c   ****   IR_AC_Signal_Current = lowPassFIRFilter(sample - IR_Average_Estimated);
+ 135              		.loc 1 48 0
+ 136 002a 7B68     		ldr	r3, [r7, #4]
+ 137 002c 9AB2     		uxth	r2, r3
+ 138 002e 554B     		ldr	r3, .L7+12
+ 139 0030 B3F90030 		ldrsh	r3, [r3]
+ 140 0034 9BB2     		uxth	r3, r3
+ 141 0036 D31A     		subs	r3, r2, r3
+ 142 0038 9BB2     		uxth	r3, r3
+ 143 003a 1BB2     		sxth	r3, r3
+ 144 003c 1846     		mov	r0, r3
+ 145 003e FFF7FEFF 		bl	lowPassFIRFilter
+ 146 0042 0346     		mov	r3, r0
+ 147 0044 1A46     		mov	r2, r3
+ 148 0046 4C4B     		ldr	r3, .L7
+ 149 0048 1A80     		strh	r2, [r3]	@ movhi
+  49:heartRate.c   **** 
+  50:heartRate.c   ****   //  Detect positive zero crossing (rising edge)
+  51:heartRate.c   ****   if ((IR_AC_Signal_Previous < 0) & (IR_AC_Signal_Current >= 0))
+ 150              		.loc 1 51 0
+ 151 004a 4C4B     		ldr	r3, .L7+4
+ 152 004c B3F90030 		ldrsh	r3, [r3]
+ 153 0050 9BB2     		uxth	r3, r3
+ 154 0052 DB0B     		lsrs	r3, r3, #15
+ 155 0054 DAB2     		uxtb	r2, r3
+ 156 0056 484B     		ldr	r3, .L7
+ 157 0058 B3F90030 		ldrsh	r3, [r3]
+ 158 005c DB43     		mvns	r3, r3
+ 159 005e 9BB2     		uxth	r3, r3
+ 160 0060 DB0B     		lsrs	r3, r3, #15
+ 161 0062 DBB2     		uxtb	r3, r3
+ 162 0064 1340     		ands	r3, r3, r2
+ 163 0066 DBB2     		uxtb	r3, r3
+ 164 0068 002B     		cmp	r3, #0
+ 165 006a 34D0     		beq	.L2
+  52:heartRate.c   ****   {
+  53:heartRate.c   ****   
+  54:heartRate.c   ****     IR_AC_Max = IR_AC_Signal_max; //Adjust our AC max and min
+ 166              		.loc 1 54 0
+ 167 006c 464B     		ldr	r3, .L7+16
+ 168 006e B3F90020 		ldrsh	r2, [r3]
+ 169 0072 464B     		ldr	r3, .L7+20
+ 170 0074 1A80     		strh	r2, [r3]	@ movhi
+  55:heartRate.c   ****     IR_AC_Min = IR_AC_Signal_min;
+ 171              		.loc 1 55 0
+ 172 0076 464B     		ldr	r3, .L7+24
+ 173 0078 B3F90020 		ldrsh	r2, [r3]
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 5
+
+
+ 174 007c 454B     		ldr	r3, .L7+28
+ 175 007e 1A80     		strh	r2, [r3]	@ movhi
+  56:heartRate.c   **** 
+  57:heartRate.c   ****     positiveEdge = 1;
+ 176              		.loc 1 57 0
+ 177 0080 454B     		ldr	r3, .L7+32
+ 178 0082 0122     		movs	r2, #1
+ 179 0084 1A80     		strh	r2, [r3]	@ movhi
+  58:heartRate.c   ****     negativeEdge = 0;
+ 180              		.loc 1 58 0
+ 181 0086 454B     		ldr	r3, .L7+36
+ 182 0088 0022     		movs	r2, #0
+ 183 008a 1A80     		strh	r2, [r3]	@ movhi
+  59:heartRate.c   ****     IR_AC_Signal_max = 0;
+ 184              		.loc 1 59 0
+ 185 008c 3E4B     		ldr	r3, .L7+16
+ 186 008e 0022     		movs	r2, #0
+ 187 0090 1A80     		strh	r2, [r3]	@ movhi
+  60:heartRate.c   **** 
+  61:heartRate.c   ****     //if ((IR_AC_Max - IR_AC_Min) > 100 & (IR_AC_Max - IR_AC_Min) < 1000)
+  62:heartRate.c   ****     if (((IR_AC_Max - IR_AC_Min) > 20) & ((IR_AC_Max - IR_AC_Min) < 1000))
+ 188              		.loc 1 62 0
+ 189 0092 3E4B     		ldr	r3, .L7+20
+ 190 0094 B3F90030 		ldrsh	r3, [r3]
+ 191 0098 1A46     		mov	r2, r3
+ 192 009a 3E4B     		ldr	r3, .L7+28
+ 193 009c B3F90030 		ldrsh	r3, [r3]
+ 194 00a0 D31A     		subs	r3, r2, r3
+ 195 00a2 142B     		cmp	r3, #20
+ 196 00a4 CCBF     		ite	gt
+ 197 00a6 0123     		movgt	r3, #1
+ 198 00a8 0023     		movle	r3, #0
+ 199 00aa DAB2     		uxtb	r2, r3
+ 200 00ac 374B     		ldr	r3, .L7+20
+ 201 00ae B3F90030 		ldrsh	r3, [r3]
+ 202 00b2 1946     		mov	r1, r3
+ 203 00b4 374B     		ldr	r3, .L7+28
+ 204 00b6 B3F90030 		ldrsh	r3, [r3]
+ 205 00ba CB1A     		subs	r3, r1, r3
+ 206 00bc 40F2E731 		movw	r1, #999
+ 207 00c0 8B42     		cmp	r3, r1
+ 208 00c2 D4BF     		ite	le
+ 209 00c4 0123     		movle	r3, #1
+ 210 00c6 0023     		movgt	r3, #0
+ 211 00c8 DBB2     		uxtb	r3, r3
+ 212 00ca 1340     		ands	r3, r3, r2
+ 213 00cc DBB2     		uxtb	r3, r3
+ 214 00ce 002B     		cmp	r3, #0
+ 215 00d0 01D0     		beq	.L2
+  63:heartRate.c   ****     {
+  64:heartRate.c   ****       //Heart beat!!!
+  65:heartRate.c   ****       beatDetected = true;
+ 216              		.loc 1 65 0
+ 217 00d2 0123     		movs	r3, #1
+ 218 00d4 FB73     		strb	r3, [r7, #15]
+ 219              	.L2:
+  66:heartRate.c   ****     }
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 6
+
+
+  67:heartRate.c   ****   }
+  68:heartRate.c   **** 
+  69:heartRate.c   ****   //  Detect negative zero crossing (falling edge)
+  70:heartRate.c   ****   if ((IR_AC_Signal_Previous > 0) & (IR_AC_Signal_Current <= 0))
+ 220              		.loc 1 70 0
+ 221 00d6 294B     		ldr	r3, .L7+4
+ 222 00d8 B3F90030 		ldrsh	r3, [r3]
+ 223 00dc 002B     		cmp	r3, #0
+ 224 00de CCBF     		ite	gt
+ 225 00e0 0123     		movgt	r3, #1
+ 226 00e2 0023     		movle	r3, #0
+ 227 00e4 DAB2     		uxtb	r2, r3
+ 228 00e6 244B     		ldr	r3, .L7
+ 229 00e8 B3F90030 		ldrsh	r3, [r3]
+ 230 00ec 002B     		cmp	r3, #0
+ 231 00ee D4BF     		ite	le
+ 232 00f0 0123     		movle	r3, #1
+ 233 00f2 0023     		movgt	r3, #0
+ 234 00f4 DBB2     		uxtb	r3, r3
+ 235 00f6 1340     		ands	r3, r3, r2
+ 236 00f8 DBB2     		uxtb	r3, r3
+ 237 00fa 002B     		cmp	r3, #0
+ 238 00fc 08D0     		beq	.L3
+  71:heartRate.c   ****   {
+  72:heartRate.c   ****     positiveEdge = 0;
+ 239              		.loc 1 72 0
+ 240 00fe 264B     		ldr	r3, .L7+32
+ 241 0100 0022     		movs	r2, #0
+ 242 0102 1A80     		strh	r2, [r3]	@ movhi
+  73:heartRate.c   ****     negativeEdge = 1;
+ 243              		.loc 1 73 0
+ 244 0104 254B     		ldr	r3, .L7+36
+ 245 0106 0122     		movs	r2, #1
+ 246 0108 1A80     		strh	r2, [r3]	@ movhi
+  74:heartRate.c   ****     IR_AC_Signal_min = 0;
+ 247              		.loc 1 74 0
+ 248 010a 214B     		ldr	r3, .L7+24
+ 249 010c 0022     		movs	r2, #0
+ 250 010e 1A80     		strh	r2, [r3]	@ movhi
+ 251              	.L3:
+  75:heartRate.c   ****   }
+  76:heartRate.c   **** 
+  77:heartRate.c   ****   //  Find Maximum value in positive cycle
+  78:heartRate.c   ****   if (positiveEdge & (IR_AC_Signal_Current > IR_AC_Signal_Previous))
+ 252              		.loc 1 78 0
+ 253 0110 214B     		ldr	r3, .L7+32
+ 254 0112 B3F90030 		ldrsh	r3, [r3]
+ 255 0116 1946     		mov	r1, r3
+ 256 0118 174B     		ldr	r3, .L7
+ 257 011a B3F90020 		ldrsh	r2, [r3]
+ 258 011e 174B     		ldr	r3, .L7+4
+ 259 0120 B3F90030 		ldrsh	r3, [r3]
+ 260 0124 9A42     		cmp	r2, r3
+ 261 0126 CCBF     		ite	gt
+ 262 0128 0123     		movgt	r3, #1
+ 263 012a 0023     		movle	r3, #0
+ 264 012c DBB2     		uxtb	r3, r3
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 7
+
+
+ 265 012e 0B40     		ands	r3, r3, r1
+ 266 0130 002B     		cmp	r3, #0
+ 267 0132 04D0     		beq	.L4
+  79:heartRate.c   ****   {
+  80:heartRate.c   ****     IR_AC_Signal_max = IR_AC_Signal_Current;
+ 268              		.loc 1 80 0
+ 269 0134 104B     		ldr	r3, .L7
+ 270 0136 B3F90020 		ldrsh	r2, [r3]
+ 271 013a 134B     		ldr	r3, .L7+16
+ 272 013c 1A80     		strh	r2, [r3]	@ movhi
+ 273              	.L4:
+  81:heartRate.c   ****   }
+  82:heartRate.c   **** 
+  83:heartRate.c   ****   //  Find Minimum value in negative cycle
+  84:heartRate.c   ****   if (negativeEdge & (IR_AC_Signal_Current < IR_AC_Signal_Previous))
+ 274              		.loc 1 84 0
+ 275 013e 174B     		ldr	r3, .L7+36
+ 276 0140 B3F90030 		ldrsh	r3, [r3]
+ 277 0144 1946     		mov	r1, r3
+ 278 0146 0C4B     		ldr	r3, .L7
+ 279 0148 B3F90020 		ldrsh	r2, [r3]
+ 280 014c 0B4B     		ldr	r3, .L7+4
+ 281 014e B3F90030 		ldrsh	r3, [r3]
+ 282 0152 9A42     		cmp	r2, r3
+ 283 0154 B4BF     		ite	lt
+ 284 0156 0123     		movlt	r3, #1
+ 285 0158 0023     		movge	r3, #0
+ 286 015a DBB2     		uxtb	r3, r3
+ 287 015c 0B40     		ands	r3, r3, r1
+ 288 015e 002B     		cmp	r3, #0
+ 289 0160 04D0     		beq	.L5
+  85:heartRate.c   ****   {
+  86:heartRate.c   ****     IR_AC_Signal_min = IR_AC_Signal_Current;
+ 290              		.loc 1 86 0
+ 291 0162 054B     		ldr	r3, .L7
+ 292 0164 B3F90020 		ldrsh	r2, [r3]
+ 293 0168 094B     		ldr	r3, .L7+24
+ 294 016a 1A80     		strh	r2, [r3]	@ movhi
+ 295              	.L5:
+  87:heartRate.c   ****   }
+  88:heartRate.c   ****   
+  89:heartRate.c   ****   return(beatDetected);
+ 296              		.loc 1 89 0
+ 297 016c FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+  90:heartRate.c   **** }
+ 298              		.loc 1 90 0
+ 299 016e 1846     		mov	r0, r3
+ 300 0170 1037     		adds	r7, r7, #16
+ 301              		.cfi_def_cfa_offset 8
+ 302 0172 BD46     		mov	sp, r7
+ 303              		.cfi_def_cfa_register 13
+ 304              		@ sp needed
+ 305 0174 80BD     		pop	{r7, pc}
+ 306              	.L8:
+ 307 0176 00BF     		.align	2
+ 308              	.L7:
+ 309 0178 00000000 		.word	IR_AC_Signal_Current
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 8
+
+
+ 310 017c 00000000 		.word	IR_AC_Signal_Previous
+ 311 0180 00000000 		.word	ir_avg_reg
+ 312 0184 00000000 		.word	IR_Average_Estimated
+ 313 0188 00000000 		.word	IR_AC_Signal_max
+ 314 018c 00000000 		.word	IR_AC_Max
+ 315 0190 00000000 		.word	IR_AC_Signal_min
+ 316 0194 00000000 		.word	IR_AC_Min
+ 317 0198 00000000 		.word	positiveEdge
+ 318 019c 00000000 		.word	negativeEdge
+ 319              		.cfi_endproc
+ 320              	.LFE0:
+ 321              		.size	checkForBeat, .-checkForBeat
+ 322              		.section	.text.averageDCEstimator,"ax",%progbits
+ 323              		.align	2
+ 324              		.global	averageDCEstimator
+ 325              		.thumb
+ 326              		.thumb_func
+ 327              		.type	averageDCEstimator, %function
+ 328              	averageDCEstimator:
+ 329              	.LFB1:
+  91:heartRate.c   **** 
+  92:heartRate.c   **** //  Average DC Estimator
+  93:heartRate.c   **** int16_t averageDCEstimator(int32_t *p, uint16_t x)
+  94:heartRate.c   **** {
+ 330              		.loc 1 94 0
+ 331              		.cfi_startproc
+ 332              		@ args = 0, pretend = 0, frame = 8
+ 333              		@ frame_needed = 1, uses_anonymous_args = 0
+ 334              		@ link register save eliminated.
+ 335 0000 80B4     		push	{r7}
+ 336              		.cfi_def_cfa_offset 4
+ 337              		.cfi_offset 7, -4
+ 338 0002 83B0     		sub	sp, sp, #12
+ 339              		.cfi_def_cfa_offset 16
+ 340 0004 00AF     		add	r7, sp, #0
+ 341              		.cfi_def_cfa_register 7
+ 342 0006 7860     		str	r0, [r7, #4]
+ 343 0008 0B46     		mov	r3, r1
+ 344 000a 7B80     		strh	r3, [r7, #2]	@ movhi
+  95:heartRate.c   ****   *p += ((((long) x << 15) - *p) >> 4);
+ 345              		.loc 1 95 0
+ 346 000c 7B68     		ldr	r3, [r7, #4]
+ 347 000e 1A68     		ldr	r2, [r3]
+ 348 0010 7B88     		ldrh	r3, [r7, #2]
+ 349 0012 D903     		lsls	r1, r3, #15
+ 350 0014 7B68     		ldr	r3, [r7, #4]
+ 351 0016 1B68     		ldr	r3, [r3]
+ 352 0018 CB1A     		subs	r3, r1, r3
+ 353 001a 1B11     		asrs	r3, r3, #4
+ 354 001c 1A44     		add	r2, r2, r3
+ 355 001e 7B68     		ldr	r3, [r7, #4]
+ 356 0020 1A60     		str	r2, [r3]
+  96:heartRate.c   ****   return (*p >> 15);
+ 357              		.loc 1 96 0
+ 358 0022 7B68     		ldr	r3, [r7, #4]
+ 359 0024 1B68     		ldr	r3, [r3]
+ 360 0026 DB13     		asrs	r3, r3, #15
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 9
+
+
+ 361 0028 1BB2     		sxth	r3, r3
+  97:heartRate.c   **** }
+ 362              		.loc 1 97 0
+ 363 002a 1846     		mov	r0, r3
+ 364 002c 0C37     		adds	r7, r7, #12
+ 365              		.cfi_def_cfa_offset 4
+ 366 002e BD46     		mov	sp, r7
+ 367              		.cfi_def_cfa_register 13
+ 368              		@ sp needed
+ 369 0030 5DF8047B 		ldr	r7, [sp], #4
+ 370              		.cfi_restore 7
+ 371              		.cfi_def_cfa_offset 0
+ 372 0034 7047     		bx	lr
+ 373              		.cfi_endproc
+ 374              	.LFE1:
+ 375              		.size	averageDCEstimator, .-averageDCEstimator
+ 376 0036 00BF     		.section	.text.lowPassFIRFilter,"ax",%progbits
+ 377              		.align	2
+ 378              		.global	lowPassFIRFilter
+ 379              		.thumb
+ 380              		.thumb_func
+ 381              		.type	lowPassFIRFilter, %function
+ 382              	lowPassFIRFilter:
+ 383              	.LFB2:
+  98:heartRate.c   **** 
+  99:heartRate.c   **** //  Low Pass FIR Filter
+ 100:heartRate.c   **** int16_t lowPassFIRFilter(int16_t din)
+ 101:heartRate.c   **** {  
+ 384              		.loc 1 101 0
+ 385              		.cfi_startproc
+ 386              		@ args = 0, pretend = 0, frame = 16
+ 387              		@ frame_needed = 1, uses_anonymous_args = 0
+ 388 0000 80B5     		push	{r7, lr}
+ 389              		.cfi_def_cfa_offset 8
+ 390              		.cfi_offset 7, -8
+ 391              		.cfi_offset 14, -4
+ 392 0002 84B0     		sub	sp, sp, #16
+ 393              		.cfi_def_cfa_offset 24
+ 394 0004 00AF     		add	r7, sp, #0
+ 395              		.cfi_def_cfa_register 7
+ 396 0006 0346     		mov	r3, r0
+ 397 0008 FB80     		strh	r3, [r7, #6]	@ movhi
+ 102:heartRate.c   ****   cbuf[offset] = din;
+ 398              		.loc 1 102 0
+ 399 000a 2C4B     		ldr	r3, .L15
+ 400 000c 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 401 000e 1946     		mov	r1, r3
+ 402 0010 2B4A     		ldr	r2, .L15+4
+ 403 0012 FB88     		ldrh	r3, [r7, #6]	@ movhi
+ 404 0014 22F81130 		strh	r3, [r2, r1, lsl #1]	@ movhi
+ 103:heartRate.c   **** 
+ 104:heartRate.c   ****   int32_t z = mul16(FIRCoeffs[11], cbuf[(offset - 11) & 0x1F]);
+ 405              		.loc 1 104 0
+ 406 0018 4FF48053 		mov	r3, #4096
+ 407 001c 18B2     		sxth	r0, r3
+ 408 001e 274B     		ldr	r3, .L15
+ 409 0020 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 10
+
+
+ 410 0022 0B3B     		subs	r3, r3, #11
+ 411 0024 03F01F03 		and	r3, r3, #31
+ 412 0028 254A     		ldr	r2, .L15+4
+ 413 002a 32F91330 		ldrsh	r3, [r2, r3, lsl #1]
+ 414 002e 1946     		mov	r1, r3
+ 415 0030 FFF7FEFF 		bl	mul16
+ 416 0034 F860     		str	r0, [r7, #12]
+ 417              	.LBB2:
+ 105:heartRate.c   ****   
+ 106:heartRate.c   ****   for (uint8_t i = 0 ; i < 11 ; i++)
+ 418              		.loc 1 106 0
+ 419 0036 0023     		movs	r3, #0
+ 420 0038 FB72     		strb	r3, [r7, #11]
+ 421 003a 28E0     		b	.L12
+ 422              	.L13:
+ 107:heartRate.c   ****   {
+ 108:heartRate.c   ****     z += mul16(FIRCoeffs[i], cbuf[(offset - i) & 0x1F] + cbuf[(offset - 22 + i) & 0x1F]);
+ 423              		.loc 1 108 0 discriminator 3
+ 424 003c FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 425 003e 214A     		ldr	r2, .L15+8
+ 426 0040 32F81330 		ldrh	r3, [r2, r3, lsl #1]
+ 427 0044 18B2     		sxth	r0, r3
+ 428 0046 1D4B     		ldr	r3, .L15
+ 429 0048 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 430 004a 1A46     		mov	r2, r3
+ 431 004c FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 432 004e D31A     		subs	r3, r2, r3
+ 433 0050 03F01F03 		and	r3, r3, #31
+ 434 0054 1A4A     		ldr	r2, .L15+4
+ 435 0056 32F91330 		ldrsh	r3, [r2, r3, lsl #1]
+ 436 005a 9AB2     		uxth	r2, r3
+ 437 005c 174B     		ldr	r3, .L15
+ 438 005e 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 439 0060 A3F11601 		sub	r1, r3, #22
+ 440 0064 FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 441 0066 0B44     		add	r3, r3, r1
+ 442 0068 03F01F03 		and	r3, r3, #31
+ 443 006c 1449     		ldr	r1, .L15+4
+ 444 006e 31F91330 		ldrsh	r3, [r1, r3, lsl #1]
+ 445 0072 9BB2     		uxth	r3, r3
+ 446 0074 1344     		add	r3, r3, r2
+ 447 0076 9BB2     		uxth	r3, r3
+ 448 0078 1BB2     		sxth	r3, r3
+ 449 007a 1946     		mov	r1, r3
+ 450 007c FFF7FEFF 		bl	mul16
+ 451 0080 0246     		mov	r2, r0
+ 452 0082 FB68     		ldr	r3, [r7, #12]
+ 453 0084 1344     		add	r3, r3, r2
+ 454 0086 FB60     		str	r3, [r7, #12]
+ 106:heartRate.c   ****   {
+ 455              		.loc 1 106 0 discriminator 3
+ 456 0088 FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 457 008a 0133     		adds	r3, r3, #1
+ 458 008c FB72     		strb	r3, [r7, #11]
+ 459              	.L12:
+ 106:heartRate.c   ****   {
+ 460              		.loc 1 106 0 is_stmt 0 discriminator 1
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 11
+
+
+ 461 008e FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 462 0090 0A2B     		cmp	r3, #10
+ 463 0092 D3D9     		bls	.L13
+ 464              	.LBE2:
+ 109:heartRate.c   ****   }
+ 110:heartRate.c   **** 
+ 111:heartRate.c   ****   offset++;
+ 465              		.loc 1 111 0 is_stmt 1
+ 466 0094 094B     		ldr	r3, .L15
+ 467 0096 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 468 0098 0133     		adds	r3, r3, #1
+ 469 009a DAB2     		uxtb	r2, r3
+ 470 009c 074B     		ldr	r3, .L15
+ 471 009e 1A70     		strb	r2, [r3]
+ 112:heartRate.c   ****   offset %= 32; //Wrap condition
+ 472              		.loc 1 112 0
+ 473 00a0 064B     		ldr	r3, .L15
+ 474 00a2 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 475 00a4 03F01F03 		and	r3, r3, #31
+ 476 00a8 DAB2     		uxtb	r2, r3
+ 477 00aa 044B     		ldr	r3, .L15
+ 478 00ac 1A70     		strb	r2, [r3]
+ 113:heartRate.c   **** 
+ 114:heartRate.c   ****   return(z >> 15);
+ 479              		.loc 1 114 0
+ 480 00ae FB68     		ldr	r3, [r7, #12]
+ 481 00b0 DB13     		asrs	r3, r3, #15
+ 482 00b2 1BB2     		sxth	r3, r3
+ 115:heartRate.c   **** }
+ 483              		.loc 1 115 0
+ 484 00b4 1846     		mov	r0, r3
+ 485 00b6 1037     		adds	r7, r7, #16
+ 486              		.cfi_def_cfa_offset 8
+ 487 00b8 BD46     		mov	sp, r7
+ 488              		.cfi_def_cfa_register 13
+ 489              		@ sp needed
+ 490 00ba 80BD     		pop	{r7, pc}
+ 491              	.L16:
+ 492              		.align	2
+ 493              	.L15:
+ 494 00bc 00000000 		.word	offset
+ 495 00c0 00000000 		.word	cbuf
+ 496 00c4 00000000 		.word	FIRCoeffs
+ 497              		.cfi_endproc
+ 498              	.LFE2:
+ 499              		.size	lowPassFIRFilter, .-lowPassFIRFilter
+ 500              		.section	.text.mul16,"ax",%progbits
+ 501              		.align	2
+ 502              		.global	mul16
+ 503              		.thumb
+ 504              		.thumb_func
+ 505              		.type	mul16, %function
+ 506              	mul16:
+ 507              	.LFB3:
+ 116:heartRate.c   **** 
+ 117:heartRate.c   **** //  Integer multiplier
+ 118:heartRate.c   **** int32_t mul16(int16_t x, int16_t y)
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 12
+
+
+ 119:heartRate.c   **** {
+ 508              		.loc 1 119 0
+ 509              		.cfi_startproc
+ 510              		@ args = 0, pretend = 0, frame = 8
+ 511              		@ frame_needed = 1, uses_anonymous_args = 0
+ 512              		@ link register save eliminated.
+ 513 0000 80B4     		push	{r7}
+ 514              		.cfi_def_cfa_offset 4
+ 515              		.cfi_offset 7, -4
+ 516 0002 83B0     		sub	sp, sp, #12
+ 517              		.cfi_def_cfa_offset 16
+ 518 0004 00AF     		add	r7, sp, #0
+ 519              		.cfi_def_cfa_register 7
+ 520 0006 0346     		mov	r3, r0
+ 521 0008 0A46     		mov	r2, r1
+ 522 000a FB80     		strh	r3, [r7, #6]	@ movhi
+ 523 000c 1346     		mov	r3, r2	@ movhi
+ 524 000e BB80     		strh	r3, [r7, #4]	@ movhi
+ 120:heartRate.c   ****   return((long)x * (long)y);
+ 525              		.loc 1 120 0
+ 526 0010 B7F90630 		ldrsh	r3, [r7, #6]
+ 527 0014 B7F90420 		ldrsh	r2, [r7, #4]
+ 528 0018 02FB03F3 		mul	r3, r2, r3
+ 121:heartRate.c   **** }
+ 529              		.loc 1 121 0
+ 530 001c 1846     		mov	r0, r3
+ 531 001e 0C37     		adds	r7, r7, #12
+ 532              		.cfi_def_cfa_offset 4
+ 533 0020 BD46     		mov	sp, r7
+ 534              		.cfi_def_cfa_register 13
+ 535              		@ sp needed
+ 536 0022 5DF8047B 		ldr	r7, [sp], #4
+ 537              		.cfi_restore 7
+ 538              		.cfi_def_cfa_offset 0
+ 539 0026 7047     		bx	lr
+ 540              		.cfi_endproc
+ 541              	.LFE3:
+ 542              		.size	mul16, .-mul16
+ 543              		.text
+ 544              	.Letext0:
+ 545              		.file 2 "c:\\program files (x86)\\cypress\\psoc creator\\4.4\\psoc creator\\import\\gnu\\arm\\5.4.
+ 546              		.file 3 "c:\\program files (x86)\\cypress\\psoc creator\\4.4\\psoc creator\\import\\gnu\\arm\\5.4.
+ 547              		.section	.debug_info,"",%progbits
+ 548              	.Ldebug_info0:
+ 549 0000 BF020000 		.4byte	0x2bf
+ 550 0004 0400     		.2byte	0x4
+ 551 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 552 000a 04       		.byte	0x4
+ 553 000b 01       		.uleb128 0x1
+ 554 000c B2000000 		.4byte	.LASF38
+ 555 0010 0C       		.byte	0xc
+ 556 0011 5D020000 		.4byte	.LASF39
+ 557 0015 65010000 		.4byte	.LASF40
+ 558 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 559 001d 00000000 		.4byte	0
+ 560 0021 00000000 		.4byte	.Ldebug_line0
+ 561 0025 02       		.uleb128 0x2
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 13
+
+
+ 562 0026 01       		.byte	0x1
+ 563 0027 06       		.byte	0x6
+ 564 0028 85020000 		.4byte	.LASF0
+ 565 002c 03       		.uleb128 0x3
+ 566 002d 07000000 		.4byte	.LASF2
+ 567 0031 02       		.byte	0x2
+ 568 0032 1D       		.byte	0x1d
+ 569 0033 37000000 		.4byte	0x37
+ 570 0037 02       		.uleb128 0x2
+ 571 0038 01       		.byte	0x1
+ 572 0039 08       		.byte	0x8
+ 573 003a 61000000 		.4byte	.LASF1
+ 574 003e 03       		.uleb128 0x3
+ 575 003f 17000000 		.4byte	.LASF3
+ 576 0043 02       		.byte	0x2
+ 577 0044 29       		.byte	0x29
+ 578 0045 49000000 		.4byte	0x49
+ 579 0049 02       		.uleb128 0x2
+ 580 004a 02       		.byte	0x2
+ 581 004b 05       		.byte	0x5
+ 582 004c 69020000 		.4byte	.LASF4
+ 583 0050 03       		.uleb128 0x3
+ 584 0051 AB010000 		.4byte	.LASF5
+ 585 0055 02       		.byte	0x2
+ 586 0056 2B       		.byte	0x2b
+ 587 0057 5B000000 		.4byte	0x5b
+ 588 005b 02       		.uleb128 0x2
+ 589 005c 02       		.byte	0x2
+ 590 005d 07       		.byte	0x7
+ 591 005e 9F000000 		.4byte	.LASF6
+ 592 0062 03       		.uleb128 0x3
+ 593 0063 2B000000 		.4byte	.LASF7
+ 594 0067 02       		.byte	0x2
+ 595 0068 3F       		.byte	0x3f
+ 596 0069 6D000000 		.4byte	0x6d
+ 597 006d 02       		.uleb128 0x2
+ 598 006e 04       		.byte	0x4
+ 599 006f 05       		.byte	0x5
+ 600 0070 7C020000 		.4byte	.LASF8
+ 601 0074 02       		.uleb128 0x2
+ 602 0075 04       		.byte	0x4
+ 603 0076 07       		.byte	0x7
+ 604 0077 8D000000 		.4byte	.LASF9
+ 605 007b 02       		.uleb128 0x2
+ 606 007c 08       		.byte	0x8
+ 607 007d 05       		.byte	0x5
+ 608 007e 2E020000 		.4byte	.LASF10
+ 609 0082 02       		.uleb128 0x2
+ 610 0083 08       		.byte	0x8
+ 611 0084 07       		.byte	0x7
+ 612 0085 E5010000 		.4byte	.LASF11
+ 613 0089 04       		.uleb128 0x4
+ 614 008a 04       		.byte	0x4
+ 615 008b 05       		.byte	0x5
+ 616 008c 696E7400 		.ascii	"int\000"
+ 617 0090 02       		.uleb128 0x2
+ 618 0091 04       		.byte	0x4
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 14
+
+
+ 619 0092 07       		.byte	0x7
+ 620 0093 D8010000 		.4byte	.LASF12
+ 621 0097 03       		.uleb128 0x3
+ 622 0098 FC010000 		.4byte	.LASF13
+ 623 009c 03       		.byte	0x3
+ 624 009d 18       		.byte	0x18
+ 625 009e 2C000000 		.4byte	0x2c
+ 626 00a2 03       		.uleb128 0x3
+ 627 00a3 04020000 		.4byte	.LASF14
+ 628 00a7 03       		.byte	0x3
+ 629 00a8 20       		.byte	0x20
+ 630 00a9 3E000000 		.4byte	0x3e
+ 631 00ad 03       		.uleb128 0x3
+ 632 00ae 73020000 		.4byte	.LASF15
+ 633 00b2 03       		.byte	0x3
+ 634 00b3 24       		.byte	0x24
+ 635 00b4 50000000 		.4byte	0x50
+ 636 00b8 03       		.uleb128 0x3
+ 637 00b9 1D020000 		.4byte	.LASF16
+ 638 00bd 03       		.byte	0x3
+ 639 00be 2C       		.byte	0x2c
+ 640 00bf 62000000 		.4byte	0x62
+ 641 00c3 05       		.uleb128 0x5
+ 642 00c4 54000000 		.4byte	.LASF18
+ 643 00c8 01       		.byte	0x1
+ 644 00c9 23       		.byte	0x23
+ 645 00ca F9000000 		.4byte	0xf9
+ 646 00ce 00000000 		.4byte	.LFB0
+ 647 00d2 A0010000 		.4byte	.LFE0-.LFB0
+ 648 00d6 01       		.uleb128 0x1
+ 649 00d7 9C       		.byte	0x9c
+ 650 00d8 F9000000 		.4byte	0xf9
+ 651 00dc 06       		.uleb128 0x6
+ 652 00dd 00000000 		.4byte	.LASF20
+ 653 00e1 01       		.byte	0x1
+ 654 00e2 23       		.byte	0x23
+ 655 00e3 B8000000 		.4byte	0xb8
+ 656 00e7 02       		.uleb128 0x2
+ 657 00e8 91       		.byte	0x91
+ 658 00e9 6C       		.sleb128 -20
+ 659 00ea 07       		.uleb128 0x7
+ 660 00eb CB010000 		.4byte	.LASF22
+ 661 00ef 01       		.byte	0x1
+ 662 00f0 25       		.byte	0x25
+ 663 00f1 F9000000 		.4byte	0xf9
+ 664 00f5 02       		.uleb128 0x2
+ 665 00f6 91       		.byte	0x91
+ 666 00f7 77       		.sleb128 -9
+ 667 00f8 00       		.byte	0
+ 668 00f9 02       		.uleb128 0x2
+ 669 00fa 01       		.byte	0x1
+ 670 00fb 02       		.byte	0x2
+ 671 00fc 91020000 		.4byte	.LASF17
+ 672 0100 08       		.uleb128 0x8
+ 673 0101 6F000000 		.4byte	.LASF19
+ 674 0105 01       		.byte	0x1
+ 675 0106 5D       		.byte	0x5d
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 15
+
+
+ 676 0107 A2000000 		.4byte	0xa2
+ 677 010b 00000000 		.4byte	.LFB1
+ 678 010f 36000000 		.4byte	.LFE1-.LFB1
+ 679 0113 01       		.uleb128 0x1
+ 680 0114 9C       		.byte	0x9c
+ 681 0115 32010000 		.4byte	0x132
+ 682 0119 09       		.uleb128 0x9
+ 683 011a 7000     		.ascii	"p\000"
+ 684 011c 01       		.byte	0x1
+ 685 011d 5D       		.byte	0x5d
+ 686 011e 32010000 		.4byte	0x132
+ 687 0122 02       		.uleb128 0x2
+ 688 0123 91       		.byte	0x91
+ 689 0124 74       		.sleb128 -12
+ 690 0125 09       		.uleb128 0x9
+ 691 0126 7800     		.ascii	"x\000"
+ 692 0128 01       		.byte	0x1
+ 693 0129 5D       		.byte	0x5d
+ 694 012a AD000000 		.4byte	0xad
+ 695 012e 02       		.uleb128 0x2
+ 696 012f 91       		.byte	0x91
+ 697 0130 72       		.sleb128 -14
+ 698 0131 00       		.byte	0
+ 699 0132 0A       		.uleb128 0xa
+ 700 0133 04       		.byte	0x4
+ 701 0134 B8000000 		.4byte	0xb8
+ 702 0138 05       		.uleb128 0x5
+ 703 0139 BC020000 		.4byte	.LASF21
+ 704 013d 01       		.byte	0x1
+ 705 013e 64       		.byte	0x64
+ 706 013f A2000000 		.4byte	0xa2
+ 707 0143 00000000 		.4byte	.LFB2
+ 708 0147 C8000000 		.4byte	.LFE2-.LFB2
+ 709 014b 01       		.uleb128 0x1
+ 710 014c 9C       		.byte	0x9c
+ 711 014d 82010000 		.4byte	0x182
+ 712 0151 09       		.uleb128 0x9
+ 713 0152 64696E00 		.ascii	"din\000"
+ 714 0156 01       		.byte	0x1
+ 715 0157 64       		.byte	0x64
+ 716 0158 A2000000 		.4byte	0xa2
+ 717 015c 02       		.uleb128 0x2
+ 718 015d 91       		.byte	0x91
+ 719 015e 6E       		.sleb128 -18
+ 720 015f 0B       		.uleb128 0xb
+ 721 0160 7A00     		.ascii	"z\000"
+ 722 0162 01       		.byte	0x1
+ 723 0163 68       		.byte	0x68
+ 724 0164 B8000000 		.4byte	0xb8
+ 725 0168 02       		.uleb128 0x2
+ 726 0169 91       		.byte	0x91
+ 727 016a 74       		.sleb128 -12
+ 728 016b 0C       		.uleb128 0xc
+ 729 016c 36000000 		.4byte	.LBB2
+ 730 0170 5E000000 		.4byte	.LBE2-.LBB2
+ 731 0174 0B       		.uleb128 0xb
+ 732 0175 6900     		.ascii	"i\000"
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 16
+
+
+ 733 0177 01       		.byte	0x1
+ 734 0178 6A       		.byte	0x6a
+ 735 0179 97000000 		.4byte	0x97
+ 736 017d 02       		.uleb128 0x2
+ 737 017e 91       		.byte	0x91
+ 738 017f 73       		.sleb128 -13
+ 739 0180 00       		.byte	0
+ 740 0181 00       		.byte	0
+ 741 0182 08       		.uleb128 0x8
+ 742 0183 11000000 		.4byte	.LASF23
+ 743 0187 01       		.byte	0x1
+ 744 0188 76       		.byte	0x76
+ 745 0189 B8000000 		.4byte	0xb8
+ 746 018d 00000000 		.4byte	.LFB3
+ 747 0191 28000000 		.4byte	.LFE3-.LFB3
+ 748 0195 01       		.uleb128 0x1
+ 749 0196 9C       		.byte	0x9c
+ 750 0197 B4010000 		.4byte	0x1b4
+ 751 019b 09       		.uleb128 0x9
+ 752 019c 7800     		.ascii	"x\000"
+ 753 019e 01       		.byte	0x1
+ 754 019f 76       		.byte	0x76
+ 755 01a0 A2000000 		.4byte	0xa2
+ 756 01a4 02       		.uleb128 0x2
+ 757 01a5 91       		.byte	0x91
+ 758 01a6 76       		.sleb128 -10
+ 759 01a7 09       		.uleb128 0x9
+ 760 01a8 7900     		.ascii	"y\000"
+ 761 01aa 01       		.byte	0x1
+ 762 01ab 76       		.byte	0x76
+ 763 01ac A2000000 		.4byte	0xa2
+ 764 01b0 02       		.uleb128 0x2
+ 765 01b1 91       		.byte	0x91
+ 766 01b2 74       		.sleb128 -12
+ 767 01b3 00       		.byte	0
+ 768 01b4 0D       		.uleb128 0xd
+ 769 01b5 CB010000 		.4byte	0x1cb
+ 770 01b9 C4010000 		.4byte	0x1c4
+ 771 01bd 0E       		.uleb128 0xe
+ 772 01be C4010000 		.4byte	0x1c4
+ 773 01c2 0B       		.byte	0xb
+ 774 01c3 00       		.byte	0
+ 775 01c4 02       		.uleb128 0x2
+ 776 01c5 04       		.byte	0x4
+ 777 01c6 07       		.byte	0x7
+ 778 01c7 25020000 		.4byte	.LASF24
+ 779 01cb 0F       		.uleb128 0xf
+ 780 01cc AD000000 		.4byte	0xad
+ 781 01d0 07       		.uleb128 0x7
+ 782 01d1 35000000 		.4byte	.LASF25
+ 783 01d5 01       		.byte	0x1
+ 784 01d6 1E       		.byte	0x1e
+ 785 01d7 E1010000 		.4byte	0x1e1
+ 786 01db 05       		.uleb128 0x5
+ 787 01dc 03       		.byte	0x3
+ 788 01dd 00000000 		.4byte	FIRCoeffs
+ 789 01e1 0F       		.uleb128 0xf
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 17
+
+
+ 790 01e2 B4010000 		.4byte	0x1b4
+ 791 01e6 10       		.uleb128 0x10
+ 792 01e7 97020000 		.4byte	.LASF26
+ 793 01eb 01       		.byte	0x1
+ 794 01ec 0E       		.byte	0xe
+ 795 01ed A2000000 		.4byte	0xa2
+ 796 01f1 05       		.uleb128 0x5
+ 797 01f2 03       		.byte	0x3
+ 798 01f3 00000000 		.4byte	IR_AC_Max
+ 799 01f7 10       		.uleb128 0x10
+ 800 01f8 21000000 		.4byte	.LASF27
+ 801 01fc 01       		.byte	0x1
+ 802 01fd 0F       		.byte	0xf
+ 803 01fe A2000000 		.4byte	0xa2
+ 804 0202 05       		.uleb128 0x5
+ 805 0203 03       		.byte	0x3
+ 806 0204 00000000 		.4byte	IR_AC_Min
+ 807 0208 10       		.uleb128 0x10
+ 808 0209 B6010000 		.4byte	.LASF28
+ 809 020d 01       		.byte	0x1
+ 810 020e 11       		.byte	0x11
+ 811 020f A2000000 		.4byte	0xa2
+ 812 0213 05       		.uleb128 0x5
+ 813 0214 03       		.byte	0x3
+ 814 0215 00000000 		.4byte	IR_AC_Signal_Current
+ 815 0219 10       		.uleb128 0x10
+ 816 021a A1020000 		.4byte	.LASF29
+ 817 021e 01       		.byte	0x1
+ 818 021f 12       		.byte	0x12
+ 819 0220 A2000000 		.4byte	0xa2
+ 820 0224 05       		.uleb128 0x5
+ 821 0225 03       		.byte	0x3
+ 822 0226 00000000 		.4byte	IR_AC_Signal_Previous
+ 823 022a 10       		.uleb128 0x10
+ 824 022b 0C020000 		.4byte	.LASF30
+ 825 022f 01       		.byte	0x1
+ 826 0230 13       		.byte	0x13
+ 827 0231 A2000000 		.4byte	0xa2
+ 828 0235 05       		.uleb128 0x5
+ 829 0236 03       		.byte	0x3
+ 830 0237 00000000 		.4byte	IR_AC_Signal_min
+ 831 023b 10       		.uleb128 0x10
+ 832 023c 9A010000 		.4byte	.LASF31
+ 833 0240 01       		.byte	0x1
+ 834 0241 14       		.byte	0x14
+ 835 0242 A2000000 		.4byte	0xa2
+ 836 0246 05       		.uleb128 0x5
+ 837 0247 03       		.byte	0x3
+ 838 0248 00000000 		.4byte	IR_AC_Signal_max
+ 839 024c 10       		.uleb128 0x10
+ 840 024d 3F000000 		.4byte	.LASF32
+ 841 0251 01       		.byte	0x1
+ 842 0252 15       		.byte	0x15
+ 843 0253 A2000000 		.4byte	0xa2
+ 844 0257 05       		.uleb128 0x5
+ 845 0258 03       		.byte	0x3
+ 846 0259 00000000 		.4byte	IR_Average_Estimated
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 18
+
+
+ 847 025d 10       		.uleb128 0x10
+ 848 025e 49020000 		.4byte	.LASF33
+ 849 0262 01       		.byte	0x1
+ 850 0263 17       		.byte	0x17
+ 851 0264 A2000000 		.4byte	0xa2
+ 852 0268 05       		.uleb128 0x5
+ 853 0269 03       		.byte	0x3
+ 854 026a 00000000 		.4byte	positiveEdge
+ 855 026e 10       		.uleb128 0x10
+ 856 026f 3C020000 		.4byte	.LASF34
+ 857 0273 01       		.byte	0x1
+ 858 0274 18       		.byte	0x18
+ 859 0275 A2000000 		.4byte	0xa2
+ 860 0279 05       		.uleb128 0x5
+ 861 027a 03       		.byte	0x3
+ 862 027b 00000000 		.4byte	negativeEdge
+ 863 027f 10       		.uleb128 0x10
+ 864 0280 82000000 		.4byte	.LASF35
+ 865 0284 01       		.byte	0x1
+ 866 0285 19       		.byte	0x19
+ 867 0286 B8000000 		.4byte	0xb8
+ 868 028a 05       		.uleb128 0x5
+ 869 028b 03       		.byte	0x3
+ 870 028c 00000000 		.4byte	ir_avg_reg
+ 871 0290 0D       		.uleb128 0xd
+ 872 0291 A2000000 		.4byte	0xa2
+ 873 0295 A0020000 		.4byte	0x2a0
+ 874 0299 0E       		.uleb128 0xe
+ 875 029a C4010000 		.4byte	0x1c4
+ 876 029e 1F       		.byte	0x1f
+ 877 029f 00       		.byte	0
+ 878 02a0 10       		.uleb128 0x10
+ 879 02a1 B7020000 		.4byte	.LASF36
+ 880 02a5 01       		.byte	0x1
+ 881 02a6 1B       		.byte	0x1b
+ 882 02a7 90020000 		.4byte	0x290
+ 883 02ab 05       		.uleb128 0x5
+ 884 02ac 03       		.byte	0x3
+ 885 02ad 00000000 		.4byte	cbuf
+ 886 02b1 10       		.uleb128 0x10
+ 887 02b2 56020000 		.4byte	.LASF37
+ 888 02b6 01       		.byte	0x1
+ 889 02b7 1C       		.byte	0x1c
+ 890 02b8 97000000 		.4byte	0x97
+ 891 02bc 05       		.uleb128 0x5
+ 892 02bd 03       		.byte	0x3
+ 893 02be 00000000 		.4byte	offset
+ 894 02c2 00       		.byte	0
+ 895              		.section	.debug_abbrev,"",%progbits
+ 896              	.Ldebug_abbrev0:
+ 897 0000 01       		.uleb128 0x1
+ 898 0001 11       		.uleb128 0x11
+ 899 0002 01       		.byte	0x1
+ 900 0003 25       		.uleb128 0x25
+ 901 0004 0E       		.uleb128 0xe
+ 902 0005 13       		.uleb128 0x13
+ 903 0006 0B       		.uleb128 0xb
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 19
+
+
+ 904 0007 03       		.uleb128 0x3
+ 905 0008 0E       		.uleb128 0xe
+ 906 0009 1B       		.uleb128 0x1b
+ 907 000a 0E       		.uleb128 0xe
+ 908 000b 55       		.uleb128 0x55
+ 909 000c 17       		.uleb128 0x17
+ 910 000d 11       		.uleb128 0x11
+ 911 000e 01       		.uleb128 0x1
+ 912 000f 10       		.uleb128 0x10
+ 913 0010 17       		.uleb128 0x17
+ 914 0011 00       		.byte	0
+ 915 0012 00       		.byte	0
+ 916 0013 02       		.uleb128 0x2
+ 917 0014 24       		.uleb128 0x24
+ 918 0015 00       		.byte	0
+ 919 0016 0B       		.uleb128 0xb
+ 920 0017 0B       		.uleb128 0xb
+ 921 0018 3E       		.uleb128 0x3e
+ 922 0019 0B       		.uleb128 0xb
+ 923 001a 03       		.uleb128 0x3
+ 924 001b 0E       		.uleb128 0xe
+ 925 001c 00       		.byte	0
+ 926 001d 00       		.byte	0
+ 927 001e 03       		.uleb128 0x3
+ 928 001f 16       		.uleb128 0x16
+ 929 0020 00       		.byte	0
+ 930 0021 03       		.uleb128 0x3
+ 931 0022 0E       		.uleb128 0xe
+ 932 0023 3A       		.uleb128 0x3a
+ 933 0024 0B       		.uleb128 0xb
+ 934 0025 3B       		.uleb128 0x3b
+ 935 0026 0B       		.uleb128 0xb
+ 936 0027 49       		.uleb128 0x49
+ 937 0028 13       		.uleb128 0x13
+ 938 0029 00       		.byte	0
+ 939 002a 00       		.byte	0
+ 940 002b 04       		.uleb128 0x4
+ 941 002c 24       		.uleb128 0x24
+ 942 002d 00       		.byte	0
+ 943 002e 0B       		.uleb128 0xb
+ 944 002f 0B       		.uleb128 0xb
+ 945 0030 3E       		.uleb128 0x3e
+ 946 0031 0B       		.uleb128 0xb
+ 947 0032 03       		.uleb128 0x3
+ 948 0033 08       		.uleb128 0x8
+ 949 0034 00       		.byte	0
+ 950 0035 00       		.byte	0
+ 951 0036 05       		.uleb128 0x5
+ 952 0037 2E       		.uleb128 0x2e
+ 953 0038 01       		.byte	0x1
+ 954 0039 3F       		.uleb128 0x3f
+ 955 003a 19       		.uleb128 0x19
+ 956 003b 03       		.uleb128 0x3
+ 957 003c 0E       		.uleb128 0xe
+ 958 003d 3A       		.uleb128 0x3a
+ 959 003e 0B       		.uleb128 0xb
+ 960 003f 3B       		.uleb128 0x3b
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 20
+
+
+ 961 0040 0B       		.uleb128 0xb
+ 962 0041 27       		.uleb128 0x27
+ 963 0042 19       		.uleb128 0x19
+ 964 0043 49       		.uleb128 0x49
+ 965 0044 13       		.uleb128 0x13
+ 966 0045 11       		.uleb128 0x11
+ 967 0046 01       		.uleb128 0x1
+ 968 0047 12       		.uleb128 0x12
+ 969 0048 06       		.uleb128 0x6
+ 970 0049 40       		.uleb128 0x40
+ 971 004a 18       		.uleb128 0x18
+ 972 004b 9642     		.uleb128 0x2116
+ 973 004d 19       		.uleb128 0x19
+ 974 004e 01       		.uleb128 0x1
+ 975 004f 13       		.uleb128 0x13
+ 976 0050 00       		.byte	0
+ 977 0051 00       		.byte	0
+ 978 0052 06       		.uleb128 0x6
+ 979 0053 05       		.uleb128 0x5
+ 980 0054 00       		.byte	0
+ 981 0055 03       		.uleb128 0x3
+ 982 0056 0E       		.uleb128 0xe
+ 983 0057 3A       		.uleb128 0x3a
+ 984 0058 0B       		.uleb128 0xb
+ 985 0059 3B       		.uleb128 0x3b
+ 986 005a 0B       		.uleb128 0xb
+ 987 005b 49       		.uleb128 0x49
+ 988 005c 13       		.uleb128 0x13
+ 989 005d 02       		.uleb128 0x2
+ 990 005e 18       		.uleb128 0x18
+ 991 005f 00       		.byte	0
+ 992 0060 00       		.byte	0
+ 993 0061 07       		.uleb128 0x7
+ 994 0062 34       		.uleb128 0x34
+ 995 0063 00       		.byte	0
+ 996 0064 03       		.uleb128 0x3
+ 997 0065 0E       		.uleb128 0xe
+ 998 0066 3A       		.uleb128 0x3a
+ 999 0067 0B       		.uleb128 0xb
+ 1000 0068 3B       		.uleb128 0x3b
+ 1001 0069 0B       		.uleb128 0xb
+ 1002 006a 49       		.uleb128 0x49
+ 1003 006b 13       		.uleb128 0x13
+ 1004 006c 02       		.uleb128 0x2
+ 1005 006d 18       		.uleb128 0x18
+ 1006 006e 00       		.byte	0
+ 1007 006f 00       		.byte	0
+ 1008 0070 08       		.uleb128 0x8
+ 1009 0071 2E       		.uleb128 0x2e
+ 1010 0072 01       		.byte	0x1
+ 1011 0073 3F       		.uleb128 0x3f
+ 1012 0074 19       		.uleb128 0x19
+ 1013 0075 03       		.uleb128 0x3
+ 1014 0076 0E       		.uleb128 0xe
+ 1015 0077 3A       		.uleb128 0x3a
+ 1016 0078 0B       		.uleb128 0xb
+ 1017 0079 3B       		.uleb128 0x3b
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 21
+
+
+ 1018 007a 0B       		.uleb128 0xb
+ 1019 007b 27       		.uleb128 0x27
+ 1020 007c 19       		.uleb128 0x19
+ 1021 007d 49       		.uleb128 0x49
+ 1022 007e 13       		.uleb128 0x13
+ 1023 007f 11       		.uleb128 0x11
+ 1024 0080 01       		.uleb128 0x1
+ 1025 0081 12       		.uleb128 0x12
+ 1026 0082 06       		.uleb128 0x6
+ 1027 0083 40       		.uleb128 0x40
+ 1028 0084 18       		.uleb128 0x18
+ 1029 0085 9742     		.uleb128 0x2117
+ 1030 0087 19       		.uleb128 0x19
+ 1031 0088 01       		.uleb128 0x1
+ 1032 0089 13       		.uleb128 0x13
+ 1033 008a 00       		.byte	0
+ 1034 008b 00       		.byte	0
+ 1035 008c 09       		.uleb128 0x9
+ 1036 008d 05       		.uleb128 0x5
+ 1037 008e 00       		.byte	0
+ 1038 008f 03       		.uleb128 0x3
+ 1039 0090 08       		.uleb128 0x8
+ 1040 0091 3A       		.uleb128 0x3a
+ 1041 0092 0B       		.uleb128 0xb
+ 1042 0093 3B       		.uleb128 0x3b
+ 1043 0094 0B       		.uleb128 0xb
+ 1044 0095 49       		.uleb128 0x49
+ 1045 0096 13       		.uleb128 0x13
+ 1046 0097 02       		.uleb128 0x2
+ 1047 0098 18       		.uleb128 0x18
+ 1048 0099 00       		.byte	0
+ 1049 009a 00       		.byte	0
+ 1050 009b 0A       		.uleb128 0xa
+ 1051 009c 0F       		.uleb128 0xf
+ 1052 009d 00       		.byte	0
+ 1053 009e 0B       		.uleb128 0xb
+ 1054 009f 0B       		.uleb128 0xb
+ 1055 00a0 49       		.uleb128 0x49
+ 1056 00a1 13       		.uleb128 0x13
+ 1057 00a2 00       		.byte	0
+ 1058 00a3 00       		.byte	0
+ 1059 00a4 0B       		.uleb128 0xb
+ 1060 00a5 34       		.uleb128 0x34
+ 1061 00a6 00       		.byte	0
+ 1062 00a7 03       		.uleb128 0x3
+ 1063 00a8 08       		.uleb128 0x8
+ 1064 00a9 3A       		.uleb128 0x3a
+ 1065 00aa 0B       		.uleb128 0xb
+ 1066 00ab 3B       		.uleb128 0x3b
+ 1067 00ac 0B       		.uleb128 0xb
+ 1068 00ad 49       		.uleb128 0x49
+ 1069 00ae 13       		.uleb128 0x13
+ 1070 00af 02       		.uleb128 0x2
+ 1071 00b0 18       		.uleb128 0x18
+ 1072 00b1 00       		.byte	0
+ 1073 00b2 00       		.byte	0
+ 1074 00b3 0C       		.uleb128 0xc
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 22
+
+
+ 1075 00b4 0B       		.uleb128 0xb
+ 1076 00b5 01       		.byte	0x1
+ 1077 00b6 11       		.uleb128 0x11
+ 1078 00b7 01       		.uleb128 0x1
+ 1079 00b8 12       		.uleb128 0x12
+ 1080 00b9 06       		.uleb128 0x6
+ 1081 00ba 00       		.byte	0
+ 1082 00bb 00       		.byte	0
+ 1083 00bc 0D       		.uleb128 0xd
+ 1084 00bd 01       		.uleb128 0x1
+ 1085 00be 01       		.byte	0x1
+ 1086 00bf 49       		.uleb128 0x49
+ 1087 00c0 13       		.uleb128 0x13
+ 1088 00c1 01       		.uleb128 0x1
+ 1089 00c2 13       		.uleb128 0x13
+ 1090 00c3 00       		.byte	0
+ 1091 00c4 00       		.byte	0
+ 1092 00c5 0E       		.uleb128 0xe
+ 1093 00c6 21       		.uleb128 0x21
+ 1094 00c7 00       		.byte	0
+ 1095 00c8 49       		.uleb128 0x49
+ 1096 00c9 13       		.uleb128 0x13
+ 1097 00ca 2F       		.uleb128 0x2f
+ 1098 00cb 0B       		.uleb128 0xb
+ 1099 00cc 00       		.byte	0
+ 1100 00cd 00       		.byte	0
+ 1101 00ce 0F       		.uleb128 0xf
+ 1102 00cf 26       		.uleb128 0x26
+ 1103 00d0 00       		.byte	0
+ 1104 00d1 49       		.uleb128 0x49
+ 1105 00d2 13       		.uleb128 0x13
+ 1106 00d3 00       		.byte	0
+ 1107 00d4 00       		.byte	0
+ 1108 00d5 10       		.uleb128 0x10
+ 1109 00d6 34       		.uleb128 0x34
+ 1110 00d7 00       		.byte	0
+ 1111 00d8 03       		.uleb128 0x3
+ 1112 00d9 0E       		.uleb128 0xe
+ 1113 00da 3A       		.uleb128 0x3a
+ 1114 00db 0B       		.uleb128 0xb
+ 1115 00dc 3B       		.uleb128 0x3b
+ 1116 00dd 0B       		.uleb128 0xb
+ 1117 00de 49       		.uleb128 0x49
+ 1118 00df 13       		.uleb128 0x13
+ 1119 00e0 3F       		.uleb128 0x3f
+ 1120 00e1 19       		.uleb128 0x19
+ 1121 00e2 02       		.uleb128 0x2
+ 1122 00e3 18       		.uleb128 0x18
+ 1123 00e4 00       		.byte	0
+ 1124 00e5 00       		.byte	0
+ 1125 00e6 00       		.byte	0
+ 1126              		.section	.debug_aranges,"",%progbits
+ 1127 0000 34000000 		.4byte	0x34
+ 1128 0004 0200     		.2byte	0x2
+ 1129 0006 00000000 		.4byte	.Ldebug_info0
+ 1130 000a 04       		.byte	0x4
+ 1131 000b 00       		.byte	0
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 23
+
+
+ 1132 000c 0000     		.2byte	0
+ 1133 000e 0000     		.2byte	0
+ 1134 0010 00000000 		.4byte	.LFB0
+ 1135 0014 A0010000 		.4byte	.LFE0-.LFB0
+ 1136 0018 00000000 		.4byte	.LFB1
+ 1137 001c 36000000 		.4byte	.LFE1-.LFB1
+ 1138 0020 00000000 		.4byte	.LFB2
+ 1139 0024 C8000000 		.4byte	.LFE2-.LFB2
+ 1140 0028 00000000 		.4byte	.LFB3
+ 1141 002c 28000000 		.4byte	.LFE3-.LFB3
+ 1142 0030 00000000 		.4byte	0
+ 1143 0034 00000000 		.4byte	0
+ 1144              		.section	.debug_ranges,"",%progbits
+ 1145              	.Ldebug_ranges0:
+ 1146 0000 00000000 		.4byte	.LFB0
+ 1147 0004 A0010000 		.4byte	.LFE0
+ 1148 0008 00000000 		.4byte	.LFB1
+ 1149 000c 36000000 		.4byte	.LFE1
+ 1150 0010 00000000 		.4byte	.LFB2
+ 1151 0014 C8000000 		.4byte	.LFE2
+ 1152 0018 00000000 		.4byte	.LFB3
+ 1153 001c 28000000 		.4byte	.LFE3
+ 1154 0020 00000000 		.4byte	0
+ 1155 0024 00000000 		.4byte	0
+ 1156              		.section	.debug_line,"",%progbits
+ 1157              	.Ldebug_line0:
+ 1158 0000 9E010000 		.section	.debug_str,"MS",%progbits,1
+ 1158      02001F01 
+ 1158      00000201 
+ 1158      FB0E0D00 
+ 1158      01010101 
+ 1159              	.LASF20:
+ 1160 0000 73616D70 		.ascii	"sample\000"
+ 1160      6C6500
+ 1161              	.LASF2:
+ 1162 0007 5F5F7569 		.ascii	"__uint8_t\000"
+ 1162      6E74385F 
+ 1162      7400
+ 1163              	.LASF23:
+ 1164 0011 6D756C31 		.ascii	"mul16\000"
+ 1164      3600
+ 1165              	.LASF3:
+ 1166 0017 5F5F696E 		.ascii	"__int16_t\000"
+ 1166      7431365F 
+ 1166      7400
+ 1167              	.LASF27:
+ 1168 0021 49525F41 		.ascii	"IR_AC_Min\000"
+ 1168      435F4D69 
+ 1168      6E00
+ 1169              	.LASF7:
+ 1170 002b 5F5F696E 		.ascii	"__int32_t\000"
+ 1170      7433325F 
+ 1170      7400
+ 1171              	.LASF25:
+ 1172 0035 46495243 		.ascii	"FIRCoeffs\000"
+ 1172      6F656666 
+ 1172      7300
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 24
+
+
+ 1173              	.LASF32:
+ 1174 003f 49525F41 		.ascii	"IR_Average_Estimated\000"
+ 1174      76657261 
+ 1174      67655F45 
+ 1174      7374696D 
+ 1174      61746564 
+ 1175              	.LASF18:
+ 1176 0054 63686563 		.ascii	"checkForBeat\000"
+ 1176      6B466F72 
+ 1176      42656174 
+ 1176      00
+ 1177              	.LASF1:
+ 1178 0061 756E7369 		.ascii	"unsigned char\000"
+ 1178      676E6564 
+ 1178      20636861 
+ 1178      7200
+ 1179              	.LASF19:
+ 1180 006f 61766572 		.ascii	"averageDCEstimator\000"
+ 1180      61676544 
+ 1180      43457374 
+ 1180      696D6174 
+ 1180      6F7200
+ 1181              	.LASF35:
+ 1182 0082 69725F61 		.ascii	"ir_avg_reg\000"
+ 1182      76675F72 
+ 1182      656700
+ 1183              	.LASF9:
+ 1184 008d 6C6F6E67 		.ascii	"long unsigned int\000"
+ 1184      20756E73 
+ 1184      69676E65 
+ 1184      6420696E 
+ 1184      7400
+ 1185              	.LASF6:
+ 1186 009f 73686F72 		.ascii	"short unsigned int\000"
+ 1186      7420756E 
+ 1186      7369676E 
+ 1186      65642069 
+ 1186      6E7400
+ 1187              	.LASF38:
+ 1188 00b2 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 1188      43313120 
+ 1188      352E342E 
+ 1188      31203230 
+ 1188      31363036 
+ 1189 00e5 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m4 -mfloat-abi=s"
+ 1189      20726576 
+ 1189      6973696F 
+ 1189      6E203233 
+ 1189      37373135 
+ 1190 0118 6F667466 		.ascii	"oftfp -mfpu=fpv4-sp-d16 -mthumb -g -O0 -ffunction-s"
+ 1190      70202D6D 
+ 1190      6670753D 
+ 1190      66707634 
+ 1190      2D73702D 
+ 1191 014b 65637469 		.ascii	"ections -ffat-lto-objects\000"
+ 1191      6F6E7320 
+ 1191      2D666661 
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 25
+
+
+ 1191      742D6C74 
+ 1191      6F2D6F62 
+ 1192              	.LASF40:
+ 1193 0165 443A5C56 		.ascii	"D:\\Vlad\\[2]_PSOC_Porting\\PSOC_Project\\PSOC_PPG."
+ 1193      6C61645C 
+ 1193      5B325D5F 
+ 1193      50534F43 
+ 1193      5F506F72 
+ 1194 0194 63796473 		.ascii	"cydsn\000"
+ 1194      6E00
+ 1195              	.LASF31:
+ 1196 019a 49525F41 		.ascii	"IR_AC_Signal_max\000"
+ 1196      435F5369 
+ 1196      676E616C 
+ 1196      5F6D6178 
+ 1196      00
+ 1197              	.LASF5:
+ 1198 01ab 5F5F7569 		.ascii	"__uint16_t\000"
+ 1198      6E743136 
+ 1198      5F7400
+ 1199              	.LASF28:
+ 1200 01b6 49525F41 		.ascii	"IR_AC_Signal_Current\000"
+ 1200      435F5369 
+ 1200      676E616C 
+ 1200      5F437572 
+ 1200      72656E74 
+ 1201              	.LASF22:
+ 1202 01cb 62656174 		.ascii	"beatDetected\000"
+ 1202      44657465 
+ 1202      63746564 
+ 1202      00
+ 1203              	.LASF12:
+ 1204 01d8 756E7369 		.ascii	"unsigned int\000"
+ 1204      676E6564 
+ 1204      20696E74 
+ 1204      00
+ 1205              	.LASF11:
+ 1206 01e5 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 1206      206C6F6E 
+ 1206      6720756E 
+ 1206      7369676E 
+ 1206      65642069 
+ 1207              	.LASF13:
+ 1208 01fc 75696E74 		.ascii	"uint8_t\000"
+ 1208      385F7400 
+ 1209              	.LASF14:
+ 1210 0204 696E7431 		.ascii	"int16_t\000"
+ 1210      365F7400 
+ 1211              	.LASF30:
+ 1212 020c 49525F41 		.ascii	"IR_AC_Signal_min\000"
+ 1212      435F5369 
+ 1212      676E616C 
+ 1212      5F6D696E 
+ 1212      00
+ 1213              	.LASF16:
+ 1214 021d 696E7433 		.ascii	"int32_t\000"
+ 1214      325F7400 
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 26
+
+
+ 1215              	.LASF24:
+ 1216 0225 73697A65 		.ascii	"sizetype\000"
+ 1216      74797065 
+ 1216      00
+ 1217              	.LASF10:
+ 1218 022e 6C6F6E67 		.ascii	"long long int\000"
+ 1218      206C6F6E 
+ 1218      6720696E 
+ 1218      7400
+ 1219              	.LASF34:
+ 1220 023c 6E656761 		.ascii	"negativeEdge\000"
+ 1220      74697665 
+ 1220      45646765 
+ 1220      00
+ 1221              	.LASF33:
+ 1222 0249 706F7369 		.ascii	"positiveEdge\000"
+ 1222      74697665 
+ 1222      45646765 
+ 1222      00
+ 1223              	.LASF37:
+ 1224 0256 6F666673 		.ascii	"offset\000"
+ 1224      657400
+ 1225              	.LASF39:
+ 1226 025d 68656172 		.ascii	"heartRate.c\000"
+ 1226      74526174 
+ 1226      652E6300 
+ 1227              	.LASF4:
+ 1228 0269 73686F72 		.ascii	"short int\000"
+ 1228      7420696E 
+ 1228      7400
+ 1229              	.LASF15:
+ 1230 0273 75696E74 		.ascii	"uint16_t\000"
+ 1230      31365F74 
+ 1230      00
+ 1231              	.LASF8:
+ 1232 027c 6C6F6E67 		.ascii	"long int\000"
+ 1232      20696E74 
+ 1232      00
+ 1233              	.LASF0:
+ 1234 0285 7369676E 		.ascii	"signed char\000"
+ 1234      65642063 
+ 1234      68617200 
+ 1235              	.LASF17:
+ 1236 0291 5F426F6F 		.ascii	"_Bool\000"
+ 1236      6C00
+ 1237              	.LASF26:
+ 1238 0297 49525F41 		.ascii	"IR_AC_Max\000"
+ 1238      435F4D61 
+ 1238      7800
+ 1239              	.LASF29:
+ 1240 02a1 49525F41 		.ascii	"IR_AC_Signal_Previous\000"
+ 1240      435F5369 
+ 1240      676E616C 
+ 1240      5F507265 
+ 1240      76696F75 
+ 1241              	.LASF36:
+ 1242 02b7 63627566 		.ascii	"cbuf\000"
+ARM GAS  C:\Users\LOCALA~1\AppData\Local\Temp\ccAMVuTJ.s 			page 27
+
+
+ 1242      00
+ 1243              	.LASF21:
+ 1244 02bc 6C6F7750 		.ascii	"lowPassFIRFilter\000"
+ 1244      61737346 
+ 1244      49524669 
+ 1244      6C746572 
+ 1244      00
+ 1245              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran
