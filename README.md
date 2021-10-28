@@ -100,8 +100,9 @@ pip install -r requirements.txt
 PSOC 6 APP and GUI
 --------------------------------
 
-In `src/max3010_psoc6_hospital` the Arduino code for MAX3010 HR and SPO2 readings was ported to PSOC 6. The directory contains the PSOC Creator project.
-In `src/max3010_psoc6_hospital_gui` there is another GUI to display the signal (IR channel) from the PSOC6 board.
+* In `src/max3010_psoc6_hospital` the Arduino code for MAX3010 HR and SPO2 readings was ported to PSOC 6. The directory contains the PSOC Creator project.
+
+* In `src/max3010_psoc6_hospital_gui` there is another GUI to display the signal (IR channel) from the PSOC6 board.
 ![psoc_gui](https://user-images.githubusercontent.com/24388880/139290099-09090911-a340-4840-a05d-257763d7b4c4.PNG)
 
 
