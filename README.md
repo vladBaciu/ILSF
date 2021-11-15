@@ -75,6 +75,7 @@ pip install -r requirements.txt
 * Output:
 <!--- ![IMG_6396](https://user-images.githubusercontent.com/24388880/141839481-c832b534-be74-4fb2-ab01-e396e7205e26.JPG) --> 
 <img src="https://user-images.githubusercontent.com/24388880/141839481-c832b534-be74-4fb2-ab01-e396e7205e26.JPG" width="500">
+
 Run the PPG dashboard application
 --------------------------------
 * Install the requirements list from `src\python_dashboard` 
