@@ -72,6 +72,9 @@ pip install -r requirements.txt
 
 * The response from the printer can be found in the console/terminal where the application was started. Refer to the [HTTP status codes](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes) in order to find out what is going on. If the answer is `201` the printer should start printing the PPG capture. While printing, other `gcode` files can be pushed in the queue but the files have to be manually selected for the printing (in the `OctoPrint` localhost). A [continous print plugin] (https://github.com/chennes/OctoPrint-Queue) can be further integrated.
 
+* Output:
+<!--- ![IMG_6396](https://user-images.githubusercontent.com/24388880/141839481-c832b534-be74-4fb2-ab01-e396e7205e26.JPG) --> 
+<img src="https://user-images.githubusercontent.com/24388880/141839481-c832b534-be74-4fb2-ab01-e396e7205e26.JPG" width="500">
 Run the PPG dashboard application
 --------------------------------
 * Install the requirements list from `src\python_dashboard` 
