@@ -43,6 +43,11 @@ The fan control is done using a PI loop. An external PID library can be used by 
 ![image](https://user-images.githubusercontent.com/24388880/137920019-55cfe34a-41a6-4d69-a914-817fedebcdab.png)
 
 
+
+
+https://github.com/user-attachments/assets/a07557ed-310e-44e9-b599-7a53d3dc4807
+
+
 Run the 3D printing application
 --------------------------------
 
@@ -93,12 +98,17 @@ pip install -r requirements.txt
 
 * Open the local host URL.
 
-![dashboard_app1](https://user-images.githubusercontent.com/24388880/137915819-b22966f6-fc20-419a-9f07-b21021818e7d.gif)
+[![dashboard_app1](https://user-images.githubusercontent.com/24388880/137915819-b22966f6-fc20-419a-9f07-b21021818e7d.gif)](https://github.com/user-attachments/assets/2f40d4d9-4cb8-4e14-a404-80dd8923c33a
+)
 
 
 * If the current console in Spyder/PyCharm was not closed the serial port can not be opened.
 
 ![image](https://user-images.githubusercontent.com/24388880/137914711-8c1dfe60-5bcd-49ef-ae7d-ffba7fe87830.png)
+
+
+
+
 
 
 PSOC 6 APP and GUI
